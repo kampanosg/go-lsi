@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -15,7 +16,9 @@ func main() {
 	token := getEnv("APP_TOKEN")
 
 	c := client.NewLinnworksClient(appId, secret, token)
-	c.GetCategories()
+    cats, _ := c.GetCategories()
+
+    fmt.Printf("%v\n", cats)
 }
 
 func getEnv(key string) string {
