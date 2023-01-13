@@ -64,7 +64,7 @@ func (c *LinnworksClient) GetCategories() ([]domain.Category, error) {
 	var authResp []response.CategoryResponse
 	json.Unmarshal(responseData, &authResp)
 
-    return transform.FromArrCategoryRespToDomain(authResp), nil
+	return transform.FromArrCategoryRespToDomain(authResp), nil
 }
 
 func (c *LinnworksClient) refreshToken() {

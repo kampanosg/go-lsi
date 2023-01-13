@@ -13,8 +13,8 @@ func FromCategoryRespToDomain(resp response.CategoryResponse) domain.Category {
 }
 
 func FromArrCategoryRespToDomain(resp []response.CategoryResponse) (categories []domain.Category) {
-    for _, c := range resp {
-        categories = append(categories, FromCategoryRespToDomain(c))
-    }
-    return categories
+	for _, c := range resp {
+		categories = append(categories, FromCategoryRespToDomain(c))
+	}
+	return categories
 }
