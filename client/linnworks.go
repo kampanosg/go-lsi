@@ -70,39 +70,59 @@ func (c *LinnworksClient) GetCategories() ([]domain.Category, error) {
 func (c *LinnworksClient) GetProducts() ([]domain.Product, error) {
 	c.refreshToken()
 	products := []domain.Product{}
+	entriesPerPage := 200 // TODO: move this to config
+	pageNumber := 1
 
 	url := "https://eu-ext.linnworks.net/api/Stock/GetStockItemsFull"
 	method := "POST"
 
-	payload := strings.NewReader("loadCompositeParents=True&loadVariationParents=False&entriesPerPage=5&pageNumber=1&dataRequirements=%5B1%2C8%5D&searchTypes=%5B0%2C1%2C2%5D")
+	var builder strings.Builder
+	builder.WriteString("loadCompositeParents=True")
+	builder.WriteString("&loadVariationParents=False")
+	builder.WriteString("&dataRequirements=%5B1%2C8%5D&searchTypes=%5B0%2C1%2C2%5D")
+	builder.WriteString(fmt.Sprintf("&entriesPerPage=%d", entriesPerPage))
 
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	for {
+		pld := fmt.Sprintf("%s&pageNumber=%d", builder.String(), pageNumber)
+		payload := strings.NewReader(pld)
 
-	if err != nil {
-		log.Printf("setup failed, reason=%v", err)
-		return products, err
+		client := &http.Client{}
+		req, err := http.NewRequest(method, url, payload)
+
+		if err != nil {
+			log.Printf("setup failed, reason=%v", err)
+			return products, err
+		}
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Add("Authorization", c.auth.Token)
+
+		res, err := client.Do(req)
+		if err != nil {
+			log.Printf("request failed, reason=%v", err)
+			return products, err
+		}
+		defer res.Body.Close()
+
+		responseData, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			log.Printf("unable to process response, reason: %v\n", err)
+			return products, err
+		}
+
+		var authResp []response.ProductResponse
+		json.Unmarshal(responseData, &authResp)
+		for _, p := range transform.FromProductsRespToDomain(authResp) {
+			products = append(products, p)
+		}
+
+		pageNumber += 1
+
+		if len(responseData) < entriesPerPage {
+			break
+		}
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Authorization", c.auth.Token)
+	return products, nil
 
-	res, err := client.Do(req)
-	if err != nil {
-		log.Printf("request failed, reason=%v", err)
-		return products, err
-	}
-	defer res.Body.Close()
-
-	responseData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("unable to process response, reason: %v\n", err)
-		return products, err
-	}
-
-	var authResp []response.ProductResponse
-	json.Unmarshal(responseData, &authResp)
-
-	return transform.FromProductsRespToDomain(authResp), nil
 }
 
 func (c *LinnworksClient) refreshToken() {

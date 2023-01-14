@@ -24,9 +24,9 @@ func main() {
 
 	c := client.NewLinnworksClient(appId, secret, token)
 	// newCategories, _ := c.GetCategories()
-    newProducts, _ := c.GetProducts()
+	newProducts, _ := c.GetProducts()
 
-    log.Printf("%v\n", newProducts)
+	log.Printf("%v\n", newProducts)
 
 	sqliteDb := db.NewSqliteDB(dbPath)
 	defer sqliteDb.Connection.Close()
