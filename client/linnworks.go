@@ -33,7 +33,7 @@ func (c *LinnworksClient) GetCategories() ([]domain.Category, error) {
 	categories := []domain.Category{}
 
 	url := "https://eu-ext.linnworks.net/api/Inventory/GetCategories"
-	method := "GET"
+	method := "POST"
 
 	client := &http.Client{}
 	payload := strings.NewReader("=")
@@ -64,11 +64,50 @@ func (c *LinnworksClient) GetCategories() ([]domain.Category, error) {
 	var authResp []response.CategoryResponse
 	json.Unmarshal(responseData, &authResp)
 
-	return transform.FromArrCategoryRespToDomain(authResp), nil
+	return transform.FromCategoriesRespToDomain(authResp), nil
+}
+
+func (c *LinnworksClient) GetProducts() ([]domain.Product, error) {
+	c.refreshToken()
+	products := []domain.Product{}
+
+	url := "https://eu-ext.linnworks.net/api/Stock/GetStockItemsFull"
+	method := "POST"
+
+	payload := strings.NewReader("loadCompositeParents=True&loadVariationParents=False&entriesPerPage=5&pageNumber=1&dataRequirements=%5B1%2C8%5D&searchTypes=%5B0%2C1%2C2%5D")
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		log.Printf("setup failed, reason=%v", err)
+		return products, err
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Authorization", c.auth.Token)
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Printf("request failed, reason=%v", err)
+		return products, err
+	}
+	defer res.Body.Close()
+
+	responseData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("unable to process response, reason: %v\n", err)
+		return products, err
+	}
+
+	var authResp []response.ProductResponse
+	json.Unmarshal(responseData, &authResp)
+
+	return transform.FromProductsRespToDomain(authResp), nil
 }
 
 func (c *LinnworksClient) refreshToken() {
 
+	// TODO: efficiency - check if current token has expired
 	url := "https://api.linnworks.net/api/Auth/AuthorizeByApplication"
 	method := "POST"
 

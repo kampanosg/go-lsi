@@ -23,7 +23,10 @@ func main() {
 	dbPath := getEnv("DB")
 
 	c := client.NewLinnworksClient(appId, secret, token)
-	newCategories, _ := c.GetCategories()
+	// newCategories, _ := c.GetCategories()
+    newProducts, _ := c.GetProducts()
+
+    log.Printf("%v\n", newProducts)
 
 	sqliteDb := db.NewSqliteDB(dbPath)
 	defer sqliteDb.Connection.Close()
@@ -48,26 +51,25 @@ func main() {
 	//        Categories to be deleted, have the flag deleted=true
 	// Wipe the database and add the entries again
 
-	oldCats, _ := sqliteDb.GetCategories()
-	mergedCategories := buildCategoryMap(oldCats)
+	// oldCats, _ := sqliteDb.GetCategories()
+	// mergedCategories := buildCategoryMap(oldCats)
 
-	for _, newCat := range newCategories {
-		mergedCategories[newCat.Id] = upsertCategory{category: newCat, shouldDelete: false}
-	}
+	// for _, newCat := range newCategories {
+	// 	mergedCategories[newCat.Id] = upsertCategory{category: newCat, shouldDelete: false}
+	// }
 
-    sqliteDb.ClearCategories()
+	// sqliteDb.ClearCategories()
 
-    log.Printf("will merge %d categories", len(mergedCategories))
-	categories := []domain.Category {}
-	for _, entry := range mergedCategories {
-		log.Printf("%s - %s - should_delete=%v\n", entry.category.Id, entry.category.Name, entry.shouldDelete)
-        if !entry.shouldDelete {
-            categories = append(categories, entry.category)
-        }
-	}
+	// log.Printf("will merge %d categories", len(mergedCategories))
+	// categories := []domain.Category{}
+	// for _, entry := range mergedCategories {
+	// 	log.Printf("%s - %s - should_delete=%v\n", entry.category.Id, entry.category.Name, entry.shouldDelete)
+	// 	if !entry.shouldDelete {
+	// 		categories = append(categories, entry.category)
+	// 	}
+	// }
 
-	sqliteDb.InsertCategories(categories)
-
+	// sqliteDb.InsertCategories(categories)
 }
 
 func buildCategoryMap(categories []domain.Category) map[string]upsertCategory {
