@@ -16,6 +16,11 @@ type upsertCategory struct {
 	shouldDelete bool
 }
 
+type upsertProduct struct {
+	product      domain.Product
+	shouldDelete bool
+}
+
 func main() {
 	appId := getEnv("APP_ID")
 	secret := getEnv("APP_SECRET")
@@ -23,13 +28,17 @@ func main() {
 	dbPath := getEnv("DB")
 
 	c := client.NewLinnworksClient(appId, secret, token)
-	// newCategories, _ := c.GetCategories()
+	newCategories, _ := c.GetCategories()
 	newProducts, _ := c.GetProducts()
-
-	log.Printf("%v\n", newProducts)
 
 	sqliteDb := db.NewSqliteDB(dbPath)
 	defer sqliteDb.Connection.Close()
+
+	// newProducts := []domain.Product{
+	// 	{Id: "id-2", CategoryId: "id-1", Title: "Test product 2", Barcode: "012345679", Price: 169.420},
+	// 	{Id: "id-3", CategoryId: "id-1", Title: "Test product 3", Barcode: "012345677", Price: 269.420},
+	// 	{Id: "id-4", CategoryId: "id-4", Title: "Test product 4", Barcode: "012345676", Price: 369.420},
+	// }
 
 	// newCategories := []domain.Category{
 	// 	{Id: "id-1", Name: "Category 1"},
@@ -42,34 +51,53 @@ func main() {
 	// }
 
 	// Strategy:
-	// Assume that all categories in the database are to be deleted
+	// Assume that all entries in the database are to be deleted
 	// Start the merge map, with all the values from the db
-	// Go over the new categories
-	//    For every new category upsert it to the merged map, and set to_delete=false
-	//        New categories are appended
-	//        Existing categories are updated
-	//        Categories to be deleted, have the flag deleted=true
+	// Go over the new entries (from the client)
+	//    For every entry upsert it to the merged map, and set to_delete=false
+	//        New entries are appended
+	//        Existing entries are updated
+	//        Entries to be deleted, have the flag deleted=true
 	// Wipe the database and add the entries again
 
-	// oldCats, _ := sqliteDb.GetCategories()
-	// mergedCategories := buildCategoryMap(oldCats)
+	oldCats, _ := sqliteDb.GetCategories()
+	mergedCategories := buildCategoryMap(oldCats)
 
-	// for _, newCat := range newCategories {
-	// 	mergedCategories[newCat.Id] = upsertCategory{category: newCat, shouldDelete: false}
-	// }
+	for _, newCat := range newCategories {
+		mergedCategories[newCat.Id] = upsertCategory{category: newCat, shouldDelete: false}
+	}
 
-	// sqliteDb.ClearCategories()
+	sqliteDb.ClearCategories()
 
 	// log.Printf("will merge %d categories", len(mergedCategories))
-	// categories := []domain.Category{}
-	// for _, entry := range mergedCategories {
-	// 	log.Printf("%s - %s - should_delete=%v\n", entry.category.Id, entry.category.Name, entry.shouldDelete)
-	// 	if !entry.shouldDelete {
-	// 		categories = append(categories, entry.category)
-	// 	}
-	// }
+	categories := []domain.Category{}
+	for _, entry := range mergedCategories {
+		// log.Printf("%s - %s - should_delete=%v\n", entry.category.Id, entry.category.Name, entry.shouldDelete)
+		if !entry.shouldDelete {
+			categories = append(categories, entry.category)
+		}
+	}
 
-	// sqliteDb.InsertCategories(categories)
+	sqliteDb.InsertCategories(categories)
+
+	oldProducts, _ := sqliteDb.GetProducts()
+	mergedProducts := buildProductMap(oldProducts)
+
+	for _, newProduct := range newProducts {
+		mergedProducts[newProduct.Id] = upsertProduct{product: newProduct, shouldDelete: false}
+	}
+
+	sqliteDb.ClearProducts()
+
+	products := []domain.Product{}
+	for _, entry := range mergedProducts {
+		if !entry.shouldDelete {
+			log.Printf("%s - %s - should_delete=%v\n", entry.product.Id, entry.product.Title, entry.shouldDelete)
+			products = append(products, entry.product)
+		}
+	}
+
+	sqliteDb.InsertProducts(products)
 }
 
 func buildCategoryMap(categories []domain.Category) map[string]upsertCategory {
@@ -77,6 +105,17 @@ func buildCategoryMap(categories []domain.Category) map[string]upsertCategory {
 	for _, c := range categories {
 		m[c.Id] = upsertCategory{
 			category:     c,
+			shouldDelete: true,
+		}
+	}
+	return m
+}
+
+func buildProductMap(products []domain.Product) map[string]upsertProduct {
+	m := map[string]upsertProduct{}
+	for _, p := range products {
+		m[p.Id] = upsertProduct{
+			product:      p,
 			shouldDelete: true,
 		}
 	}

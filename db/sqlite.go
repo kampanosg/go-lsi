@@ -16,7 +16,6 @@ type sqliteDb struct {
 func NewSqliteDB(dbPath string) sqliteDb {
 	conn, err := sql.Open("sqlite3", dbPath)
 	checkErr(err)
-	log.Printf("Connected to the database: %s\n", dbPath)
 	return sqliteDb{Connection: conn}
 }
 
@@ -90,6 +89,90 @@ func (db *sqliteDb) InsertCategories(categories []domain.Category) error {
 		}
 
 		log.Printf("db: created category, id=%s, name=%s, res=%v", category.Id, category.Name, res)
+	}
+	tx.Commit()
+	return nil
+}
+
+func (db *sqliteDb) GetProducts() (products []domain.Product, err error) {
+	q := `SELECT lw_id, category_id, title, price, barcode FROM product;`
+	rows, err := db.Connection.Query(q)
+	if err != nil {
+		log.Printf("unable to get products from db, reason=%v\n", err)
+		return products, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var id, categoryId, title, barcode string
+		var price float64
+		rows.Scan(&id, &categoryId, &title, &price, &barcode)
+		products = append(products, domain.Product{
+			Id:         id,
+			CategoryId: categoryId,
+			Title:      title,
+			Price:      price,
+			Barcode:    barcode,
+		})
+
+	}
+	return products, nil
+}
+
+func (db *sqliteDb) ClearProducts() error {
+	q := `DELETE FROM product;`
+	dl, err := db.Connection.Prepare(q)
+	if err != nil {
+		log.Printf("db: failed to clear products. reason=%v", err.Error())
+		return err
+	}
+
+	tx, err := db.Connection.Begin()
+	if err != nil {
+		log.Printf("db: failed to clear products. reason=%v", err.Error())
+		return err
+	}
+
+	res, err := tx.Stmt(dl).Exec()
+
+	if err != nil {
+		tx.Rollback()
+		log.Printf("db: failed to clear products. reason=%v", err.Error())
+		return err
+	}
+
+	tx.Commit()
+	log.Printf("db: deleted products. res=%v", res)
+	return nil
+}
+
+func (db *sqliteDb) InsertProducts(products []domain.Product) error {
+	q := `INSERT INTO product
+            (lw_id, category_id, title, price, barcode) VALUES (?, ?, ?, ?, ?)
+    `
+	dl, err := db.Connection.Prepare(q)
+	if err != nil {
+		log.Printf("db: failed to create, reason=%v", err.Error())
+		return err
+	}
+
+	tx, err := db.Connection.Begin()
+	for _, product := range products {
+		if err != nil {
+			log.Printf("db: failed to create category=%s, reason=%v", product.Id, err.Error())
+			return err
+		}
+
+		res, err := tx.Stmt(dl).Exec(product.Id, product.CategoryId, product.Title, product.Price, product.Barcode)
+
+		if err != nil {
+			tx.Rollback()
+			log.Printf("db: failed to create product=%s, reason=%v", product.Id, err.Error())
+			return err
+		}
+
+		log.Printf("db: created product, id=%s, name=%s, res=%v", product.Id, product.Title, res)
 	}
 	tx.Commit()
 	return nil
