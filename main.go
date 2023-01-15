@@ -18,18 +18,19 @@ type upsertProduct struct {
 }
 
 func main() {
-	appId := getEnv("APP_ID")
-	secret := getEnv("APP_SECRET")
-	token := getEnv("APP_TOKEN")
+	// appId := getEnv("APP_ID")
+	// secret := getEnv("APP_SECRET")
+	// token := getEnv("APP_TOKEN")
 	squareToken := getEnv("SQ_ACCESS_TOKEN")
 	squareHost := getEnv("SQ_HOST")
 	dbPath := getEnv("DB")
 
-	c := client.NewLinnworksClient(appId, secret, token)
-	newCategories, _ := c.GetCategories()
+	// c := client.NewLinnworksClient(appId, secret, token)
+	// newCategories, _ := c.GetCategories()
 	// newProducts, _ := c.GetProducts()
 
 	sq := client.NewSquareClient(squareToken, squareHost)
+	log.Printf("%v", sq)
 
 	sqliteDb := db.NewSqliteDB(dbPath)
 	defer sqliteDb.Connection.Close()
@@ -37,10 +38,10 @@ func main() {
 	// newProducts := []domain.Product{
 	// 	{Id: "id-2", CategoryId: "id-1", Title: "Test product 2", Barcode: "012345679", Price: 169.420},
 	// }
-	// newCategories := []domain.Category{
-	// { Id: "test-cat-7", Name: "Test Category 7" },
-	// { Id: "test-cat-8", Name: "Test Category 8" },
-	// }
+	newCategories := []domain.Category{
+		{Id: "test-cat-7", Name: "Test Category 69"},
+		{Id: "test-cat-8", Name: "Test Category 70"},
+	}
 
 	// Strategy:
 	// Assume that all entries in the database are to be deleted
@@ -61,6 +62,7 @@ func main() {
 			newCat.SquareId = fmt.Sprintf("#%s", newCat.Id)
 		} else {
 			newCat.SquareId = upsert.Category.SquareId
+			newCat.Version = upsert.Category.Version
 		}
 		mergedCategories[newCat.Id] = domain.UpsertCategory{
 			Category:  newCat,
@@ -79,8 +81,6 @@ func main() {
 		}
 	}
 
-	// log.Printf("%v", mergedCategories)
-
 	resp := sq.UpsertCategories(categoriesToUpsert)
 
 	categories := []domain.Category{}
@@ -88,6 +88,14 @@ func main() {
 		clientId := mapping.ClientObjectID[1:]
 		entry := mergedCategories[clientId]
 		entry.Category.SquareId = mapping.ObjectID
+
+		for _, obj := range resp.Objects {
+			if obj.ID == mapping.ObjectID {
+				entry.Category.Version = obj.Version
+				break
+			}
+		}
+
 		categories = append(categories, entry.Category)
 	}
 

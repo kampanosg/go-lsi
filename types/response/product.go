@@ -10,11 +10,11 @@ type ProductResponse struct {
 	ItemChannelTitles        []interface{}          `json:"ItemChannelTitles"`
 	ItemChannelPrices        []interface{}          `json:"ItemChannelPrices"`
 	Images                   []ProductImageResponse `json:"Images"`
-	ItemNumber               string                 `json:"ItemNumber"`
+	SKU                      string                 `json:"ItemNumber"`
 	ItemTitle                string                 `json:"ItemTitle"`
 	BarcodeNumber            string                 `json:"BarcodeNumber"`
 	MetaData                 string                 `json:"MetaData"`
-	IsVariationParent        bool                   `json:"IsVariationParent"`
+	IsVariationParent        bool                   `json:"IsVariationParent"` // TODO: only want products with this set to false
 	IsBatchedStockType       bool                   `json:"isBatchedStockType"`
 	PurchasePrice            float64                `json:"PurchasePrice"`
 	RetailPrice              float64                `json:"RetailPrice"`

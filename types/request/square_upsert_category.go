@@ -12,6 +12,7 @@ type SquareBatch struct {
 type SquareUpsertCategoryRequest struct {
 	Type         string       `json:"type"`
 	Id           string       `json:"id"`
+	Version      int64        `json:"version"`
 	IsDeleted    bool         `json:"is_deleted"`
 	CategoryData CategoryData `json:"category_data"`
 }

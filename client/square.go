@@ -31,6 +31,7 @@ func (c *SquareClient) UpsertCategories(categories []domain.Category) response.S
 			Id:        category.SquareId,
 			Type:      "CATEGORY",
 			IsDeleted: false,
+			Version:   category.Version,
 			CategoryData: request.CategoryData{
 				Name: category.Name,
 			},
@@ -49,6 +50,10 @@ func (c *SquareClient) UpsertCategories(categories []domain.Category) response.S
 	}
 
 	jsonReq, _ := json.Marshal(batchRequest)
+
+	log.Printf("upsert req: %s", string(jsonReq))
+
+	// panic("fhfhfhfhfh")
 
 	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
 
@@ -84,8 +89,6 @@ func (c *SquareClient) DeleteCategories(categories []domain.Category) response.S
 	for _, category := range categories {
 		objectIds = append(objectIds, category.SquareId)
 	}
-
-	log.Printf("%v", objectIds)
 
 	batchRequest.ObjectIds = objectIds
 
