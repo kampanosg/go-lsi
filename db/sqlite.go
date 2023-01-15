@@ -20,7 +20,7 @@ func NewSqliteDB(dbPath string) sqliteDb {
 }
 
 func (db *sqliteDb) GetCategories() (categories []domain.Category, err error) {
-	q := `SELECT lw_id, name FROM category;`
+	q := `SELECT lw_id, square_id, name FROM category;`
 	rows, err := db.Connection.Query(q)
 	if err != nil {
 		log.Printf("unable to get categories from db, reason=%v\n", err)
@@ -30,10 +30,9 @@ func (db *sqliteDb) GetCategories() (categories []domain.Category, err error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id string
-		var title string
-		rows.Scan(&id, &title)
-		categories = append(categories, domain.Category{Id: id, Name: title})
+		var id, squareId, name string
+		rows.Scan(&id, &squareId, &name)
+		categories = append(categories, domain.Category{Id: id, SquareId: squareId, Name: name})
 	}
 	return categories, nil
 }
@@ -66,7 +65,7 @@ func (db *sqliteDb) ClearCategories() error {
 }
 
 func (db *sqliteDb) InsertCategories(categories []domain.Category) error {
-	q := `INSERT INTO category (lw_id, name) VALUES (?, ?);`
+	q := `INSERT INTO category (lw_id, square_id, name) VALUES (?, ?, ?);`
 	dl, err := db.Connection.Prepare(q)
 	if err != nil {
 		log.Printf("db: failed to create, reason=%v", err.Error())
@@ -80,7 +79,7 @@ func (db *sqliteDb) InsertCategories(categories []domain.Category) error {
 			return err
 		}
 
-		res, err := tx.Stmt(dl).Exec(category.Id, category.Name)
+		res, err := tx.Stmt(dl).Exec(category.Id, category.SquareId, category.Name)
 
 		if err != nil {
 			tx.Rollback()

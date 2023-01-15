@@ -1,0 +1,7 @@
+CREATE TABLE "category" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"lw_id"	TEXT NOT NULL,
+	"square_id"	INTEGER NOT NULL,
+	"name"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
