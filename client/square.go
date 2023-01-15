@@ -16,10 +16,11 @@ import (
 
 type SquareClient struct {
 	AccessToken string `json:"accessToken"`
+	Host        string `json:"host"`
 }
 
-func NewSquareClient(accessToken string) SquareClient {
-	return SquareClient{AccessToken: accessToken}
+func NewSquareClient(accessToken, host string) SquareClient {
+	return SquareClient{AccessToken: accessToken, Host: host}
 }
 
 func (c *SquareClient) UpsertCategories(categories []domain.Category) response.SquareUpsertCategoryResponse {
@@ -49,7 +50,7 @@ func (c *SquareClient) UpsertCategories(categories []domain.Category) response.S
 
 	jsonReq, _ := json.Marshal(batchRequest)
 
-	url := "https://connect.squareupsandbox.com/v2/catalog/batch-upsert"
+	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	req.Header.Set("Square-Version", "2022-12-14")
@@ -84,13 +85,13 @@ func (c *SquareClient) DeleteCategories(categories []domain.Category) response.S
 		objectIds = append(objectIds, category.SquareId)
 	}
 
-    log.Printf("%v", objectIds)
+	log.Printf("%v", objectIds)
 
-    batchRequest.ObjectIds = objectIds
+	batchRequest.ObjectIds = objectIds
 
 	jsonReq, _ := json.Marshal(batchRequest)
 
-	url := "https://connect.squareupsandbox.com/v2/catalog/batch-delete"
+	url := fmt.Sprintf("%s/catalog/batch-delete", c.Host)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	req.Header.Set("Square-Version", "2022-12-14")

@@ -22,13 +22,14 @@ func main() {
 	secret := getEnv("APP_SECRET")
 	token := getEnv("APP_TOKEN")
 	squareToken := getEnv("SQ_ACCESS_TOKEN")
+	squareHost := getEnv("SQ_HOST")
 	dbPath := getEnv("DB")
 
 	c := client.NewLinnworksClient(appId, secret, token)
 	newCategories, _ := c.GetCategories()
 	// newProducts, _ := c.GetProducts()
 
-	sq := client.NewSquareClient(squareToken)
+	sq := client.NewSquareClient(squareToken, squareHost)
 
 	sqliteDb := db.NewSqliteDB(dbPath)
 	defer sqliteDb.Connection.Close()
@@ -37,8 +38,8 @@ func main() {
 	// 	{Id: "id-2", CategoryId: "id-1", Title: "Test product 2", Barcode: "012345679", Price: 169.420},
 	// }
 	// newCategories := []domain.Category{
-        // { Id: "test-cat-7", Name: "Test Category 7" },
-        // { Id: "test-cat-8", Name: "Test Category 8" },
+	// { Id: "test-cat-7", Name: "Test Category 7" },
+	// { Id: "test-cat-8", Name: "Test Category 8" },
 	// }
 
 	// Strategy:
