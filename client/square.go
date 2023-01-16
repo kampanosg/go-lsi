@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"github.com/kampanosg/go-lsi/types/domain"
 	"github.com/kampanosg/go-lsi/types/request"
 	"github.com/kampanosg/go-lsi/types/response"
+	"io/ioutil"
 	"log"
 	"net/http"
 

@@ -3,10 +3,10 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"github.com/kampanosg/go-lsi/transform"
 	"github.com/kampanosg/go-lsi/types/domain"
 	"github.com/kampanosg/go-lsi/types/response"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
