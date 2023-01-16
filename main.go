@@ -29,21 +29,21 @@ func main() {
 	// panic("ff")
 
 	c := client.NewLinnworksClient(appId, secret, token)
-	newCategories, _ := c.GetCategories()
-	newProducts, _ := c.GetProducts()
+	// newCategories, _ := c.GetCategories()
+	// newProducts, _ := c.GetProducts()
 	log.Printf("%v", c)
 
 	sq := client.NewSquareClient(squareToken, squareHost)
 	log.Printf("%v", sq)
 
-	// newProducts := []domain.Product{
+	newProducts := []domain.Product{
 	// 	{Id: "id-2", CategoryId: "test-cat-7", Title: "Coffee Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
 	// 	{Id: "id-3", CategoryId: "test-cat-7", Title: "Tea Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
 	// 	{Id: "id-4", CategoryId: "test-cat-7", Title: "Chocolate Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
-	// }
-	// newCategories := []domain.Category{
+	 }
+	newCategories := []domain.Category{
 	// 	{Id: "test-cat-7", Name: "Test Category"},
-    // }
+     }
 
 	// Strategy:
 	// Assume that all entries in the database are to be deleted

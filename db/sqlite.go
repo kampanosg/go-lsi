@@ -85,7 +85,7 @@ func (db *sqliteDb) InsertCategories(categories []domain.Category) error {
 			return err
 		}
 
-		res, err := tx.Stmt(dl).Exec(category.Id, category.SquareId, category.Name, category.Version)
+		_, err := tx.Stmt(dl).Exec(category.Id, category.SquareId, category.Name, category.Version)
 
 		if err != nil {
 			tx.Rollback()
@@ -93,7 +93,7 @@ func (db *sqliteDb) InsertCategories(categories []domain.Category) error {
 			return err
 		}
 
-		log.Printf("db: created category, id=%s, name=%s, res=%v", category.Id, category.Name, res)
+		// log.Printf("db: created category, id=%s, name=%s, res=%v", category.Id, category.Name, res)
 	}
 	tx.Commit()
 	return nil
