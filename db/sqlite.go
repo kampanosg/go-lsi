@@ -100,7 +100,7 @@ func (db *sqliteDb) InsertCategories(categories []domain.Category) error {
 }
 
 func (db *sqliteDb) GetProducts() (products []domain.Product, err error) {
-	q := `SELECT lw_id, category_id, title, price, barcode FROM product;`
+	q := `SELECT lw_id, square_id, square_var_id, category_id, square_category_id, title, price, barcode, sku, version FROM product;`
 	rows, err := db.Connection.Query(q)
 	if err != nil {
 		log.Printf("unable to get products from db, reason=%v\n", err)
@@ -110,15 +110,21 @@ func (db *sqliteDb) GetProducts() (products []domain.Product, err error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, categoryId, title, barcode string
+		var id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku string
 		var price float64
-		rows.Scan(&id, &categoryId, &title, &price, &barcode)
+		var version int64
+		rows.Scan(&id, &squareId, &squareVarId, &categoryId, &squareCategoryId, &title, &price, &barcode, &sku, &version)
 		products = append(products, domain.Product{
-			Id:         id,
-			CategoryId: categoryId,
-			Title:      title,
-			Price:      price,
-			Barcode:    barcode,
+			Id:          id,
+			SquareId:    squareId,
+			SquareVarId: squareVarId,
+			CategoryId:  categoryId,
+            SquareCategoryId: squareCategoryId,
+			Title:       title,
+			Price:       price,
+			Barcode:     barcode,
+			SKU:         sku,
+			Version:     version,
 		})
 
 	}
@@ -154,7 +160,7 @@ func (db *sqliteDb) ClearProducts() error {
 
 func (db *sqliteDb) InsertProducts(products []domain.Product) error {
 	q := `INSERT INTO product
-            (lw_id, category_id, title, price, barcode) VALUES (?, ?, ?, ?, ?)
+            (lw_id, square_id, square_var_id, category_id, square_category_id, title, price, barcode, sku, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
 	dl, err := db.Connection.Prepare(q)
 	if err != nil {
@@ -169,7 +175,8 @@ func (db *sqliteDb) InsertProducts(products []domain.Product) error {
 			return err
 		}
 
-		res, err := tx.Stmt(dl).Exec(product.Id, product.CategoryId, product.Title, product.Price, product.Barcode)
+		res, err := tx.Stmt(dl).Exec(product.Id, product.SquareId, product.SquareVarId, product.CategoryId, 
+            product.SquareCategoryId, product.Title, product.Price, product.Barcode, product.SKU, product.Version)
 
 		if err != nil {
 			tx.Rollback()

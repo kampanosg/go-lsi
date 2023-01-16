@@ -12,6 +12,7 @@ func FromProductRespToDomain(resp response.ProductResponse) domain.Product {
 		Title:      resp.ItemTitle,
 		Barcode:    resp.BarcodeNumber,
 		Price:      resp.RetailPrice,
+		SKU:        resp.SKU,
 		Images:     FromProductImagesResponseToDomain(resp.Images),
 	}
 }

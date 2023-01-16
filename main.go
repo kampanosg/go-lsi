@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"kev/client"
 	"kev/db"
@@ -11,11 +12,6 @@ import (
 
 	"github.com/joho/godotenv"
 )
-
-type upsertProduct struct {
-	product      domain.Product
-	shouldDelete bool
-}
 
 func main() {
 	// appId := getEnv("APP_ID")
@@ -35,12 +31,11 @@ func main() {
 	sqliteDb := db.NewSqliteDB(dbPath)
 	defer sqliteDb.Connection.Close()
 
-	// newProducts := []domain.Product{
-	// 	{Id: "id-2", CategoryId: "id-1", Title: "Test product 2", Barcode: "012345679", Price: 169.420},
-	// }
+	newProducts := []domain.Product{
+		{Id: "id-2", CategoryId: "test-cat-7", Title: "Coffee Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
+	}
 	newCategories := []domain.Category{
-		{Id: "test-cat-7", Name: "Test Category 69"},
-		{Id: "test-cat-8", Name: "Test Category 70"},
+		{Id: "test-cat-7", Name: "Test Category"},
 	}
 
 	// Strategy:
@@ -84,19 +79,32 @@ func main() {
 	resp := sq.UpsertCategories(categoriesToUpsert)
 
 	categories := []domain.Category{}
-	for _, mapping := range resp.IDMappings {
-		clientId := mapping.ClientObjectID[1:]
-		entry := mergedCategories[clientId]
-		entry.Category.SquareId = mapping.ObjectID
+	for _, upserted := range categoriesToUpsert {
 
-		for _, obj := range resp.Objects {
-			if obj.ID == mapping.ObjectID {
-				entry.Category.Version = obj.Version
+		var version int64
+		var squareId string
+
+		if upserted.SquareId[0] == '#' {
+			for _, mapping := range resp.IDMappings {
+				if mapping.ClientObjectID == upserted.SquareId {
+					squareId = mapping.ObjectID
+					break
+				}
+			}
+		} else {
+			squareId = upserted.SquareId
+		}
+
+		for _, object := range resp.Objects {
+			if object.ID == squareId {
+				version = object.Version
 				break
 			}
 		}
 
-		categories = append(categories, entry.Category)
+		upserted.Version = version
+		upserted.SquareId = squareId
+		categories = append(categories, upserted)
 	}
 
 	if len(categoriesToDelete) > 0 {
@@ -106,24 +114,95 @@ func main() {
 	sqliteDb.ClearCategories()
 	sqliteDb.InsertCategories(categories)
 
-	// oldProducts, _ := sqliteDb.GetProducts()
-	// mergedProducts := buildProductMap(oldProducts)
+	oldProducts, _ := sqliteDb.GetProducts()
+	mergedProducts := buildProductMap(oldProducts)
 
-	// for _, newProduct := range newProducts {
-	// 	mergedProducts[newProduct.Id] = upsertProduct{product: newProduct, shouldDelete: false}
-	// }
+	for _, newProd := range newProducts {
+		upsert, ok := mergedProducts[newProd.Id]
+		if !ok {
+			newProd.SquareId = fmt.Sprintf("#%s", newProd.Id)
+			newProd.SquareVarId = fmt.Sprintf("#%s-var", newProd.Id)
+		} else {
+			newProd.SquareId = upsert.Product.SquareId
+			newProd.SquareVarId = upsert.Product.SquareVarId
+			newProd.Version = upsert.Product.Version
+		}
 
-	// sqliteDb.ClearProducts()
+		for _, category := range categories {
+			if category.Id == newProd.CategoryId {
+				newProd.SquareCategoryId = category.SquareId
+				break
+			}
+		}
 
-	// products := []domain.Product{}
-	// for _, entry := range mergedProducts {
-	// 	if !entry.shouldDelete {
-	// 		log.Printf("%s - %s - should_delete=%v\n", entry.product.Id, entry.product.Title, entry.shouldDelete)
-	// 		products = append(products, entry.product)
-	// 	}
-	// }
+		mergedProducts[newProd.Id] = domain.UpsertProduct{
+			Product:   newProd,
+			IsDeleted: false,
+		}
+	}
 
-	// sqliteDb.InsertProducts(products)
+	productsToUpsert := []domain.Product{}
+	productsToDelete := []domain.Product{}
+
+	for _, entry := range mergedProducts {
+		if entry.IsDeleted {
+			productsToDelete = append(productsToDelete, entry.Product)
+		} else {
+			productsToUpsert = append(productsToUpsert, entry.Product)
+		}
+	}
+
+	prodResp := sq.UpsertProducts(productsToUpsert)
+
+	products := []domain.Product{}
+	for _, upserted := range productsToUpsert {
+
+		var version int64
+		var squareId, squareVarId string
+
+		// new product
+		if upserted.SquareId[0] == '#' {
+			for _, mapping := range prodResp.IDMappings {
+				if strings.HasSuffix(mapping.ClientObjectID, "-var") {
+					// if the id ends with -var, it means its a variation
+					id := mapping.ClientObjectID[1 : len(mapping.ClientObjectID)-4] // need to sanitize the id from #product-id-var to product-id
+					if id == upserted.Id {
+						squareVarId = mapping.ObjectID
+					}
+				} else {
+					id := mapping.ClientObjectID[1:]
+					if id == upserted.Id {
+						squareId = mapping.ObjectID
+					}
+				}
+			}
+
+		} else {
+			squareId = upserted.SquareId
+			squareVarId = upserted.SquareVarId
+		}
+
+		for _, object := range prodResp.Objects {
+            log.Printf("objkect=%v, squareId=%s\n", object, squareId)
+			if object.ID == squareId {
+				version = object.Version
+				break
+			}
+		}
+
+		upserted.SquareId = squareId
+		upserted.SquareVarId = squareVarId
+		upserted.Version = version
+
+		products = append(products, upserted)
+	}
+
+    if len(productsToDelete) > 0 {
+		sq.DeleteProducts(productsToDelete)
+	}
+
+	sqliteDb.ClearProducts()
+	sqliteDb.InsertProducts(products)
 }
 
 func buildCategoryMap(categories []domain.Category) map[string]domain.UpsertCategory {
@@ -137,12 +216,12 @@ func buildCategoryMap(categories []domain.Category) map[string]domain.UpsertCate
 	return m
 }
 
-func buildProductMap(products []domain.Product) map[string]upsertProduct {
-	m := map[string]upsertProduct{}
+func buildProductMap(products []domain.Product) map[string]domain.UpsertProduct {
+	m := map[string]domain.UpsertProduct{}
 	for _, p := range products {
-		m[p.Id] = upsertProduct{
-			product:      p,
-			shouldDelete: true,
+		m[p.Id] = domain.UpsertProduct{
+			Product:   p,
+			IsDeleted: true,
 		}
 	}
 	return m
