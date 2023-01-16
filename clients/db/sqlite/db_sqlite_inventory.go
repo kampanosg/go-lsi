@@ -1,8 +1,8 @@
 package sqlite
 
 import (
-	"github.com/kampanosg/go-lsi/types"
 	"github.com/kampanosg/go-lsi/transformers"
+	"github.com/kampanosg/go-lsi/types"
 )
 
 func (db *SqliteDb) GetCategories() (categories []types.Category, err error) {
@@ -10,13 +10,13 @@ func (db *SqliteDb) GetCategories() (categories []types.Category, err error) {
 	defer rows.Close()
 
 	for rows.Next() {
-        var id, squareId, name string
-        var version int64
+		var id, squareId, name string
+		var version int64
 		if rows.Scan(&id, &squareId, &name, &version); err != nil {
 			return categories, err
-	    }
-        category := transformers.FromCategoryDbRowToDomain(id, squareId, name, version)
-        categories = append(categories, category) 
+		}
+		category := transformers.FromCategoryDbRowToDomain(id, squareId, name, version)
+		categories = append(categories, category)
 	}
 
 	return categories, nil
@@ -34,19 +34,19 @@ func (db *SqliteDb) ClearCategories() error {
 	return db.commitTx(query_CLEAR_CATEGORIES, make([][]any, 0))
 }
 
-func (db *SqliteDb) GetProducts() (products []types.Product, err error) { 
+func (db *SqliteDb) GetProducts() (products []types.Product, err error) {
 	rows, err := db.Connection.Query(query_GET_PRODUCTS)
 	defer rows.Close()
 
 	for rows.Next() {
-        var id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku string
-        var price float64
-        var version int64
+		var id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku string
+		var price float64
+		var version int64
 		if rows.Scan(&id, &squareId, &squareVarId, &categoryId, &squareCategoryId, &title, &price, &barcode, &sku, &version); err != nil {
 			return products, err
-	    }
-        product := transformers.FromProductDbRowToDomain(id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku, price, version)
-        products = append(products, product) 
+		}
+		product := transformers.FromProductDbRowToDomain(id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku, price, version)
+		products = append(products, product)
 	}
 
 	return products, nil
