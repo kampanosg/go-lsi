@@ -6,12 +6,27 @@ import (
 )
 
 func FromProductRespToDomain(resp response.ProductResponse) domain.Product {
+	var price float64
+	var title string
+
+	if resp.RetailPrice < 0 {
+		price = 0
+	} else {
+		price = resp.RetailPrice
+	}
+
+	if resp.ItemTitle == "" {
+		title = "---"
+	} else {
+		title = resp.ItemTitle
+	}
+
 	return domain.Product{
 		Id:         resp.StockItemID,
 		CategoryId: resp.CategoryID,
-		Title:      resp.ItemTitle,
+		Title:      title,
 		Barcode:    resp.BarcodeNumber,
-		Price:      resp.RetailPrice,
+		Price:      price,
 		SKU:        resp.SKU,
 		Images:     FromProductImagesResponseToDomain(resp.Images),
 	}

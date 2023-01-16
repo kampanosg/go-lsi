@@ -111,8 +111,12 @@ func (c *LinnworksClient) GetProducts() ([]domain.Product, error) {
 
 		var authResp []response.ProductResponse
 		json.Unmarshal(responseData, &authResp)
-		for _, p := range transform.FromProductsRespToDomain(authResp) {
-			products = append(products, p)
+
+		for _, pResp := range authResp {
+			if !pResp.IsBatchedStockType {
+				transformed := transform.FromProductRespToDomain(pResp)
+				products = append(products, transformed)
+			}
 		}
 
 		pageNumber += 1

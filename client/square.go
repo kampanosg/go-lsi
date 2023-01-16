@@ -51,7 +51,7 @@ func (c *SquareClient) UpsertCategories(categories []domain.Category) response.S
 
 	jsonReq, _ := json.Marshal(batchRequest)
 
-	log.Printf("upsert req: %s", string(jsonReq))
+	// log.Printf("upsert req: %s", string(jsonReq))
 
 	// panic("fhfhfhfhfh")
 
@@ -72,7 +72,7 @@ func (c *SquareClient) UpsertCategories(categories []domain.Category) response.S
 	log.Println("response Status:", resp.Status)
 	log.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("response Body:", string(body))
+	// log.Println("response Body:", string(body))
 
 	var squareResp response.SquareUpsertCategoryResponse
 	json.Unmarshal(body, &squareResp)
@@ -109,9 +109,9 @@ func (c *SquareClient) DeleteCategories(categories []domain.Category) response.S
 	defer resp.Body.Close()
 
 	log.Println("response Status:", resp.Status)
-	log.Println("response Headers:", resp.Header)
+	// log.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("response Body:", string(body))
+	// log.Println("response Body:", string(body))
 
 	var squareResp response.SquareUpsertCategoryResponse
 	json.Unmarshal(body, &squareResp)
@@ -122,11 +122,19 @@ func (c *SquareClient) DeleteCategories(categories []domain.Category) response.S
 
 func (c *SquareClient) UpsertProducts(products []domain.Product) response.SquareUpsertItemResponse {
 
-	objects := []request.ItemObject{}
+	objects := make([]request.ItemObject, 0)
+	batches := make([]request.ItemBatch, 0)
+	currentBatch := request.ItemBatch{}
 
 	for _, product := range products {
 
-		log.Printf("product to upsert: %v\n", product)
+		if len(objects) >= 500 { // TODO: Move len to config
+			currentBatch.Objects = objects
+			batches = append(batches, currentBatch)
+
+			currentBatch = request.ItemBatch{}
+			objects = make([]request.ItemObject, 0)
+		}
 
 		itemMoney := request.PriceMoney{
 			Amount:   int(product.Price * 100),
@@ -175,10 +183,9 @@ func (c *SquareClient) UpsertProducts(products []domain.Product) response.Square
 		objects = append(objects, object)
 	}
 
-	batches := []request.ItemBatch{
-		{
-			Objects: objects,
-		},
+	if len(objects) > 0 {
+		currentBatch.Objects = objects
+		batches = append(batches, currentBatch)
 	}
 
 	batchRequest := request.SquareBatchUpsertItemRequest{
@@ -188,7 +195,7 @@ func (c *SquareClient) UpsertProducts(products []domain.Product) response.Square
 
 	jsonReq, _ := json.Marshal(batchRequest)
 
-	log.Printf("upsert req: %s", string(jsonReq))
+	// log.Printf("upsert req: %s", string(jsonReq))
 	// panic("dadasadadsads")
 
 	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
@@ -206,9 +213,9 @@ func (c *SquareClient) UpsertProducts(products []domain.Product) response.Square
 	defer resp.Body.Close()
 
 	log.Println("response Status:", resp.Status)
-	log.Println("response Headers:", resp.Header)
+	// log.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("response Body:", string(body))
+	// log.Println("response Body:", string(body))
 
 	var squareResp response.SquareUpsertItemResponse
 	json.Unmarshal(body, &squareResp)
@@ -216,42 +223,50 @@ func (c *SquareClient) UpsertProducts(products []domain.Product) response.Square
 	return squareResp
 }
 
-
-func (c *SquareClient) DeleteProducts(products []domain.Product) response.SquareUpsertCategoryResponse {
+func (c *SquareClient) DeleteProducts(products []domain.Product) {
 
 	batchRequest := request.BatchDeleteCategoriesRequest{}
 	objectIds := []string{}
 
+	batchRequests := make([]request.BatchDeleteCategoriesRequest, 0)
+
 	for _, product := range products {
 		objectIds = append(objectIds, product.SquareId)
+		if len(objectIds) == 200 {
+			batchRequest.ObjectIds = objectIds
+			batchRequests = append(batchRequests, batchRequest)
+
+			batchRequest = request.BatchDeleteCategoriesRequest{}
+			objectIds = make([]string, 0)
+		}
 	}
 
 	batchRequest.ObjectIds = objectIds
+	batchRequests = append(batchRequests, batchRequest)
 
-	jsonReq, _ := json.Marshal(batchRequest)
+	for _, br := range batchRequests {
 
-	url := fmt.Sprintf("%s/catalog/batch-delete", c.Host)
+		jsonReq, _ := json.Marshal(br)
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
-	req.Header.Set("Square-Version", "2022-12-14")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+		url := fmt.Sprintf("%s/catalog/batch-delete", c.Host)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
+		req.Header.Set("Square-Version", "2022-12-14")
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		log.Println("response Status:", resp.Status)
+		log.Println("response Headers:", resp.Header)
+		body, _ := ioutil.ReadAll(resp.Body)
+		log.Println("response Body:", string(body))
+
 	}
-	defer resp.Body.Close()
-
-	log.Println("response Status:", resp.Status)
-	log.Println("response Headers:", resp.Header)
-	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("response Body:", string(body))
-
-	var squareResp response.SquareUpsertCategoryResponse
-	json.Unmarshal(body, &squareResp)
-
-	return squareResp
 
 }

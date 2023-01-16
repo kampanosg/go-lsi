@@ -1,17 +1,17 @@
 package domain
 
 type Product struct {
-	Id          string         `json:"id"`
-	SquareId    string         `json:"squareId"`
-	SquareVarId string         `json:"squareVariationId"`
-	CategoryId  string         `json:"categoryId"`
-	SquareCategoryId  string         `json:"squareCategoryId"`
-	Title       string         `json:"title"`
-	Price       float64        `json:"price"`
-	Barcode     string         `json:"barcode"`
-	SKU         string         `json:"sku"`
-	Images      []ProductImage `json:"images"`
-	Version     int64          `json:"version"`
+	Id               string         `json:"id"`
+	SquareId         string         `json:"squareId"`
+	SquareVarId      string         `json:"squareVariationId"`
+	CategoryId       string         `json:"categoryId"`
+	SquareCategoryId string         `json:"squareCategoryId"`
+	Title            string         `json:"title"`
+	Price            float64        `json:"price"`
+	Barcode          string         `json:"barcode"`
+	SKU              string         `json:"sku"`
+	Images           []ProductImage `json:"images"`
+	Version          int64          `json:"version"`
 }
 
 type ProductImage struct {

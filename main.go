@@ -14,29 +14,36 @@ import (
 )
 
 func main() {
-	// appId := getEnv("APP_ID")
-	// secret := getEnv("APP_SECRET")
-	// token := getEnv("APP_TOKEN")
+	appId := getEnv("APP_ID")
+	secret := getEnv("APP_SECRET")
+	token := getEnv("APP_TOKEN")
 	squareToken := getEnv("SQ_ACCESS_TOKEN")
 	squareHost := getEnv("SQ_HOST")
 	dbPath := getEnv("DB")
 
-	// c := client.NewLinnworksClient(appId, secret, token)
-	// newCategories, _ := c.GetCategories()
-	// newProducts, _ := c.GetProducts()
+	sqliteDb := db.NewSqliteDB(dbPath)
+	defer sqliteDb.Connection.Close()
+
+	// sqliteDb.ClearCategories()
+	// sqliteDb.ClearProducts()
+	// panic("ff")
+
+	c := client.NewLinnworksClient(appId, secret, token)
+	newCategories, _ := c.GetCategories()
+	newProducts, _ := c.GetProducts()
+	log.Printf("%v", c)
 
 	sq := client.NewSquareClient(squareToken, squareHost)
 	log.Printf("%v", sq)
 
-	sqliteDb := db.NewSqliteDB(dbPath)
-	defer sqliteDb.Connection.Close()
-
-	newProducts := []domain.Product{
-		{Id: "id-2", CategoryId: "test-cat-7", Title: "Coffee Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
-	}
-	newCategories := []domain.Category{
-		{Id: "test-cat-7", Name: "Test Category"},
-	}
+	// newProducts := []domain.Product{
+	// 	{Id: "id-2", CategoryId: "test-cat-7", Title: "Coffee Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
+	// 	{Id: "id-3", CategoryId: "test-cat-7", Title: "Tea Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
+	// 	{Id: "id-4", CategoryId: "test-cat-7", Title: "Chocolate Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
+	// }
+	// newCategories := []domain.Category{
+	// 	{Id: "test-cat-7", Name: "Test Category"},
+    // }
 
 	// Strategy:
 	// Assume that all entries in the database are to be deleted
@@ -183,7 +190,6 @@ func main() {
 		}
 
 		for _, object := range prodResp.Objects {
-            log.Printf("objkect=%v, squareId=%s\n", object, squareId)
 			if object.ID == squareId {
 				version = object.Version
 				break
@@ -197,7 +203,7 @@ func main() {
 		products = append(products, upserted)
 	}
 
-    if len(productsToDelete) > 0 {
+	if len(productsToDelete) > 0 {
 		sq.DeleteProducts(productsToDelete)
 	}
 

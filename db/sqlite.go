@@ -115,16 +115,16 @@ func (db *sqliteDb) GetProducts() (products []domain.Product, err error) {
 		var version int64
 		rows.Scan(&id, &squareId, &squareVarId, &categoryId, &squareCategoryId, &title, &price, &barcode, &sku, &version)
 		products = append(products, domain.Product{
-			Id:          id,
-			SquareId:    squareId,
-			SquareVarId: squareVarId,
-			CategoryId:  categoryId,
-            SquareCategoryId: squareCategoryId,
-			Title:       title,
-			Price:       price,
-			Barcode:     barcode,
-			SKU:         sku,
-			Version:     version,
+			Id:               id,
+			SquareId:         squareId,
+			SquareVarId:      squareVarId,
+			CategoryId:       categoryId,
+			SquareCategoryId: squareCategoryId,
+			Title:            title,
+			Price:            price,
+			Barcode:          barcode,
+			SKU:              sku,
+			Version:          version,
 		})
 
 	}
@@ -175,8 +175,8 @@ func (db *sqliteDb) InsertProducts(products []domain.Product) error {
 			return err
 		}
 
-		res, err := tx.Stmt(dl).Exec(product.Id, product.SquareId, product.SquareVarId, product.CategoryId, 
-            product.SquareCategoryId, product.Title, product.Price, product.Barcode, product.SKU, product.Version)
+		_, err := tx.Stmt(dl).Exec(product.Id, product.SquareId, product.SquareVarId, product.CategoryId,
+			product.SquareCategoryId, product.Title, product.Price, product.Barcode, product.SKU, product.Version)
 
 		if err != nil {
 			tx.Rollback()
@@ -184,7 +184,7 @@ func (db *sqliteDb) InsertProducts(products []domain.Product) error {
 			return err
 		}
 
-		log.Printf("db: created product, id=%s, name=%s, res=%v", product.Id, product.Title, res)
+		// log.Printf("db: created product, id=%s, name=%s, res=%v", product.Id, product.Title, res)
 	}
 	tx.Commit()
 	return nil
