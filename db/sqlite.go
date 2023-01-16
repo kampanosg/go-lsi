@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"kev/types/domain"
+	"github.com/kampanosg/go-lsi/types/domain"
 
 	_ "github.com/mattn/go-sqlite3"
 )

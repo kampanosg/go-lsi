@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"kev/client"
-	"kev/db"
-	"kev/types/domain"
+	"github.com/kampanosg/go-lsi/client"
+	"github.com/kampanosg/go-lsi/db"
+	"github.com/kampanosg/go-lsi/types/domain"
 
 	"github.com/joho/godotenv"
 )

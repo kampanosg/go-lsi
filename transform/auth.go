@@ -1,8 +1,8 @@
 package transform
 
 import (
-	"kev/types/domain"
-	"kev/types/response"
+	"github.com/kampanosg/go-lsi/types/domain"
+	"github.com/kampanosg/go-lsi/types/response"
 )
 
 func FromAuthResponseToDomain(resp response.Auth) domain.Auth {

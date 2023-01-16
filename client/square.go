@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"kev/types/domain"
-	"kev/types/request"
-	"kev/types/response"
+	"github.com/kampanosg/go-lsi/types/domain"
+	"github.com/kampanosg/go-lsi/types/request"
+	"github.com/kampanosg/go-lsi/types/response"
 	"log"
 	"net/http"
 
