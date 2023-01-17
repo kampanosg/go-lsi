@@ -7,71 +7,17 @@ import (
 	// "strings"
 
 	// "github.com/kampanosg/go-lsi/client"
-	"github.com/kampanosg/go-lsi/clients/linnworks"
-	"github.com/kampanosg/go-lsi/transformers"
+	// "github.com/kampanosg/go-lsi/clients/linnworks"
+	// "github.com/kampanosg/go-lsi/transformers"
 	// "github.com/kampanosg/go-lsi/types/domain"
+	// "github.com/kampanosg/go-lsi/clients/square"
 
 	// "github.com/kampanosg/go-lsi/clients/db/sqlite"
-	// "github.com/kampanosg/go-lsi/types"
 	"github.com/joho/godotenv"
+	// "github.com/kampanosg/go-lsi/types"
 )
 
 func main() {
-
-	// dbPath := getEnv("DB")
-	// dbClient := sqlite.NewSqliteDB(dbPath)
-
-	// dbClient.ClearCategories()
-	// dbClient.ClearProducts()
-
-	// // categories := []types.Category {
-	//     { Id: "category-2", Name: "Coffee", SquareId: "abc1234", Version: 123456789 },
-	//     { Id: "category-3", Name: "Tea", SquareId: "cbahdide", Version: 123456789 },
-	// }
-
-	// products := []types.Product {
-	//     { Id: "product-2", SquareId: "123131313123", SquareVarId: "fdjskfjskdfjksdfj", CategoryId: "category-2", SquareCategoryId: "eqqweqeq", Title: "Test Product 1", SKU: "12313131", Barcode: "ddasdada", Version: 32313131, Price: 123.32 },
-	// }
-
-	lwAppId := getEnv("LINNWORKS_APP_ID")
-	lwSecret := getEnv("LINNWORKS_APP_SECRET")
-	lwToken := getEnv("LINNWORKS_APP_TOKEN")
-
-	lwClient := linnworks.NewLinnworksClient(lwAppId, lwSecret, lwToken)
-	categories, _ := lwClient.GetCategories()
-	products, _ := lwClient.GetProducts()
-
-	log.Printf("%v", transformers.FromCategoryLinnworksResponsesToDomain(categories))
-	log.Printf("%v", transformers.FromProductLinnworksResponsesToDomain(products))
-
-	// squareToken := getEnv("SQ_ACCESS_TOKEN")
-	// squareHost := getEnv("SQ_HOST")
-	// dbPath := getEnv("DB")
-
-	// sqliteDb := db.NewSqliteDB(dbPath)
-	// defer sqliteDb.Connection.Close()
-
-	// sqliteDb.ClearCategories()
-	// sqliteDb.ClearProducts()
-	// panic("ff")
-
-	// c := client.NewLinnworksClient(appId, secret, token)
-	// newCategories, _ := c.GetCategories()
-	// newProducts, _ := c.GetProducts()
-	// log.Printf("%v", c)
-
-	// sq := client.NewSquareClient(squareToken, squareHost)
-	// log.Printf("%v", sq)
-
-	// newProducts := []domain.Product{
-	// 	{Id: "id-2", CategoryId: "test-cat-7", Title: "Coffee Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
-	// 	{Id: "id-3", CategoryId: "test-cat-7", Title: "Tea Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
-	// 	{Id: "id-4", CategoryId: "test-cat-7", Title: "Chocolate Beans", Barcode: "012345679", SKU: "0x12999", Price: 169.420},
-	// }
-	// newCategories := []domain.Category{
-	// 	{Id: "test-cat-7", Name: "Test Category"},
-	// }
-
 	// Strategy:
 	// Assume that all entries in the database are to be deleted
 	// Start the merge map, with all the values from the db
