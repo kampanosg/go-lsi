@@ -4,7 +4,13 @@ import (
 	// "fmt"
 	"log"
 	"os"
+
 	// "strings"
+
+	"github.com/kampanosg/go-lsi/clients/db/sqlite"
+	"github.com/kampanosg/go-lsi/clients/linnworks"
+	"github.com/kampanosg/go-lsi/clients/square"
+	"github.com/kampanosg/go-lsi/sync"
 
 	// "github.com/kampanosg/go-lsi/client"
 	// "github.com/kampanosg/go-lsi/clients/linnworks"
@@ -18,6 +24,22 @@ import (
 )
 
 func main() {
+
+	lwAppId := getEnv("LINNWORKS_APP_ID")
+	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
+	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
+
+	sqAccessToken := getEnv("SQUARE_ACCESS_TOKEN")
+	sqHost := getEnv("SQUARE_HOST")
+
+	dbPath := getEnv("DB")
+
+	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
+	sqClient := square.NewSquareClient(sqAccessToken, sqHost)
+	sqliteDb := sqlite.NewSqliteDB(dbPath)
+	s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
+	s.SyncCategories()
+
 	// Strategy:
 	// Assume that all entries in the database are to be deleted
 	// Start the merge map, with all the values from the db
@@ -193,7 +215,7 @@ func main() {
 // 		}
 // 	}
 // 	return m
-// }
+// }v
 
 // func buildProductMap(products []domain.Product) map[string]domain.UpsertProduct {
 // 	m := map[string]domain.UpsertProduct{}

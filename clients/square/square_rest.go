@@ -13,7 +13,7 @@ const (
 )
 
 var (
-    errBadRequest = errors.New("bad request")
+	errBadRequest = errors.New("bad request")
 )
 
 func makeRequest(method, url string, headers map[string]string, jsonReq []byte) ([]byte, error) {
@@ -39,9 +39,9 @@ func makeRequest(method, url string, headers map[string]string, jsonReq []byte) 
 		return responseData, err
 	}
 
-    if res.StatusCode >= 400 && res.StatusCode <= 500 {
-        return responseData, errBadRequest
-    }
+	if res.StatusCode >= 400 && res.StatusCode <= 500 {
+		return responseData, errBadRequest
+	}
 
 	return responseData, nil
 }

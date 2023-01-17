@@ -17,7 +17,7 @@ func NewSqliteDB(dbPath string) SqliteDb {
 	return SqliteDb{Connection: conn}
 }
 
-func (db *SqliteDb) commitTx(query string, args [][]any) error {
+func (db SqliteDb) commitTx(query string, args [][]any) error {
 	stmt, err := db.Connection.Prepare(query)
 	if err != nil {
 		log.Printf("db: failed to commit tx. reason=%v\n", err.Error())

@@ -5,7 +5,7 @@ import (
 	"github.com/kampanosg/go-lsi/types"
 )
 
-func (db *SqliteDb) GetCategories() (categories []types.Category, err error) {
+func (db SqliteDb) GetCategories() (categories []types.Category, err error) {
 	rows, err := db.Connection.Query(query_GET_CATEGORIES)
 	defer rows.Close()
 
@@ -22,7 +22,7 @@ func (db *SqliteDb) GetCategories() (categories []types.Category, err error) {
 	return categories, nil
 }
 
-func (db *SqliteDb) InsertCategories(categories []types.Category) error {
+func (db SqliteDb) InsertCategories(categories []types.Category) error {
 	args := make([][]any, len(categories))
 	for index, category := range categories {
 		args[index] = []any{category.Id, category.SquareId, category.Name, category.Version}
@@ -30,11 +30,11 @@ func (db *SqliteDb) InsertCategories(categories []types.Category) error {
 	return db.commitTx(query_INSERT_CATEGORY, args)
 }
 
-func (db *SqliteDb) ClearCategories() error {
+func (db SqliteDb) ClearCategories() error {
 	return db.commitTx(query_CLEAR_CATEGORIES, make([][]any, 0))
 }
 
-func (db *SqliteDb) GetProducts() (products []types.Product, err error) {
+func (db SqliteDb) GetProducts() (products []types.Product, err error) {
 	rows, err := db.Connection.Query(query_GET_PRODUCTS)
 	defer rows.Close()
 
@@ -52,7 +52,7 @@ func (db *SqliteDb) GetProducts() (products []types.Product, err error) {
 	return products, nil
 }
 
-func (db *SqliteDb) InsertProducts(products []types.Product) error {
+func (db SqliteDb) InsertProducts(products []types.Product) error {
 	args := make([][]any, len(products))
 	for index, product := range products {
 		args[index] = []any{product.Id, product.SquareId, product.SquareVarId,
@@ -63,6 +63,6 @@ func (db *SqliteDb) InsertProducts(products []types.Product) error {
 	return db.commitTx(query_INSERT_PRODUCT, args)
 }
 
-func (db *SqliteDb) ClearProducts() error {
+func (db SqliteDb) ClearProducts() error {
 	return db.commitTx(query_CLEAR_PRODUCTS, make([][]any, 0))
 }

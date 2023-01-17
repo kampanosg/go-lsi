@@ -25,14 +25,13 @@ const (
 	VARIATION_PRICING = "FIXED_PRICING"
 )
 
-
 type SquareClient struct {
 	AccessToken string `json:"accessToken"`
 	Host        string `json:"host"`
 }
 
-func NewSquareClient(accessToken, host string) SquareClient {
-	return SquareClient{AccessToken: accessToken, Host: host}
+func NewSquareClient(accessToken, host string) *SquareClient {
+	return &SquareClient{AccessToken: accessToken, Host: host}
 }
 
 func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpsertResponse, error) {
@@ -76,7 +75,7 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 		return squareResp, err
 	}
 
-    // TODO: Check for bad request e.g 400
+	// TODO: Check for bad request e.g 400
 
 	err = json.Unmarshal(resp, &squareResp)
 
@@ -157,7 +156,6 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		Batches:        batches,
 	}
 
-
 	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
 	jsonReq, _ := json.Marshal(batchRequest)
 	headers := make(map[string]string, 0)
@@ -178,7 +176,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 }
 
 func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
-    
+
 	batchRequest := BatchDeleteItemsRequest{}
 	objectIds := []string{}
 
@@ -198,19 +196,19 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 	batchRequest.ObjectIds = objectIds
 	batchRequests = append(batchRequests, batchRequest)
 
-    url := fmt.Sprintf("%s/catalog/batch-delete", c.Host)
-    headers := make(map[string]string, 0)
-    headers["Square-Version"] = "2022-12-14"  
-    headers["Content-Type"] = "application/json"  
-    headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
+	url := fmt.Sprintf("%s/catalog/batch-delete", c.Host)
+	headers := make(map[string]string, 0)
+	headers["Square-Version"] = "2022-12-14"
+	headers["Content-Type"] = "application/json"
+	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
 	for _, br := range batchRequests {
 		jsonReq, _ := json.Marshal(br)
 		makeRequest(POST, url, headers, jsonReq)
-        if _, err := makeRequest(POST, url, headers, jsonReq); err != nil {
-            return err
-        }
+		if _, err := makeRequest(POST, url, headers, jsonReq); err != nil {
+			return err
+		}
 
 	}
-    return nil
+	return nil
 }
