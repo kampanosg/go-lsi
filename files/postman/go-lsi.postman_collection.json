@@ -1,0 +1,417 @@
+{
+	"info": {
+		"_postman_id": "9a52ac16-34ea-41aa-b7da-14e2a7caa307",
+		"name": "go-lsi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Linnworks",
+			"item": [
+				{
+					"name": "Auth/AuthorizeByApplication",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "ApplicationId",
+									"value": "{{APP_ID}}",
+									"type": "default"
+								},
+								{
+									"key": "ApplicationSecret",
+									"value": "{{APP_SECRET}}",
+									"type": "default"
+								},
+								{
+									"key": "Token",
+									"value": "{{APP_TOKEN}}",
+									"type": "default"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.linnworks.net/api/Auth/AuthorizeByApplication",
+							"protocol": "https",
+							"host": [
+								"api",
+								"linnworks",
+								"net"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"AuthorizeByApplication"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inventory/GetCategories",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{LW_HOST}}/Inventory/GetCategories",
+							"host": [
+								"{{LW_HOST}}"
+							],
+							"path": [
+								"Inventory",
+								"GetCategories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inventory/GetInventoryItemBatchInformation",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "loadCompositeParents",
+									"value": "True",
+									"type": "default"
+								},
+								{
+									"key": "loadVariationParents",
+									"value": "False",
+									"type": "default"
+								},
+								{
+									"key": "entriesPerPage",
+									"value": "1",
+									"type": "default"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"type": "default"
+								},
+								{
+									"key": "dataRequirements",
+									"value": "[1,8]",
+									"type": "default"
+								},
+								{
+									"key": "searchTypes",
+									"value": "[0,1,2]",
+									"type": "default"
+								},
+								{
+									"key": "",
+									"value": "",
+									"type": "default",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{LW_HOST}}/Stock/GetStockItemsFull",
+							"host": [
+								"{{LW_HOST}}"
+							],
+							"path": [
+								"Stock",
+								"GetStockItemsFull"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inventory/GetStockItemsFullByIds",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "request={\n    \"StockItemIds\":[\n        \"b4bf8ef2-4771-4d2d-b008-625a2d233102\",\n        \"5a0db161-ba41-4322-8374-2e36e06f4e2c\"\n    ], \n    \"DataRequirements\":[1,2,3,4,5,6,7]\n}"
+						},
+						"url": {
+							"raw": "{{LW_HOST}}/Stock/GetStockItemsFullByIds",
+							"host": [
+								"{{LW_HOST}}"
+							],
+							"path": [
+								"Stock",
+								"GetStockItemsFullByIds"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Square",
+			"item": [
+				{
+					"name": "Catalog/ListCatalog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SQUARE_ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							},
+							{
+								"key": "Square-Version",
+								"value": "2022-12-14",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{SQUARE_HOST}}/catalog/list?types=ITEM",
+							"host": [
+								"{{SQUARE_HOST}}"
+							],
+							"path": [
+								"catalog",
+								"list"
+							],
+							"query": [
+								{
+									"key": "types",
+									"value": "ITEM"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Catalog/BatchUpsertCatalogObjects (CATEGORY)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SQUARE_ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Square-Version",
+								"value": "2022-12-14",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idempotency_key\": \"03ff83ae-5c6c-567a-8bc7-7da0868d77c1\",\n    \"batches\": [\n      {\n        \"objects\": [\n          {\n            \"type\": \"CATEGORY\",\n            \"id\": \"JD2REK7MXJWEQNH2ZD7FNEBE\",\n            \"is_deleted\": false,\n            \"version\": 1673807515991,\n            \"category_data\": {\n              \"name\": \"Test Category\"\n            }\n          }\n        ]\n      }\n    ]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SQUARE_HOST}}/catalog/batch-upsert",
+							"host": [
+								"{{SQUARE_HOST}}"
+							],
+							"path": [
+								"catalog",
+								"batch-upsert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Catalog/BatchUpsertCatalogObjects (ITEM)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SQUARE_ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Square-Version",
+								"value": "2022-12-14",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idempotency_key\": \"a9b2c7f9-f253-4985-91b2-21a5562cf469\",\n    \"batches\": [\n      {\n        \"objects\": [\n          {\n            \"type\": \"ITEM\",\n            \"id\": \"#product-coffee\",\n            \"is_deleted\": false,\n            \"present_at_all_locations\": true,\n            \"item_data\": {\n                \"name\": \"Tea\",\n                \"description\": \"this is some coffee that helps you poo\",\n                \"is_taxable\": true,\n                \"visibility\": \"PRIVATE\",\n                \"category_id\": \"JD2REK7MXJWEQNH2ZD7FNEBE\",\n                \"variations\": [\n                {\n                    \"type\": \"ITEM_VARIATION\",\n                    \"id\": \"#product-coffee-var-1\",\n                    \"is_deleted\": false,\n                    \"present_at_all_locations\": true,\n                    \"item_variation_data\": {\n                        \"item_id\": \"#product-coffee\",\n                        \"name\": \"Regular\",\n                        \"sku\": \"0x1234567ff\",\n                        \"ordinal\": 1,\n                        \"pricing_type\": \"FIXED_PRICING\",\n                        \"price_money\": {\n                            \"amount\": 500,\n                            \"currency\": \"GBP\"\n                        }\n                    }\n                }\n                ],\n                \"product_type\": \"REGULAR\",\n                \"skip_modifier_screen\": false\n            }\n          }\n        ]\n      }\n    ]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SQUARE_HOST}}/catalog/batch-upsert",
+							"host": [
+								"{{SQUARE_HOST}}"
+							],
+							"path": [
+								"catalog",
+								"batch-upsert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Catalog/BatchDeleteCatalogObjects Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SQUARE_ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Square-Version",
+								"value": "2022-12-14",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"object_ids\": [\n        \"2AS7YYRSG2QJV7SEWSM4CMBP\"\n     ]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SQUARE_HOST}}/catalog/batch-delete",
+							"host": [
+								"{{SQUARE_HOST}}"
+							],
+							"path": [
+								"catalog",
+								"batch-delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

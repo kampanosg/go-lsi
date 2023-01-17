@@ -1,4 +1,11 @@
-package domain
+package types
+
+type Category struct {
+	Id       string `json:"id"`
+	SquareId string `json:"squareId"`
+	Name     string `json:"name"`
+	Version  int64  `json:"version"`
+}
 
 type Product struct {
 	Id               string         `json:"id"`
