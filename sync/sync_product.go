@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/kampanosg/go-lsi/transformers"
 	"github.com/kampanosg/go-lsi/types"
 )
 
@@ -19,9 +20,14 @@ func (s *SyncTool) SyncProducts() {
 	mappedCatergoriesById := buildMappedCategoriesById(categories)
 
 	oldProducts, _ := s.Db.GetProducts()
-	newProducts := []types.Product{
-		{Id: "product-1", Title: "Very Good Coffee Beans", CategoryId: "category-1", Price: 69.42, Barcode: "999999999999", SKU: "SKU0420"},
-	}
+    lwProduts, _ := s.LinnworksClient.GetProducts()
+    newProducts := transformers.FromProductLinnworksResponsesToDomain(lwProduts)
+
+	// newProducts := []types.Product{
+	// 	{Id: "product-1", Title: "Very Good Coffee Beans", CategoryId: "category-1", Price: 69.42, Barcode: "999999999999", SKU: "SKU0420"},
+	// }
+
+    log.Printf("will process %d new products\n", len(newProducts))
 
 	productsUpsertMap := buildUpsertProductMap(oldProducts)
 	productsToUpsert := make([]types.Product, 0)
@@ -65,7 +71,6 @@ func (s *SyncTool) SyncProducts() {
 						break
 					}
 				}
-				log.Printf("%v\n", product)
 				productsSquareIdMapping[product.SquareId] = product
 			}
 		}

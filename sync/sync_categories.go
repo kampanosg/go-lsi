@@ -3,6 +3,7 @@ package sync
 import (
 	"fmt"
 
+	"github.com/kampanosg/go-lsi/transformers"
 	"github.com/kampanosg/go-lsi/types"
 )
 
@@ -14,12 +15,14 @@ type upsertCategory struct {
 func (s *SyncTool) SyncCategories() {
 
 	oldCategories, _ := s.Db.GetCategories()
-	//  newCategories, _ := s.LinnworksClient.GetCategories()
+    lwCategories, _ := s.LinnworksClient.GetCategories()
+    newCategories := transformers.FromCategoryLinnworksResponsesToDomain(lwCategories)
 
 	// oldCategories := []types.Category{}
-	newCategories := []types.Category{
-		{Id: "category-1", Name: "Test Category 1"},
-	}
+	// newCategories := []types.Category{
+	// 	{Id: "category-1", Name: "Test Category 1"},
+	// }
+
 
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
 	categoriesToBeUpserted := make([]types.Category, 0)

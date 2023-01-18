@@ -81,7 +81,7 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 
 		for _, product := range productResps {
 			if !product.IsBatchedStockType {
-				if product.ItemTitle == "" || product.RetailPrice < 0 {
+				if product.ItemTitle != "" && product.RetailPrice > 0 {
 					products = append(products, product)
 				}
 			}
