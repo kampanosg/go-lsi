@@ -1,7 +1,6 @@
 package sync
 
 import (
-
 	"github.com/kampanosg/go-lsi/clients/db"
 	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
@@ -20,4 +19,3 @@ func NewSyncTool(lwClient *linnworks.LinnworksClient, sqClient *square.SquareCli
 		Db:              db,
 	}
 }
-

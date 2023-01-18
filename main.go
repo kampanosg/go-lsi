@@ -39,6 +39,7 @@ func main() {
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
 	s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 	s.SyncCategories()
+	s.SyncProducts()
 
 	// Strategy:
 	// Assume that all entries in the database are to be deleted

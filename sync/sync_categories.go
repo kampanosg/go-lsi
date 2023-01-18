@@ -13,16 +13,17 @@ type upsertCategory struct {
 
 func (s *SyncTool) SyncCategories() {
 
-    oldCategories, _ := s.Db.GetCategories()
+	oldCategories, _ := s.Db.GetCategories()
 	//  newCategories, _ := s.LinnworksClient.GetCategories()
 
-    // oldCategories := []types.Category{}
+	// oldCategories := []types.Category{}
 	newCategories := []types.Category{
+		{Id: "category-1", Name: "Test Category 1"},
 	}
 
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
 	categoriesToBeUpserted := make([]types.Category, 0)
-    categoriesSquareIdMapping := make(map[string]types.Category)
+	categoriesSquareIdMapping := make(map[string]types.Category)
 
 	for _, newCategory := range newCategories {
 
@@ -40,34 +41,34 @@ func (s *SyncTool) SyncCategories() {
 			isDeleted: false,
 		}
 		categoriesToBeUpserted = append(categoriesToBeUpserted, newCategory)
-        categoriesSquareIdMapping[newCategory.SquareId] = newCategory
+		categoriesSquareIdMapping[newCategory.SquareId] = newCategory
 	}
 
-    resp, _ := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
+	resp, _ := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
 
-    if len(resp.IDMappings) > 0 {
-        for _, idMapping := range resp.IDMappings {
-            category := categoriesSquareIdMapping[idMapping.ClientObjectID]
-            category.SquareId = idMapping.ObjectID
-            categoriesSquareIdMapping[category.SquareId] = category 
-        }
-    }
+	if len(resp.IDMappings) > 0 {
+		for _, idMapping := range resp.IDMappings {
+			category := categoriesSquareIdMapping[idMapping.ClientObjectID]
+			category.SquareId = idMapping.ObjectID
+			categoriesSquareIdMapping[category.SquareId] = category
+		}
+	}
 
-    categories := make([]types.Category, 0)
-    for _, object := range resp.Objects {
-        category := categoriesSquareIdMapping[object.ID]
-        category.Version = object.Version
-        categories = append(categories, category)
-    }
+	categories := make([]types.Category, 0)
+	for _, object := range resp.Objects {
+		category := categoriesSquareIdMapping[object.ID]
+		category.Version = object.Version
+		categories = append(categories, category)
+	}
 
-    s.Db.ClearCategories()
-    if len(categories) > 0 {
-        s.Db.InsertCategories(categories)
-    }
+	s.Db.ClearCategories()
+	if len(categories) > 0 {
+		s.Db.InsertCategories(categories)
+	}
 
-    categoriesToBeDeleted := getCategoriesToBeDeleted(categoriesUpsertMap)
+	categoriesToBeDeleted := getCategoriesToBeDeleted(categoriesUpsertMap)
 	if len(categoriesToBeDeleted) > 0 {
-        s.SquareClient.BatchDeleteItems(categoriesToBeDeleted)
+		s.SquareClient.BatchDeleteItems(categoriesToBeDeleted)
 	}
 }
 
