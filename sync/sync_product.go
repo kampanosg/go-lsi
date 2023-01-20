@@ -20,14 +20,14 @@ func (s *SyncTool) SyncProducts() {
 	mappedCatergoriesById := buildMappedCategoriesById(categories)
 
 	oldProducts, _ := s.Db.GetProducts()
-    lwProduts, _ := s.LinnworksClient.GetProducts()
-    newProducts := transformers.FromProductLinnworksResponsesToDomain(lwProduts)
+	lwProduts, _ := s.LinnworksClient.GetProducts()
+	newProducts := transformers.FromProductLinnworksResponsesToDomain(lwProduts)
 
 	// newProducts := []types.Product{
 	// 	{Id: "product-1", Title: "Very Good Coffee Beans", CategoryId: "category-1", Price: 69.42, Barcode: "999999999999", SKU: "SKU0420"},
 	// }
 
-    log.Printf("will process %d new products\n", len(newProducts))
+	log.Printf("will process %d new products\n", len(newProducts))
 
 	productsUpsertMap := buildUpsertProductMap(oldProducts)
 	productsToUpsert := make([]types.Product, 0)
