@@ -77,3 +77,15 @@ func FromProductLinnworksImageResponsesToDomain(lwImages []linnworks.LinnworksPr
 	}
 	return images
 }
+
+func FromInventoryDbRowToDomain(id, squareId, title, categoryName, barcode, sku string, price float64) types.InventoryItem {
+	return types.InventoryItem{
+		Id:           id,
+		SquareId:     squareId,
+		Title:        title,
+		CategoryName: categoryName,
+		Barcode:      barcode,
+		SKU:          sku,
+		Price:        price,
+	}
+}

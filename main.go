@@ -33,12 +33,15 @@ func main() {
 
 	authMiddleware := middleware.NewAuthMiddleware(signingKey)
 	authController := controllers.NewAuthController(sqliteDb, signingKey)
+	inventoryController:= controllers.NewInventoryController(sqliteDb)
 	pingController := controllers.NewPingController()
 
 	router := mux.NewRouter()
 
-	router.Handle("/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
-	router.Handle("/auth", http.HandlerFunc(authController.HandleAuthRequest))
+	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
+	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
+	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest)).Methods("POST")
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), router); err != nil {
 		log.Fatalf("Unable to start server. error=%v\n", err.Error())
@@ -55,12 +58,6 @@ func main() {
 	// s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 	// s.SyncCategories()
 	// s.SyncProducts()
-}
-
-func handleAuthRequest(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Ok",
-	})
 }
 
 func getEnv(key string) string {

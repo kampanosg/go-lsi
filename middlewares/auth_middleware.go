@@ -19,10 +19,10 @@ type authMiddleware struct {
 var (
 	logger = log.Default()
 
-	errAuthFailed         = errors.New("auth failed")
-	errUserUnauthorized   = errors.New("user is not authorized")
-	errBadDate = errors.New("invalid date provided")
-	errInvalidToken = errors.New("token is invalid")
+	errAuthFailed       = errors.New("auth failed")
+	errUserUnauthorized = errors.New("user is not authorized")
+	errBadDate          = errors.New("invalid date provided")
+	errInvalidToken     = errors.New("token is invalid")
 )
 
 func NewAuthMiddleware(signKey []byte) authMiddleware {

@@ -27,3 +27,13 @@ type ProductImage struct {
 	Thumbnail string `json:"thumbnail"`
 	Order     int    `json:"order"`
 }
+
+type InventoryItem struct {
+	Id           string
+	SquareId     string
+	Title        string
+	CategoryName string
+	Barcode      string
+	SKU          string
+	Price        string
+}

@@ -63,7 +63,7 @@ func (c *AuthController) HandleAuthRequest(w http.ResponseWriter, r *http.Reques
 
 	claims := &jwt.StandardClaims{
 		ExpiresAt: DEFAULT_TOKEN_EXPIRY.UnixMilli(),
-		IssuedAt: time.Now().UnixMilli(),
+		IssuedAt:  time.Now().UnixMilli(),
 		Subject:   user.Username,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

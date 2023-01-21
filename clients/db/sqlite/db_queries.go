@@ -1,6 +1,7 @@
 package sqlite
 
 const (
+	query_GET_INVENTORY    = `SELECT p.lw_id, p.square_id, p.title, c.name, p.price, p.barcode, p.sku FROM product AS p JOIN category AS c ON c.lw_id = p.category_id`
 	query_GET_CATEGORIES   = `SELECT lw_id, square_id, name, version FROM category;`
 	query_INSERT_CATEGORY  = `INSERT INTO category (lw_id, square_id, name, version) VALUES (?, ?, ?, ?);`
 	query_CLEAR_CATEGORIES = `DELETE FROM category;`

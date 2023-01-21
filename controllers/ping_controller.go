@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-type PingController struct {}
+type PingController struct{}
 
 func NewPingController() PingController {
 	return PingController{}

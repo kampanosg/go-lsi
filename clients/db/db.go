@@ -5,6 +5,8 @@ import (
 )
 
 type DB interface {
+	GetInventory() ([]types.InventoryItem, error)
+
 	GetCategories() ([]types.Category, error)
 	InsertCategories(categories []types.Category) error
 	ClearCategories() error
