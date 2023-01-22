@@ -29,18 +29,30 @@
                         <h5>Filters</h5>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <label>Barcode</label>
-                        <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
+                <div class="row" x-data="{
+                    barcode: '',
+                    sku: '',
+                }">
+                    <div class="col-3">
+                        <div class="input-group mb-3">
+                            <input x-model="sku" type="text" class="form-control" placeholder="SKU" aria-label="SKU" aria-describedby="btn-filter-sku">
+                            <button @click="filterBySku($data.sku)" class="btn btn-outline-secondary" type="button" id="btn-filter-sku">Filter</button>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label>SKU:</label>
-                        <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
+                    <div class="col-3">
+                        <div class="input-group mb-3">
+                            <input x-model="barcode" type="text" class="form-control" placeholder="Barcode" aria-label="Barcode" aria-describedby="btn-filter-barcode">
+                            <button @click="filterByBarcode($data.barcode)" class="btn btn-outline-secondary" type="button" id="btn-filter-barcode">Filter</button>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label>Title</label>
-                        <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
+                    <div class="col-1">
+                        <button 
+                            @click="clearFilters" 
+                            x-show="$data.sku.length > 0 || $data.barcode.length > 0" 
+                            class="btn btn-outline-danger">Clear</button>
+                    </div>
+                    <div class="col-5">
+                        <p class="text-end">Total Items: <span x-text="$store.filtered.length"></span></p>
                     </div>
                 </div>
 
@@ -59,7 +71,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="item in $store.inventory">
+                                <template x-for="item in $store.filtered">
                                     <tr>
                                         <td> 
                                             <div class="d-flex">
@@ -97,7 +109,7 @@
                         </p>
 
 
-                        <p x-data x-show="$store.inventory.length > 100" class="text-center py-4">
+                        <p x-data x-show="$store.inventory.length > 0" class="text-center py-4">
                             Wow, you reached the bottom 😲. 
                             Click the wee finger to back to the top <a href="#">👆</a>
                         </p>
@@ -132,11 +144,11 @@
                         return
                     } else if(!data.items) {
                         console.log(data.Message)
-                        // TODO: show error message
                         return
                     }
 
                     Alpine.store('inventory', data.items)
+                    Alpine.store('filtered', data.items)
                 });
         })
 
@@ -163,6 +175,26 @@
         function price(item) {
             return `£${item}`
         }
+
+        function filterBySku(sku) {
+            let items = Alpine.store('inventory')
+            sku.length === 0 ?  
+                Alpine.store('filtered', items) :
+                Alpine.store('filtered', items.filter(item => item.sku === sku))
+        }
+
+
+        function filterByBarcode(barcode) {
+            let items = Alpine.store('inventory')
+            barcode.length === 0 ?  
+                Alpine.store('filtered', items) :
+                Alpine.store('filtered', items.filter(item => item.barcode === barcode))
+        }
+
+        function clearFilters() {
+            Alpine.store('filtered', Alpine.store('inventory')) 
+        }
+
     </script>
 
 </html>
