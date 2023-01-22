@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	"encoding/json"
@@ -25,11 +25,11 @@ var (
 	errInvalidToken     = errors.New("token is invalid")
 )
 
-func NewAuthMiddleware(signKey []byte) authMiddleware {
-	return authMiddleware{signingKey: signKey}
+func NewAuthMiddleware(signKey []byte) *authMiddleware {
+	return &authMiddleware{signingKey: signKey}
 }
 
-func (m authMiddleware) ProtectedEndpoint(next http.Handler) http.Handler {
+func (m *authMiddleware) ProtectedEndpoint(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := strings.Split(r.Header.Get("Authorization"), "Bearer ")
 		if len(authHeader) != 2 {
@@ -41,7 +41,7 @@ func (m authMiddleware) ProtectedEndpoint(next http.Handler) http.Handler {
 				return m.signingKey, nil
 			})
 
-			if token.Valid {
+			if token != nil &&  token.Valid {
 				next.ServeHTTP(w, r)
 				return
 			} else if ve, ok := err.(*jwt.ValidationError); ok {

@@ -35,5 +35,5 @@ type InventoryItem struct {
 	CategoryName string
 	Barcode      string
 	SKU          string
-	Price        string
+	Price        float64
 }

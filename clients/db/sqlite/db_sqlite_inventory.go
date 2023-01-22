@@ -13,13 +13,13 @@ func (db SqliteDb) GetInventory() (inventory []types.InventoryItem, err error) {
 		var id, squareId, categoryName, title, barcode, sku string
 		var price float64
 		if rows.Scan(&id, &squareId, &title, &categoryName, &price, &barcode, &sku); err != nil {
-			return products, err
+			return inventory, err
 		}
 		inventory_item := transformers.FromInventoryDbRowToDomain(id, squareId, title, categoryName, barcode, sku, price)
 		inventory = append(inventory, inventory_item)
 	}
 
-	return products, nil
+	return inventory, nil
 }
 
 func (db SqliteDb) GetCategories() (categories []types.Category, err error) {

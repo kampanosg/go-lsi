@@ -89,3 +89,15 @@ func FromInventoryDbRowToDomain(id, squareId, title, categoryName, barcode, sku 
 		Price:        price,
 	}
 }
+
+func FromInventoryDomainToResponse(item types.InventoryItem) types.InventoryItemResponse {
+	return types.InventoryItemResponse{
+		Id:           item.Id,
+		SquareId:     item.SquareId,
+		Title:        item.Title,
+		CategoryName: item.CategoryName,
+		Barcode:      item.Barcode,
+		SKU:          item.SKU,
+		Price:        item.Price,
+	}
+}

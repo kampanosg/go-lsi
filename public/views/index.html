@@ -9,87 +9,159 @@
         <link href="/css/app.css" rel="stylesheet" />
     </head>
     <body>
-        <body class="">
-            
-            <main class="p-4" id="dashboard">
-                <div class="container mt-auto">
+        <main class="p-4" id="dashboard">
+            <div class="container mt-auto">
 
-                    <div class="row">
-                        <div class="col-7">
-                            <h1 class="text-start">POS Dashboard</h1>
-                        </div>
-                        <div class="col-3">
-                            <p class="text-end mt-2">Last sync: <strong>20/01/2023 @ 19:00</strong></p>
-                        </div>
-                        <div class="col-2">
-                            <button class="btn btn-primary" style="width: 100%">Sync now</button>
-                        </div>
+                <div class="row">
+                    <div class="col-7">
+                        <h1 class="text-start">POS Dashboard</h1>
                     </div>
-
-                    <div class="row mt-4">
-                        <div class="col">
-                            <h5>Filters</h5>
-                        </div>
+                    <div class="col-3">
+                        <p class="text-end mt-2">Last sync: <strong>20/01/2023 @ 19:00</strong></p>
                     </div>
-                    <div class="row">
-                        <div class="col">
-                            <label>Barcode</label>
-                            <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
-                        </div>
-                        <div class="col">
-                            <label>SKU:</label>
-                            <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
-                        </div>
-                        <div class="col">
-                            <label>Title</label>
-                            <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
-                        </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col">
-                            <table class="table">
-                              <thead>
-                                <tr>
-                                  <th scope="col">LW</th>
-                                  <th scope="col">Square</th>
-                                  <th scope="col">Title</th>
-                                  <th scope="col">Barcode</th>
-                                  <th scope="col">Price</th>
-                                  <th scope="col">Category</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr>
-                                  <th scope="row">1</th>
-                                  <td>Mark</td>
-                                  <td>Otto</td>
-                                  <td>@mdo</td>
-                                  <td>@mdo</td>
-                                  <td>Strings</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                        </div>
+                    <div class="col-2">
+                        <button class="btn btn-primary" style="width: 100%">Sync now</button>
                     </div>
                 </div>
-            </main>
 
-            <script src="/lib/bootstrap-5.3.0-alpha1-dist/js/bootstrap.min.js"></script>
+                <div class="row mt-4">
+                    <div class="col">
+                        <h5>Filters</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Barcode</label>
+                        <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
+                    </div>
+                    <div class="col">
+                        <label>SKU:</label>
+                        <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
+                    </div>
+                    <div class="col">
+                        <label>Title</label>
+                        <input class="form-control form-control-sm" type="text" placeholder="" aria-label="">
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col">
+                        <table class="table" x-data x-show="$store.inventory.length > 0" x-animate>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Linnworks</th>
+                                    <th scope="col">Square</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Barcode</th>
+                                    <th scope="col">SKU</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Category</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="item in $store.inventory">
+                                    <tr>
+                                        <td> 
+                                            <div class="d-flex">
+                                                <span x-text="short(item.linnworksId)" class="fw-semibold"></span>
+                                                <a href="#" class="px-2">
+                                                    <img src="/img/copy.svg" width="11px" /> 
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td> 
+                                            <div class="d-flex">
+                                                <span x-text="short(item.linnworksId)" class="fw-semibold"></span>
+                                                <a href="#" class="px-2">
+                                                    <img src="/img/copy.svg" width="11px" /> 
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td x-text="item.title"></td>
+                                        <td x-text="item.barcode"></td>
+                                        <td x-text="item.sku"></td>
+                                        <td x-text="price(item.price)"></td>
+                                        <td x-text="item.categoryName"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <p  x-data="{}" 
+                            x-show="$store.inventory.length === 0"
+                            class="placeholder-glow">
+                            <span class="placeholder col-12 placeholder-lg"></span>
+                            <template x-for="_ in 50">
+                                <span class="placeholder col-12 placeholder bg-secondary"></span>
+                            </template>
+                        </p>
+
+
+                        <p x-data x-show="$store.inventory.length > 100" class="text-center py-4">
+                            Wow, you reached the bottom 😲. 
+                            Click the wee finger to back to the top <a href="#">👆</a>
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- <script src="/lib/bootstrap-5.3.0-alpha1-dist/js/bootstrap.min.js"></script> -->
     </body>
 
     <script type="text/javascript">
-        window.onload = () => {
+
+        const AUTH_FAILED_MSG = 'auth failed'
+        
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('inventory', [])
+
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
                 goToAuthPage()
                 return
             }
-           Alpine.store('jwt', jwt) 
-        }
+            Alpine.store('jwt', jwt)
+
+            fetchInventory('/api/v1/inventory', jwt)
+                .then((data) => {
+                    if(data.Message && data.Message == AUTH_FAILED_MSG) {
+                        goToAuthPage()
+                        return
+                    } else if(!data.items) {
+                        console.log(data.Message)
+                        // TODO: show error message
+                        return
+                    }
+
+                    Alpine.store('inventory', data.items)
+                });
+        })
 
         function goToAuthPage() {
             window.location.replace("/views/login.html")
+        }
+
+        async function fetchInventory(url = '/api/v1/inventory', jwt) {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+            });
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+        function short(item) {
+            let l = item.length
+            return `${item.substr(0, 4)}...${item.substr(l-4, l)}`
+        }
+
+        function price(item) {
+            return `£${item}`
         }
     </script>
 

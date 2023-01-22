@@ -7,10 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/mux"
 	"github.com/kampanosg/go-lsi/controllers"
-	middleware "github.com/kampanosg/go-lsi/middlewares"
+	"github.com/kampanosg/go-lsi/middlewares"
 
 	// "strings"
 
@@ -31,16 +30,16 @@ func main() {
 	signingKey := []byte(getEnv("SIGNING_KEY"))
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
 
-	authMiddleware := middleware.NewAuthMiddleware(signingKey)
+	authMiddleware := middlewares.NewAuthMiddleware(signingKey)
 	authController := controllers.NewAuthController(sqliteDb, signingKey)
-	inventoryController:= controllers.NewInventoryController(sqliteDb)
+	inventoryController := controllers.NewInventoryController(sqliteDb)
 	pingController := controllers.NewPingController()
 
 	router := mux.NewRouter()
 
 	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
 	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
-	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest)).Methods("POST")
+	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), router); err != nil {
