@@ -64,15 +64,15 @@
                                         <td> 
                                             <div class="d-flex">
                                                 <span x-text="short(item.linnworksId)" class="fw-semibold"></span>
-                                                <a href="#" class="px-2">
+                                                <a @click="navigator.clipboard.writeText(item.linnworksId)" href="#" class="px-2">
                                                     <img src="/img/copy.svg" width="11px" /> 
                                                 </a>
                                             </div>
                                         </td>
                                         <td> 
                                             <div class="d-flex">
-                                                <span x-text="short(item.linnworksId)" class="fw-semibold"></span>
-                                                <a href="#" class="px-2">
+                                                <span x-text="short(item.squareId)" class="fw-semibold"></span>
+                                                <a @click="navigator.clipboard.writeText(item.squareId)" href="#" class="px-2">
                                                     <img src="/img/copy.svg" width="11px" /> 
                                                 </a>
                                             </div>
