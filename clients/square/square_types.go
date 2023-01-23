@@ -104,7 +104,7 @@ type SquareIdMapping struct {
 
 type SquareOrderSearchResponse struct {
 	Orders []SquareOrder `json:"orders"`
-	Cursor string   `json:"cursor"`
+	Cursor string        `json:"cursor"`
 }
 type SquareBasePriceMoney struct {
 	Amount   int    `json:"amount"`
@@ -131,20 +131,20 @@ type SquareVariationTotalPriceMoney struct {
 	Currency string `json:"currency"`
 }
 type SquareLineItem struct {
-	UID                      string                   `json:"uid"`
-	CatalogObjectID          string                   `json:"catalog_object_id"`
-	CatalogVersion           int64                    `json:"catalog_version"`
-	Quantity                 string                   `json:"quantity"`
-	Name                     string                   `json:"name"`
-	VariationName            string                   `json:"variation_name"`
+	UID                      string                         `json:"uid"`
+	CatalogObjectID          string                         `json:"catalog_object_id"`
+	CatalogVersion           int64                          `json:"catalog_version"`
+	Quantity                 string                         `json:"quantity"`
+	Name                     string                         `json:"name"`
+	VariationName            string                         `json:"variation_name"`
 	BasePriceMoney           SquareBasePriceMoney           `json:"base_price_money"`
-	Note                     string                   `json:"note"`
+	Note                     string                         `json:"note"`
 	GrossSalesMoney          SquareGrossSalesMoney          `json:"gross_sales_money"`
 	TotalTaxMoney            SquareTotalTaxMoney            `json:"total_tax_money"`
 	TotalDiscountMoney       SquareTotalDiscountMoney       `json:"total_discount_money"`
 	TotalMoney               SquareTotalMoney               `json:"total_money"`
 	VariationTotalPriceMoney SquareVariationTotalPriceMoney `json:"variation_total_price_money"`
-	ItemType                 string                   `json:"item_type"`
+	ItemType                 string                         `json:"item_type"`
 }
 type SquareTotalTipMoney struct {
 	Amount   int    `json:"amount"`
@@ -171,11 +171,11 @@ type ServiceChargeMoney struct {
 	Currency string `json:"currency"`
 }
 type NetAmounts struct {
-	TotalMoney         SquareTotalMoney         `json:"total_money"`
-	TaxMoney           SquareTaxMoney           `json:"tax_money"`
-	DiscountMoney      SquareDiscountMoney      `json:"discount_money"`
-	TipMoney           SquareTipMoney           `json:"tip_money"`
-	ServiceChargeMoney ServiceChargeMoney `json:"service_charge_money"`
+	TotalMoney         SquareTotalMoney    `json:"total_money"`
+	TaxMoney           SquareTaxMoney      `json:"tax_money"`
+	DiscountMoney      SquareDiscountMoney `json:"discount_money"`
+	TipMoney           SquareTipMoney      `json:"tip_money"`
+	ServiceChargeMoney ServiceChargeMoney  `json:"service_charge_money"`
 }
 type SquareSource struct {
 	Name string `json:"name"`
@@ -185,19 +185,45 @@ type SquareNetAmountDueMoney struct {
 	Currency string `json:"currency"`
 }
 type SquareOrder struct {
-	ID                      string                  `json:"id"`
-	LocationID              string                  `json:"location_id"`
-	LineItems               []SquareLineItem             `json:"line_items"`
-	CreatedAt               time.Time               `json:"created_at"`
-	UpdatedAt               time.Time               `json:"updated_at"`
-	State                   string                  `json:"state"`
-	Version                 int                     `json:"version"`
+	ID                      string                        `json:"id"`
+	LocationID              string                        `json:"location_id"`
+	LineItems               []SquareLineItem              `json:"line_items"`
+	CreatedAt               time.Time                     `json:"created_at"`
+	UpdatedAt               time.Time                     `json:"updated_at"`
+	State                   string                        `json:"state"`
+	Version                 int                           `json:"version"`
 	TotalTaxMoney           SquareTotalTaxMoney           `json:"total_tax_money"`
 	TotalDiscountMoney      SquareTotalDiscountMoney      `json:"total_discount_money"`
 	TotalTipMoney           SquareTotalTipMoney           `json:"total_tip_money"`
 	TotalMoney              SquareTotalMoney              `json:"total_money"`
 	TotalServiceChargeMoney SquareTotalServiceChargeMoney `json:"total_service_charge_money"`
-	NetAmounts              NetAmounts              `json:"net_amounts"`
+	NetAmounts              NetAmounts                    `json:"net_amounts"`
 	Source                  SquareSource                  `json:"source"`
 	NetAmountDueMoney       SquareNetAmountDueMoney       `json:"net_amount_due_money"`
+}
+
+type SquareSearchOrdersRequest struct {
+	ReturnEntries bool        `json:"return_entries"`
+	Limit         int         `json:"limit"`
+	Query         SquareQuery `json:"query"`
+	LocationIds   []string    `json:"location_ids"`
+	Cursor        string      `json:"cursor"`
+}
+type SquareSortBy struct {
+	SortField string `json:"sort_field"`
+	SortOrder string `json:"sort_order"`
+}
+type SquareCreatedAt struct {
+	StartAt time.Time `json:"start_at"`
+	EndAt   time.Time `json:"end_at"`
+}
+type SquareDateTimeFilter struct {
+	CreatedAt SquareCreatedAt `json:"created_at"`
+}
+type SquareFilter struct {
+	DateTimeFilter SquareDateTimeFilter `json:"date_time_filter"`
+}
+type SquareQuery struct {
+	Sort   SquareSortBy `json:"sort"`
+	Filter SquareFilter `json:"filter"`
 }

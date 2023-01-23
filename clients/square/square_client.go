@@ -3,6 +3,7 @@ package square
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kampanosg/go-lsi/types"
@@ -74,8 +75,6 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 	if err != nil {
 		return squareResp, err
 	}
-
-	// TODO: Check for bad request e.g 400
 
 	err = json.Unmarshal(resp, &squareResp)
 
@@ -211,4 +210,49 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 
 	}
 	return nil
+}
+
+func (c *SquareClient) SearchOrders(start time.Time, end time.Time) (SquareOrderSearchResponse, error) {
+	objects := []SquareUpsertCategoryObject{}
+
+	for _, category := range categories {
+		object := SquareUpsertCategoryObject{
+			Id:        category.SquareId,
+			Type:      TYPE_CATEGORY,
+			IsDeleted: false,
+			Version:   category.Version,
+			CategoryData: SquareCategoryData{
+				Name: category.Name,
+			},
+		}
+		objects = append(objects, object)
+	}
+
+	squareBatch := SquareCategoryBatch{
+		Objects: objects,
+	}
+
+	batchRequest := SquareBatchUpsertCatalogItemRequest{
+		IdempotencyKey: uuid.New().String(),
+		Batches:        []SquareCategoryBatch{squareBatch},
+	}
+
+	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
+	jsonReq, _ := json.Marshal(batchRequest)
+	headers := make(map[string]string)
+
+	headers["Square-Version"] = "2022-12-14"
+	headers["Content-Type"] = "application/json"
+	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
+
+	var squareResp SquareUpsertResponse
+
+	resp, err := makeRequest(POST, url, headers, jsonReq)
+	if err != nil {
+		return squareResp, err
+	}
+
+	err = json.Unmarshal(resp, &squareResp)
+
+	return squareResp, err
 }
