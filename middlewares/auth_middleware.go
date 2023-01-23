@@ -41,7 +41,7 @@ func (m *authMiddleware) ProtectedEndpoint(next http.Handler) http.Handler {
 				return m.signingKey, nil
 			})
 
-			if token != nil &&  token.Valid {
+			if token != nil && token.Valid {
 				next.ServeHTTP(w, r)
 				return
 			} else if ve, ok := err.(*jwt.ValidationError); ok {

@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	errBadPassword       = errors.New("username or password is incorrect")
+	errBadPassword = errors.New("username or password is incorrect")
 )
 
 const (
@@ -60,8 +60,8 @@ func (c *AuthController) HandleAuthRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-    now := time.Now()
-    expiry := now.Add(time.Hour * 22 * 7)
+	now := time.Now()
+	expiry := now.Add(time.Hour * 22 * 7)
 
 	claims := &jwt.StandardClaims{
 		ExpiresAt: expiry.Unix(),
