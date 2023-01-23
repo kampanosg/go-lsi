@@ -170,7 +170,7 @@ type ServiceChargeMoney struct {
 	Amount   int    `json:"amount"`
 	Currency string `json:"currency"`
 }
-type NetAmounts struct {
+type SquareNetAmounts struct {
 	TotalMoney         SquareTotalMoney    `json:"total_money"`
 	TaxMoney           SquareTaxMoney      `json:"tax_money"`
 	DiscountMoney      SquareDiscountMoney `json:"discount_money"`
@@ -197,7 +197,7 @@ type SquareOrder struct {
 	TotalTipMoney           SquareTotalTipMoney           `json:"total_tip_money"`
 	TotalMoney              SquareTotalMoney              `json:"total_money"`
 	TotalServiceChargeMoney SquareTotalServiceChargeMoney `json:"total_service_charge_money"`
-	NetAmounts              NetAmounts                    `json:"net_amounts"`
+	NetAmounts              SquareNetAmounts              `json:"net_amounts"`
 	Source                  SquareSource                  `json:"source"`
 	NetAmountDueMoney       SquareNetAmountDueMoney       `json:"net_amount_due_money"`
 }
@@ -209,21 +209,16 @@ type SquareSearchOrdersRequest struct {
 	LocationIds   []string    `json:"location_ids"`
 	Cursor        string      `json:"cursor"`
 }
-type SquareSortBy struct {
-	SortField string `json:"sort_field"`
-	SortOrder string `json:"sort_order"`
-}
-type SquareCreatedAt struct {
+type SquareDateRange struct {
 	StartAt time.Time `json:"start_at"`
 	EndAt   time.Time `json:"end_at"`
 }
 type SquareDateTimeFilter struct {
-	CreatedAt SquareCreatedAt `json:"created_at"`
+	CreatedAt SquareDateRange `json:"created_at"`
 }
 type SquareFilter struct {
 	DateTimeFilter SquareDateTimeFilter `json:"date_time_filter"`
 }
 type SquareQuery struct {
-	Sort   SquareSortBy `json:"sort"`
 	Filter SquareFilter `json:"filter"`
 }

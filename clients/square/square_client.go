@@ -3,6 +3,7 @@ package square
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -212,47 +213,64 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 	return nil
 }
 
-func (c *SquareClient) SearchOrders(start time.Time, end time.Time) (SquareOrderSearchResponse, error) {
-	objects := []SquareUpsertCategoryObject{}
+func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrder, error) {
 
-	for _, category := range categories {
-		object := SquareUpsertCategoryObject{
-			Id:        category.SquareId,
-			Type:      TYPE_CATEGORY,
-			IsDeleted: false,
-			Version:   category.Version,
-			CategoryData: SquareCategoryData{
-				Name: category.Name,
-			},
-		}
-		objects = append(objects, object)
-	}
+	url := fmt.Sprintf("%s/orders/search", c.Host)
+	cursor := ""
 
-	squareBatch := SquareCategoryBatch{
-		Objects: objects,
-	}
-
-	batchRequest := SquareBatchUpsertCatalogItemRequest{
-		IdempotencyKey: uuid.New().String(),
-		Batches:        []SquareCategoryBatch{squareBatch},
-	}
-
-	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
-	jsonReq, _ := json.Marshal(batchRequest)
 	headers := make(map[string]string)
-
-	headers["Square-Version"] = "2022-12-14"
+	headers["Square-Version"] = "2023-01-19"
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
-	var squareResp SquareUpsertResponse
+	orders := make([]SquareOrder, 0)
 
-	resp, err := makeRequest(POST, url, headers, jsonReq)
-	if err != nil {
-		return squareResp, err
+	for {
+		searchRequest := SquareSearchOrdersRequest{
+			ReturnEntries: false,
+			Limit:         1,
+			Query: SquareQuery{
+				Filter: SquareFilter{
+					DateTimeFilter: SquareDateTimeFilter{
+						CreatedAt: SquareDateRange{
+							StartAt: start,
+							EndAt:   end,
+						},
+					},
+				},
+			},
+			LocationIds: []string{"LW9PBXGZCAX1P"},
+			Cursor:      cursor,
+		}
+
+		jsonReq, _ := json.Marshal(searchRequest)
+
+		var squareResp SquareOrderSearchResponse
+
+		resp, err := makeRequest(POST, url, headers, jsonReq)
+		if err != nil {
+			log.Printf("cannot make req, err=%v\n", err)
+			log.Printf("resp: %v\n", resp)
+			return orders, err
+		}
+
+		if err := json.Unmarshal(resp, &squareResp); err != nil {
+			log.Printf("cannot unmarshal resp, err=%v\n", err)
+			return orders, err
+		}
+
+		fmt.Printf("%v\n", squareResp)
+
+		if len(squareResp.Orders) == 0 {
+			break
+		}
+
+		for _, order := range squareResp.Orders {
+			orders = append(orders, order)
+		}
+
+		cursor = squareResp.Cursor
 	}
 
-	err = json.Unmarshal(resp, &squareResp)
-
-	return squareResp, err
+	return orders, nil
 }
