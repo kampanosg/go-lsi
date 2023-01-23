@@ -16,7 +16,6 @@ import (
 
 var (
 	errBadPassword       = errors.New("username or password is incorrect")
-	DEFAULT_TOKEN_EXPIRY = time.Now().Add(time.Hour * 24)
 )
 
 const (
@@ -61,8 +60,11 @@ func (c *AuthController) HandleAuthRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+    now := time.Now()
+    expiry := now.Add(time.Hour * 22 * 7)
+
 	claims := &jwt.StandardClaims{
-		ExpiresAt: DEFAULT_TOKEN_EXPIRY.UnixMilli(),
+		ExpiresAt: expiry.Unix(),
 		Subject:   user.Username,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
