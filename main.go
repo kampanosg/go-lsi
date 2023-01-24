@@ -59,7 +59,7 @@ func main() {
 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
 
 	end := time.Now()
-	start := end.Add(-time.Hour * 8)
+	start := end.Add(-time.Hour * 24 * 7)
 
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
 	s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)

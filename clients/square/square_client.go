@@ -266,8 +266,6 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 			return orders, err
 		}
 
-		fmt.Printf("%v\n", squareResp)
-
 		if len(squareResp.Orders) == 0 {
 			break
 		}
