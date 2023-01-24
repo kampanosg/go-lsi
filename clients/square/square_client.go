@@ -30,17 +30,17 @@ const (
 type SquareClient struct {
 	AccessToken string `json:"accessToken"`
 	Host        string `json:"host"`
-    ApiVersion string `json:"apiVersion"`
-    LocationId string `json:"locationId"`
+	ApiVersion  string `json:"apiVersion"`
+	LocationId  string `json:"locationId"`
 }
 
 func NewSquareClient(accessToken, host, version, location string) *SquareClient {
 	return &SquareClient{
-        AccessToken: accessToken, 
-        Host: host,
-        ApiVersion: version,
-        LocationId: location,
-    }
+		AccessToken: accessToken,
+		Host:        host,
+		ApiVersion:  version,
+		LocationId:  location,
+	}
 }
 
 func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpsertResponse, error) {

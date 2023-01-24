@@ -92,3 +92,95 @@ type LinnworksProductImageResponse struct {
 	StockItemID    string `json:"StockItemId"`
 	StockItemIntID int    `json:"StockItemIntId"`
 }
+
+type LinnworksCreateOrdersRequest struct {
+	Orders []LinnworksOrder `json:"orders"`
+}
+type LinnworksOrderItem struct {
+	TaxCostInclusive bool          `json:"TaxCostInclusive"`
+	UseChannelTax    bool          `json:"UseChannelTax"`
+	PricePerUnit     float64       `json:"PricePerUnit"`
+	Qty              int           `json:"Qty"`
+	TaxRate          float64       `json:"TaxRate"`
+	LineDiscount     float64       `json:"LineDiscount"`
+	ItemNumber       string        `json:"ItemNumber"`
+	ChannelSKU       string        `json:"ChannelSKU"`
+	IsService        bool          `json:"IsService"`
+	ItemTitle        string        `json:"ItemTitle"`
+	Options          []interface{} `json:"Options"`
+}
+type LinnworksBillingAddress struct {
+	MatchCountryCode string `json:"MatchCountryCode"`
+	MatchCountryName string `json:"MatchCountryName"`
+	FullName         string `json:"FullName"`
+	Company          string `json:"Company"`
+	Address1         string `json:"Address1"`
+	Address2         string `json:"Address2"`
+	Address3         string `json:"Address3"`
+	Town             string `json:"Town"`
+	Region           string `json:"Region"`
+	PostCode         string `json:"PostCode"`
+	Country          string `json:"Country"`
+	PhoneNumber      string `json:"PhoneNumber"`
+	EmailAddress     string `json:"EmailAddress"`
+	IsEmpty          bool   `json:"isEmpty"`
+}
+type LinnworksDeliveryAddress struct {
+	MatchCountryCode string `json:"MatchCountryCode"`
+	MatchCountryName string `json:"MatchCountryName"`
+	FullName         string `json:"FullName"`
+	Company          string `json:"Company"`
+	Address1         string `json:"Address1"`
+	Address2         string `json:"Address2"`
+	Address3         string `json:"Address3"`
+	Town             string `json:"Town"`
+	Region           string `json:"Region"`
+	PostCode         string `json:"PostCode"`
+	Country          string `json:"Country"`
+	PhoneNumber      string `json:"PhoneNumber"`
+	EmailAddress     string `json:"EmailAddress"`
+	IsEmpty          bool   `json:"isEmpty"`
+}
+type LinnworksOrder struct {
+	UseChannelTax               bool                     `json:"UseChannelTax"`
+	PkOrderID                   string                   `json:"pkOrderId"`
+	AutomaticallyLinkBySKU      bool                     `json:"AutomaticallyLinkBySKU"`
+	Site                        string                   `json:"Site"`
+	MatchPostalServiceTag       string                   `json:"MatchPostalServiceTag"`
+	PostalServiceName           string                   `json:"PostalServiceName"`
+	SavePostalServiceIfNotExist bool                     `json:"SavePostalServiceIfNotExist"`
+	MatchPaymentMethodTag       string                   `json:"MatchPaymentMethodTag"`
+	PaymentMethodName           string                   `json:"PaymentMethodName"`
+	SavePaymentMethodIfNotExist bool                     `json:"SavePaymentMethodIfNotExist"`
+	MappingSource               string                   `json:"MappingSource"`
+	OrderState                  string                   `json:"OrderState"`
+	PaymentStatus               string                   `json:"PaymentStatus"`
+	OrderItems                  []LinnworksOrderItem     `json:"OrderItems"`
+	ExtendedProperties          []interface{}            `json:"ExtendedProperties"`
+	Notes                       []interface{}            `json:"Notes"`
+	Source                      string                   `json:"Source"`
+	SubSource                   string                   `json:"SubSource"`
+	ChannelBuyerName            string                   `json:"ChannelBuyerName"`
+	ReferenceNumber             string                   `json:"ReferenceNumber"`
+	ExternalReference           string                   `json:"ExternalReference"`
+	SecondaryReferenceNumber    string                   `json:"SecondaryReferenceNumber"`
+	Currency                    string                   `json:"Currency"`
+	ConversionRate              float64                  `json:"ConversionRate"`
+	ReceivedDate                time.Time                `json:"ReceivedDate"`
+	DispatchBy                  time.Time                `json:"DispatchBy"`
+	PaidOn                      time.Time                `json:"PaidOn"`
+	PostalServiceCost           float64                  `json:"PostalServiceCost"`
+	PostalServiceTaxRate        float64                  `json:"PostalServiceTaxRate"`
+	PostalServiceDiscount       float64                  `json:"PostalServiceDiscount"`
+	Discount                    float64                  `json:"Discount"`
+	DiscountType                string                   `json:"DiscountType"`
+	DiscountTaxType             string                   `json:"DiscountTaxType"`
+	BillingAddress              LinnworksBillingAddress  `json:"BillingAddress"`
+	DeliveryAddress             LinnworksDeliveryAddress `json:"DeliveryAddress"`
+	DeliveryStartDate           time.Time                `json:"DeliveryStartDate"`
+	DeliveryEndDate             time.Time                `json:"DeliveryEndDate"`
+	OrderIdentifierTags         []string                 `json:"OrderIdentifierTags"`
+	ForceReSaveFulfilledOrder   bool                     `json:"ForceReSaveFulfilledOrder"`
+}
+
+type LinnworksCreateOrdersResponse []string

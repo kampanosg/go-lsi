@@ -65,7 +65,7 @@ func main() {
 	s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 	// s.SyncCategories()
 	// s.SyncProducts()
-    s.SyncOrders(start, end)
+	s.SyncOrders(start, end)
 }
 
 func getEnv(key string) string {
