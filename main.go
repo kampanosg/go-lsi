@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	// "fmt"
 	"log"
+	"time"
 	// "time"
 	// "net/http"
 	"os"
@@ -15,9 +16,9 @@ import (
 	// "strings"
 
 	"github.com/kampanosg/go-lsi/clients/db/sqlite"
-	// "github.com/kampanosg/go-lsi/clients/linnworks"
+	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
-	// "github.com/kampanosg/go-lsi/sync"
+	"github.com/kampanosg/go-lsi/sync"
 
 	"github.com/joho/godotenv"
 )
@@ -30,12 +31,6 @@ func main() {
 	dbPath := getEnv("DB")
 	// signingKey := []byte(getEnv("SIGNING_KEY"))
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
-	res, err := sqliteDb.GetOrders()
-	log.Printf("err = %v", err)
-	for _, r := range res {
-		log.Printf("%v, %v - %v\n", r.Id, r.CreatedAt, r.Products)
-	}
-	panic("f")
 
 	// authMiddleware := middlewares.NewAuthMiddleware(signingKey)
 	// authController := controllers.NewAuthController(sqliteDb, signingKey)
@@ -52,24 +47,25 @@ func main() {
 	// if err := http.ListenAndServe(fmt.Sprintf(":%d", port), router); err != nil {
 	// 	log.Fatalf("Unable to start server. error=%v\n", err.Error())
 	// }
-	// lwAppId := getEnv("LINNWORKS_APP_ID")
-	// lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
-	// lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
+	lwAppId := getEnv("LINNWORKS_APP_ID")
+	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
+	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
 
 	sqAccessToken := getEnv("SQUARE_ACCESS_TOKEN")
 	sqHost := getEnv("SQUARE_HOST")
+	sqApiVersion := getEnv("SQUARE_API_VERSION")
+	sqLocationId := getEnv("SQUARE_LOCATION_ID")
 
-	// lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
+	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
 
-	// end := time.Now()
-	// start := end.Add(-time.Hour * 8)
+	end := time.Now()
+	start := end.Add(-time.Hour * 8)
 
-	sqClient := square.NewSquareClient(sqAccessToken, sqHost)
-	log.Printf("%v\n", sqClient)
-	// sqClient.SearchOrders(start, end)
-	// s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
+	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
+	s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 	// s.SyncCategories()
 	// s.SyncProducts()
+    s.SyncOrders(start, end)
 }
 
 func getEnv(key string) string {

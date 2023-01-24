@@ -30,10 +30,17 @@ const (
 type SquareClient struct {
 	AccessToken string `json:"accessToken"`
 	Host        string `json:"host"`
+    ApiVersion string `json:"apiVersion"`
+    LocationId string `json:"locationId"`
 }
 
-func NewSquareClient(accessToken, host string) *SquareClient {
-	return &SquareClient{AccessToken: accessToken, Host: host}
+func NewSquareClient(accessToken, host, version, location string) *SquareClient {
+	return &SquareClient{
+        AccessToken: accessToken, 
+        Host: host,
+        ApiVersion: version,
+        LocationId: location,
+    }
 }
 
 func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpsertResponse, error) {
@@ -66,7 +73,7 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 	jsonReq, _ := json.Marshal(batchRequest)
 	headers := make(map[string]string)
 
-	headers["Square-Version"] = "2022-12-14"
+	headers["Square-Version"] = c.ApiVersion
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
@@ -160,7 +167,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 	jsonReq, _ := json.Marshal(batchRequest)
 	headers := make(map[string]string, 0)
 
-	headers["Square-Version"] = "2022-12-14"
+	headers["Square-Version"] = c.ApiVersion
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
@@ -198,7 +205,7 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 
 	url := fmt.Sprintf("%s/catalog/batch-delete", c.Host)
 	headers := make(map[string]string, 0)
-	headers["Square-Version"] = "2022-12-14"
+	headers["Square-Version"] = c.ApiVersion
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
@@ -219,7 +226,7 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 	cursor := ""
 
 	headers := make(map[string]string)
-	headers["Square-Version"] = "2023-01-19"
+	headers["Square-Version"] = c.ApiVersion
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
@@ -239,7 +246,7 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 					},
 				},
 			},
-			LocationIds: []string{"LW9PBXGZCAX1P"},
+			LocationIds: []string{c.LocationId},
 			Cursor:      cursor,
 		}
 
