@@ -12,6 +12,7 @@ type DB interface {
 	ClearCategories() error
 
 	GetProducts() ([]types.Product, error)
+	GetProductByVarId(varId string) (types.Product, error)
 	InsertProducts(products []types.Product) error
 	ClearProducts() error
 

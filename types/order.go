@@ -4,6 +4,7 @@ import "time"
 
 type Order struct {
 	Id                 int
+	LinnworksId        string
 	SquareId           string
 	LocationId         string
 	State              string
@@ -22,4 +23,8 @@ type OrderProduct struct {
 	SquareOrderId string
 	SquareVarId   string
 	Quantity      string
+	ItemNumber    string
+	SKU           string
+	Title         string
+	PricePerUnit  float64
 }

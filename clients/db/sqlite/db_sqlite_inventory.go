@@ -69,6 +69,21 @@ func (db SqliteDb) GetProducts() (products []types.Product, err error) {
 	return products, nil
 }
 
+func (db SqliteDb) GetProductByVarId(varId string) (types.Product, error) {
+	row := db.Connection.QueryRow(query_GET_PRODUCT_BY_VAR_ID, varId)
+
+	var id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku string
+	var price float64
+	var version int64
+
+	if err := row.Scan(&id, &squareId, &squareVarId, &categoryId, &squareCategoryId, &title, &price, &barcode, &sku, &version); err != nil {
+		return types.Product{}, err
+	}
+
+	product := transformers.FromProductDbRowToDomain(id, squareId, squareVarId, categoryId, squareCategoryId, title, barcode, sku, price, version)
+	return product, nil
+}
+
 func (db SqliteDb) InsertProducts(products []types.Product) error {
 	args := make([][]any, len(products))
 	for index, product := range products {
