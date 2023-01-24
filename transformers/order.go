@@ -6,14 +6,14 @@ import (
 	"github.com/kampanosg/go-lsi/types"
 )
 
-func FromOrderDbRowToDomain(id int, squareId, locationId, state string, totalMoney float64, createdAt int) types.Order {
+func FromOrderDbRowToDomain(id int, squareId, locationId, state string, totalMoney float64, createdAt int64) types.Order {
 	return types.Order{
 		Id:         id,
 		SquareId:   squareId,
 		LocationId: locationId,
 		State:      state,
 		TotalMoney: totalMoney,
-		CreatedAt:  time.UnixMilli(int64(createdAt)),
+		CreatedAt:  time.Unix(createdAt, 0),
 	}
 }
 

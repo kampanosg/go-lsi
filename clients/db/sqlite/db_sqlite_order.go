@@ -14,9 +14,10 @@ func (db SqliteDb) GetOrders() ([]types.Order, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, createdAt int
+		var id int
 		var squareId, locationId, state string
 		var totalMoney float64
+		var createdAt int64
 		if rows.Scan(&id, &squareId, &locationId, &state, &totalMoney, &createdAt); err != nil {
 			return orders, err
 		}

@@ -33,7 +33,7 @@ func main() {
 	res, err := sqliteDb.GetOrders()
 	log.Printf("err = %v", err)
 	for _, r := range res {
-		log.Printf("%v - %v\n", r.Id, r.Products)
+		log.Printf("%v, %v - %v\n", r.Id, r.CreatedAt, r.Products)
 	}
 	panic("f")
 
