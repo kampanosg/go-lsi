@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 	"time"
+
+	"github.com/kampanosg/go-lsi/types"
 )
 
 const (
@@ -94,6 +96,11 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 		}
 	}
 	return products, nil
+}
+
+func (c *LinnworksClient) CreateOrders(orders types.Order) (LinnworksCreateOrdersResponse, error) {
+	c.refreshToken()
+	return LinnworksCreateOrdersResponse{}, nil
 }
 
 func (c *LinnworksClient) refreshToken() {

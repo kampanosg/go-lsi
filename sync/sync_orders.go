@@ -22,23 +22,23 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) {
 			for index, item := range newOrder.LineItems {
 				product, err := s.Db.GetProductByVarId(item.CatalogObjectID)
 				if err != nil {
-                    continue
+					continue
 				}
 
 				orderProduct := transformers.FromSquareLineItemToDomain(item, product)
-                orderProduct.SquareOrderId = newOrder.ID
-                orderProducts[index] = orderProduct
+				orderProduct.SquareOrderId = newOrder.ID
+				orderProducts[index] = orderProduct
 			}
 
 			order := transformers.FromSquareOrderToDomain(newOrder)
-            order.Products = orderProducts
+			order.Products = orderProducts
 			ordersToUpsert = append(ordersToUpsert, order)
 		}
 	}
 
-    for _, order := range ordersToUpsert {
-        log.Printf("%v\n", order)
-    }
+	for _, order := range ordersToUpsert {
+		log.Printf("%v\n", order)
+	}
 
 }
 
