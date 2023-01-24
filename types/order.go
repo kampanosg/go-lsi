@@ -13,6 +13,7 @@ type Order struct {
 	TotalTip           float64
 	TotalServiceCharge float64
 	CreatedAt          time.Time
+	Products           []OrderProduct
 }
 
 type OrderProduct struct {

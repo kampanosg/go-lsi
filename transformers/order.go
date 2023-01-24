@@ -13,6 +13,15 @@ func FromOrderDbRowToDomain(id int, squareId, locationId, state string, totalMon
 		LocationId: locationId,
 		State:      state,
 		TotalMoney: totalMoney,
-		CreatedAt:  time.Unix(int64(createdAt), 0),
+		CreatedAt:  time.UnixMilli(int64(createdAt)),
+	}
+}
+
+func FromOrderProductDbRowToDomain(id int, squareOrderId, squareVarId, qty string) types.OrderProduct {
+	return types.OrderProduct{
+		Id:            id,
+		SquareOrderId: squareOrderId,
+		SquareVarId:   squareVarId,
+		Quantity:      qty,
 	}
 }

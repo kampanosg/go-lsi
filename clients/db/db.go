@@ -18,6 +18,7 @@ type DB interface {
 	GetUserByUsername(username string) (types.User, error)
 
 	GetOrders() ([]types.Order, error)
+	GetOrderProductsForCategory(categoryId int) ([]types.OrderProduct, error)
 	InsertOrders([]types.Order) error
 	InsertOrderProducts([]types.OrderProduct) error
 }

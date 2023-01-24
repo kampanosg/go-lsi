@@ -12,5 +12,12 @@ const (
 
 	query_GET_USER_BY_USERNAME = `SELECT id, username, password, friendly_name FROM user u WHERE u.username = ?;`
 
-	query_GET_ORDERS = `SELECT id, square_id, location_id, state, total_money, created_at FROM square_order;`
+	query_GET_ORDERS         = `SELECT id, square_id, location_id, state, total_money, created_at FROM square_order;`
+	query_GET_ORDER_PRODUCTS = `SELECT p.id, p.square_order_id, p.square_var_id, p.quantity FROM square_order_product AS p WHERE p.order_id = ?;`
+	query_INSERT_ORDERS      = `
+        INSERT INTO square_order (square_id, location_id, state, version, total_money, total_tax, total_discount, total_tip, total_service_charge, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	query_INSERT_ORDER_PRODUCTS = `
+        INSERT INTO square_order_product (order_id, square_order_id, square_var_id, quantity) VALUES (?, ?, ?, ?);
+    `
 )

@@ -31,7 +31,10 @@ func main() {
 	// signingKey := []byte(getEnv("SIGNING_KEY"))
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
 	res, err := sqliteDb.GetOrders()
-	log.Printf("%v - %v\n", res, err)
+	log.Printf("err = %v", err)
+	for _, r := range res {
+		log.Printf("%v - %v\n", r.Id, r.Products)
+	}
 	panic("f")
 
 	// authMiddleware := middlewares.NewAuthMiddleware(signingKey)
