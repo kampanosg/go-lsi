@@ -4,7 +4,7 @@ import (
 	// "fmt"
 	// "fmt"
 	"log"
-	"time"
+	// "time"
 	// "net/http"
 	"os"
 
@@ -14,7 +14,7 @@ import (
 
 	// "strings"
 
-	// "github.com/kampanosg/go-lsi/clients/db/sqlite"
+	"github.com/kampanosg/go-lsi/clients/db/sqlite"
 	// "github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
 	// "github.com/kampanosg/go-lsi/sync"
@@ -27,9 +27,12 @@ func main() {
 	// port := 8080 // TODO: Bring from config
 	// log.Printf("Starting server at port :%d\n", port)
 
-	// dbPath := getEnv("DB")
+	dbPath := getEnv("DB")
 	// signingKey := []byte(getEnv("SIGNING_KEY"))
-	// sqliteDb := sqlite.NewSqliteDB(dbPath)
+	sqliteDb := sqlite.NewSqliteDB(dbPath)
+	res, err := sqliteDb.GetOrders()
+	log.Printf("%v - %v\n", res, err)
+	panic("f")
 
 	// authMiddleware := middlewares.NewAuthMiddleware(signingKey)
 	// authController := controllers.NewAuthController(sqliteDb, signingKey)
@@ -55,11 +58,12 @@ func main() {
 
 	// lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
 
-	end := time.Now()
-	start := end.Add(-time.Hour * 8)
+	// end := time.Now()
+	// start := end.Add(-time.Hour * 8)
 
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost)
-	sqClient.SearchOrders(start, end)
+	log.Printf("%v\n", sqClient)
+	// sqClient.SearchOrders(start, end)
 	// s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 	// s.SyncCategories()
 	// s.SyncProducts()

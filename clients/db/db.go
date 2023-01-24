@@ -16,4 +16,8 @@ type DB interface {
 	ClearProducts() error
 
 	GetUserByUsername(username string) (types.User, error)
+
+	GetOrders() ([]types.Order, error)
+	InsertOrders([]types.Order) error
+	InsertOrderProducts([]types.OrderProduct) error
 }
