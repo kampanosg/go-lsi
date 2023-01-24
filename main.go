@@ -3,8 +3,11 @@ package main
 import (
 	// "fmt"
 	// "fmt"
+	"fmt"
 	"log"
+	"net/http"
 	"time"
+
 	// "time"
 	// "net/http"
 	"os"
@@ -15,9 +18,12 @@ import (
 
 	// "strings"
 
+	"github.com/gorilla/mux"
 	"github.com/kampanosg/go-lsi/clients/db/sqlite"
 	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
+	"github.com/kampanosg/go-lsi/controllers"
+	"github.com/kampanosg/go-lsi/middlewares"
 	"github.com/kampanosg/go-lsi/sync"
 
 	"github.com/joho/godotenv"
@@ -25,29 +31,14 @@ import (
 
 func main() {
 
-	// port := 8080 // TODO: Bring from config
-	// log.Printf("Starting server at port :%d\n", port)
+	port := getEnv("HTTP_PORT")
+	log.Printf("Starting server at port :%d\n", port)
 
 	dbPath := getEnv("DB")
-	// signingKey := []byte(getEnv("SIGNING_KEY"))
-	sqliteDb := sqlite.NewSqliteDB(dbPath)
 
-	// authMiddleware := middlewares.NewAuthMiddleware(signingKey)
-	// authController := controllers.NewAuthController(sqliteDb, signingKey)
-	// inventoryController := controllers.NewInventoryController(sqliteDb)
-	// pingController := controllers.NewPingController()
+	signingKey := []byte(getEnv("SIGNING_KEY"))
 
-	// router := mux.NewRouter()
-
-	// router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
-	// router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
-	// router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
-	// router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
-
-	// if err := http.ListenAndServe(fmt.Sprintf(":%d", port), router); err != nil {
-	// 	log.Fatalf("Unable to start server. error=%v\n", err.Error())
-	// }
-	lwAppId := getEnv("LINNWORKS_APP_ID")
+    lwAppId := getEnv("LINNWORKS_APP_ID")
 	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
 	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
 
@@ -56,16 +47,28 @@ func main() {
 	sqApiVersion := getEnv("SQUARE_API_VERSION")
 	sqLocationId := getEnv("SQUARE_LOCATION_ID")
 
+	sqliteDb := sqlite.NewSqliteDB(dbPath)
 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
-
-	end := time.Now()
-	start := end.Add(-time.Hour * 24 * 7)
-
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
-	s := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
-	// s.SyncCategories()
-	// s.SyncProducts()
-	s.SyncOrders(start, end)
+	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
+
+	authMiddleware := middlewares.NewAuthMiddleware(signingKey)
+	authController := controllers.NewAuthController(sqliteDb, signingKey)
+	inventoryController := controllers.NewInventoryController(sqliteDb)
+	pingController := controllers.NewPingController()
+    syncController := controllers.NewSyncController(syncTool)
+
+	router := mux.NewRouter()
+
+	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
+	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
+	router.Handle("/api/v1/sync", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRequest)))
+	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), router); err != nil {
+		log.Fatalf("Unable to start server. error=%v\n", err.Error())
+	}
 }
 
 func getEnv(key string) string {
