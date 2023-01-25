@@ -7,30 +7,30 @@ import (
 	"github.com/kampanosg/go-lsi/types"
 )
 
-type InventoryController struct {
+type OrdersController struct {
 	db db.DB
 }
 
-func NewInventoryController(db db.DB) InventoryController {
-	return InventoryController{db: db}
+func NewOrdersController(db db.DB) OrdersController {
+	return OrdersController{db: db}
 }
 
-func (c *InventoryController) HandleInventoryRequest(w http.ResponseWriter, r *http.Request) {
+func (c *OrdersController) HandleOrdersRequest(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
 		failed(w, errMethodNotSupported, http.StatusMethodNotAllowed)
 		return
 	}
 
-	items, err := c.db.GetInventory()
+	orders, err := c.db.GetOrders()
 	if err != nil {
 		failed(w, err, http.StatusBadRequest)
 		return
 	}
 
 	resp := types.HttpResponse{
-		Total: len(items),
-		Items: items,
+		Total: len(orders),
+		Items: orders,
 	}
 
 	ok(w, resp)

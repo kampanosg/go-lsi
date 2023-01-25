@@ -38,7 +38,7 @@ func main() {
 
 	signingKey := []byte(getEnv("SIGNING_KEY"))
 
-    lwAppId := getEnv("LINNWORKS_APP_ID")
+	lwAppId := getEnv("LINNWORKS_APP_ID")
 	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
 	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
 
@@ -55,13 +55,15 @@ func main() {
 	authMiddleware := middlewares.NewAuthMiddleware(signingKey)
 	authController := controllers.NewAuthController(sqliteDb, signingKey)
 	inventoryController := controllers.NewInventoryController(sqliteDb)
+	ordersController := controllers.NewOrdersController(sqliteDb)
 	pingController := controllers.NewPingController()
-    syncController := controllers.NewSyncController(syncTool)
+	syncController := controllers.NewSyncController(syncTool)
 
 	router := mux.NewRouter()
 
 	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
 	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
+	router.Handle("/api/v1/orders", authMiddleware.ProtectedEndpoint(http.HandlerFunc(ordersController.HandleOrdersRequest)))
 	router.Handle("/api/v1/sync", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRequest)))
 	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))

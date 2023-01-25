@@ -13,16 +13,7 @@ type AuthResponse struct {
 	Timestamp time.Time
 }
 
-type InventoryItemResponse struct {
-	Id           string  `json:"linnworksId"`
-	SquareId     string  `json:"squareId"`
-	Title        string  `json:"title"`
-	CategoryName string  `json:"categoryName"`
-	Barcode      string  `json:"barcode"`
-	SKU          string  `json:"sku"`
-	Price        float64 `json:"price"`
-}
-type InventoryResponse struct {
-	Total int                     `json:"total"`
-	Items []InventoryItemResponse `json:"items"`
+type HttpResponse struct {
+	Total int `json:"total"`
+	Items any `json:"items"`
 }

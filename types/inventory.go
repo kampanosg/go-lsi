@@ -29,11 +29,11 @@ type ProductImage struct {
 }
 
 type InventoryItem struct {
-	Id           string
-	SquareId     string
-	Title        string
-	CategoryName string
-	Barcode      string
-	SKU          string
-	Price        float64
+	Id           string  `json:"id"`
+	SquareId     string  `json:"squareId"`
+	Title        string  `json:"title"`
+	CategoryName string  `json:"categoryName"`
+	Barcode      string  `json:"barcode"`
+	SKU          string  `json:"sku"`
+	Price        float64 `json:"price"`
 }
