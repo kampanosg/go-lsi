@@ -187,15 +187,15 @@ type LinnworksCreateOrdersResponse []string
 
 // Date format: 2023-01-01T00:00:00.0000000+01:00
 const (
-    OrderUUIDKey = "{{OrderUUID}}"
-    OrderItems = "{{OrderItems}}"
-    OrderSquareId = "{{OrderSquareId}}"
+	orderUUIDKey     = "{{OrderUUID}}"
+	orderItemsKey    = "{{OrderItems}}"
+	orderSquareIdKey = "{{OrderSquareId}}"
 )
-const LinnworksOrderTemplate = `
+const orderTemplate = `
     [
         {
             "UseChannelTax": true,
-            "pkOrderId": "{{OrderUUID}}",
+            "pkOrderId": "%s"
             "AutomaticallyLinkBySKU": true,
             "Site": "Square",
             "MatchPostalServiceTag": "",
@@ -267,15 +267,15 @@ const LinnworksOrderTemplate = `
             "ForceReSaveFulfilledOrder": true
         }
     ]
-` 
+`
 
 const (
-    OderItemPricePerUnitKey = "{{ItemPricePerUnit}}"
-    OrderItemQtyKey = "{{ItemQty}}"
-    OrderItemBarcodeKey = "{{ItemBarcode}}"
-    OderItemSkuKey = "{{ItemSku}}"
+	oderItemPricePerUnitKey = "{{ItemPricePerUnit}}"
+	orderItemQtyKey         = "{{ItemQty}}"
+	orderItemBarcodeKey     = "{{ItemBarcode}}"
+	oderItemSkuKey          = "{{ItemSku}}"
 )
-const OrderItemTemplate = `
+const orderItemTemplate = `
     {
         "TaxCostInclusive": true,
         "UseChannelTax": true,

@@ -13,14 +13,14 @@ import (
 const (
 	LinnworksServer1 = "https://api.linnworks.net/api/"
 	LinnworksServer2 = "https://eu-ext.linnworks.net/api/"
-    DefaultDryRun = true
+	DefaultDryRun    = true
 )
 
 type LinnworksClient struct {
 	Id     string
 	Secret string
 	Token  string
-    DryRun bool
+	DryRun bool
 	auth   linnworksAuth
 }
 
@@ -29,7 +29,7 @@ func NewLinnworksClient(id, secret, token string) *LinnworksClient {
 		Id:     id,
 		Secret: secret,
 		Token:  token,
-        DryRun: DefaultDryRun,
+		DryRun: DefaultDryRun,
 	}
 }
 
@@ -101,18 +101,32 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 	return products, nil
 }
 
-func (c *LinnworksClient) CreateOrders(orders types.Order) (LinnworksCreateOrdersResponse, error) {
+func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrdersResponse, error) {
 	c.refreshToken()
 
-    url := fmt.Sprintf("%s/Orders/CreateOrders", LinnworksServer2)
+	url := fmt.Sprintf("%s/Orders/CreateOrders", LinnworksServer2)
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = c.auth.Token
 
-    for _, order := range orders {
-        
-    }
+	for _, order := range orders {
 
+		pld := fmt.Sprintf(orderTemplate, "irieiireii")
+        fmt.Println(pld)
+        fmt.Println(order)
+        
+		payload := strings.NewReader(pld)
+
+		if c.DryRun {
+		} else {
+			resp, err := makeRequest(POST, url, payload, headers)
+			if err != nil {
+				return LinnworksCreateOrdersResponse{}, err
+			}
+            var productResps []LinnworksProductResponse
+            json.Unmarshal(resp, &productResps)
+		}
+	}
 
 	return LinnworksCreateOrdersResponse{}, nil
 }

@@ -13,11 +13,37 @@ import (
 	"github.com/kampanosg/go-lsi/controllers"
 	"github.com/kampanosg/go-lsi/middlewares"
 	"github.com/kampanosg/go-lsi/sync"
+	"github.com/kampanosg/go-lsi/types"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
+    
+	dbPath := getEnv("DB")
+
+	lwAppId := getEnv("LINNWORKS_APP_ID")
+	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
+	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
+
+	sqAccessToken := getEnv("SQUARE_ACCESS_TOKEN")
+	sqHost := getEnv("SQUARE_HOST")
+	sqApiVersion := getEnv("SQUARE_API_VERSION")
+	sqLocationId := getEnv("SQUARE_LOCATION_ID")
+
+	sqliteDb := sqlite.NewSqliteDB(dbPath)
+	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
+	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
+	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
+    log.Println(syncTool)
+
+    orders := []types.Order {
+        {SquareId: "dfsdsd"},
+    }
+    lwClient.CreateOrders(orders)
+}
+
+func main2() {
 
 	port := getEnv("HTTP_PORT")
 	log.Printf("Starting server at port :%s\n", port)
