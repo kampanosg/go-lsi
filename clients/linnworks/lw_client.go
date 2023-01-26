@@ -11,14 +11,16 @@ import (
 )
 
 const (
-	LW_SERVER_1 = "https://api.linnworks.net/api/"
-	LW_SERVER_2 = "https://eu-ext.linnworks.net/api/"
+	LinnworksServer1 = "https://api.linnworks.net/api/"
+	LinnworksServer2 = "https://eu-ext.linnworks.net/api/"
+    DefaultDryRun = true
 )
 
 type LinnworksClient struct {
 	Id     string
 	Secret string
 	Token  string
+    DryRun bool
 	auth   linnworksAuth
 }
 
@@ -27,13 +29,14 @@ func NewLinnworksClient(id, secret, token string) *LinnworksClient {
 		Id:     id,
 		Secret: secret,
 		Token:  token,
+        DryRun: DefaultDryRun,
 	}
 }
 
 func (c *LinnworksClient) GetCategories() ([]LinnworksCategoryResponse, error) {
 	c.refreshToken()
 
-	url := fmt.Sprintf("%s/Inventory/GetCategories", LW_SERVER_2)
+	url := fmt.Sprintf("%s/Inventory/GetCategories", LinnworksServer2)
 	payload := strings.NewReader("=")
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
@@ -56,7 +59,7 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 	entriesPerPage := 200
 	pageNumber := 1
 
-	url := fmt.Sprintf("%s/Stock/GetStockItemsFull", LW_SERVER_2)
+	url := fmt.Sprintf("%s/Stock/GetStockItemsFull", LinnworksServer2)
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = c.auth.Token
@@ -100,6 +103,17 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 
 func (c *LinnworksClient) CreateOrders(orders types.Order) (LinnworksCreateOrdersResponse, error) {
 	c.refreshToken()
+
+    url := fmt.Sprintf("%s/Orders/CreateOrders", LinnworksServer2)
+	headers := make(map[string]string)
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	headers["Authorization"] = c.auth.Token
+
+    for _, order := range orders {
+        
+    }
+
+
 	return LinnworksCreateOrdersResponse{}, nil
 }
 
@@ -109,7 +123,7 @@ func (c *LinnworksClient) refreshToken() {
 		return
 	}
 
-	url := fmt.Sprintf("%s/Auth/AuthorizeByApplication", LW_SERVER_1)
+	url := fmt.Sprintf("%s/Auth/AuthorizeByApplication", LinnworksServer1)
 	body := fmt.Sprintf("applicationId=%s&applicationSecret=%s&token=%s", c.Id, c.Secret, c.Token)
 	payload := strings.NewReader(body)
 	headers := make(map[string]string)

@@ -1,22 +1,10 @@
 package main
 
 import (
-	// "fmt"
-	// "fmt"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
-
-	// "time"
-	// "net/http"
 	"os"
-
-	// "github.com/gorilla/mux"
-	// "github.com/kampanosg/go-lsi/controllers"
-	// "github.com/kampanosg/go-lsi/middlewares"
-
-	// "strings"
 
 	"github.com/gorilla/mux"
 	"github.com/kampanosg/go-lsi/clients/db/sqlite"
@@ -32,7 +20,7 @@ import (
 func main() {
 
 	port := getEnv("HTTP_PORT")
-	log.Printf("Starting server at port :%d\n", port)
+	log.Printf("Starting server at port :%s\n", port)
 
 	dbPath := getEnv("DB")
 
@@ -68,7 +56,7 @@ func main() {
 	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), router); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), router); err != nil {
 		log.Fatalf("Unable to start server. error=%v\n", err.Error())
 	}
 }

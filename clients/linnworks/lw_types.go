@@ -184,3 +184,109 @@ type LinnworksOrder struct {
 }
 
 type LinnworksCreateOrdersResponse []string
+
+// Date format: 2023-01-01T00:00:00.0000000+01:00
+const (
+    OrderUUIDKey = "{{OrderUUID}}"
+    OrderItems = "{{OrderItems}}"
+    OrderSquareId = "{{OrderSquareId}}"
+)
+const LinnworksOrderTemplate = `
+    [
+        {
+            "UseChannelTax": true,
+            "pkOrderId": "{{OrderUUID}}",
+            "AutomaticallyLinkBySKU": true,
+            "Site": "Square",
+            "MatchPostalServiceTag": "",
+            "PostalServiceName": "Standard",
+            "SavePostalServiceIfNotExist": false,
+            "MatchPaymentMethodTag": "Main",
+            "PaymentMethodName": "CreditCard",
+            "SavePaymentMethodIfNotExist": false,
+            "MappingSource": "DIRECT",
+            "OrderState": "None",
+            "PaymentStatus": "Paid",
+            "OrderItems": [{{OrderItems}}],
+            "ExtendedProperties": [],
+            "Notes": [],
+            "Source": "DIRECT",
+            "SubSource": "SQUARE POS",
+            "ChannelBuyerName": "Square Order {{OrderSquareId}}",
+            "ReferenceNumber": "{{OrderSquareId}}",
+            "ExternalReference": "{{OrderSquareId}}",
+            "SecondaryReferenceNumber": "",
+            "Currency": "GBP",
+            "ConversionRate": 1,
+            "ReceivedDate": "{{OrderDate}}", 
+            "DispatchBy": "{{OrderDate}}",
+            "PaidOn": "{{OrderDate}}",
+            "PostalServiceCost": 0,
+            "PostalServiceTaxRate": 0,
+            "PostalServiceDiscount": 0,
+            "Discount": 0,
+            "DiscountType": "AllEvenly",
+            "DiscountTaxType": "DeductAfterTax",
+            "ShippingAddress": {
+                "MatchCountryCode": "UK",
+                "MatchCountryName": "United Kingdom",
+                "FullName": "Order {{OrderSquareId}}",
+                "Company": "Square",
+                "Address1": "Unit A ",
+                "Address2": "Hoyle St",
+                "Address3": "",
+                "Town": "Warrington",
+                "Region": "Cheshire",
+                "PostCode": "WA5 0LW",
+                "Country": "UK",
+                "PhoneNumber": "0700000000",
+                "EmailAddress": "orders@northwestguitars.co.uk",
+                "isEmpty": false
+            },
+            "BillingAddress": {
+                "MatchCountryCode": "UK",
+                "MatchCountryName": "United Kingdom",
+                "FullName": "Order {{SquareOrderId}}",
+                "Company": "Square",
+                "Address1": "Unit A ",
+                "Address2": "Hoyle St",
+                "Address3": "",
+                "Town": "Warrington",
+                "Region": "Cheshire",
+                "PostCode": "WA5 0LW",
+                "Country": "UK",
+                "PhoneNumber": "0700000000",
+                "EmailAddress": "orders@northwestguitars.co.uk",
+                "isEmpty": false
+            },
+            "DeliveryStartDate": "2023-01-01T00:00:00.0000000+01:00",
+            "DeliveryEndDate": "2023-01-01T00:00:00.0000000+01:00",
+            "OrderIdentifierTags": [
+                "{{SquareOrderId}}"
+            ],
+            "ForceReSaveFulfilledOrder": true
+        }
+    ]
+` 
+
+const (
+    OderItemPricePerUnitKey = "{{ItemPricePerUnit}}"
+    OrderItemQtyKey = "{{ItemQty}}"
+    OrderItemBarcodeKey = "{{ItemBarcode}}"
+    OderItemSkuKey = "{{ItemSku}}"
+)
+const OrderItemTemplate = `
+    {
+        "TaxCostInclusive": true,
+        "UseChannelTax": true,
+        "PricePerUnit": {{ItemPricePerUnit}},
+        "Qty": {{ItemQty}},
+        "TaxRate": 0,
+        "LineDiscount": 0,
+        "ItemNumber": "{{ItemBarcode}}",
+        "ChannelSKU": "{{ItemSku}}",
+        "IsService": false,
+        "ItemTitle": "",
+        "Options": []
+    }
+`
