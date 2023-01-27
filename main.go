@@ -118,7 +118,7 @@ func main() {
 
 	authMiddleware := middlewares.NewAuthMiddleware(signingKey, logger)
 	authController := controllers.NewAuthController(sqliteDb, signingKey, logger)
-	inventoryController := controllers.NewInventoryController(sqliteDb)
+	inventoryController := controllers.NewInventoryController(sqliteDb, logger)
 	ordersController := controllers.NewOrdersController(sqliteDb)
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool)
