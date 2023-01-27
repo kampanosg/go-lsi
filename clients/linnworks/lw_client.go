@@ -16,7 +16,7 @@ import (
 const (
 	LinnworksServer1 = "https://api.linnworks.net/api/"
 	LinnworksServer2 = "https://eu-ext.linnworks.net/api/"
-	DefaultDryRun    = false 
+	DefaultDryRun    = false
 )
 
 type LinnworksClient struct {
@@ -122,17 +122,17 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 				product.Quantity,
 				product.ItemNumber,
 				product.SKU,
-                "Test",
+				"Test",
 			)
 			orderProducts.WriteString(p)
 
-			if index < len(order.Products) - 1 {
+			if index < len(order.Products)-1 {
 				orderProducts.WriteString(",")
 			}
 		}
 		orderProducts.WriteString("]")
 
-        formattedTime := order.CreatedAt.Format("2006-01-02T15:04:05.000000+01:00")
+		formattedTime := order.CreatedAt.Format("2006-01-02T15:04:05.000000+01:00")
 
 		pld := fmt.Sprintf(orderTemplate,
 			uuid.New().String(),
@@ -140,28 +140,28 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 			order.SquareId,
 			order.SquareId,
 			order.SquareId,
-            formattedTime,
-            formattedTime,
-            formattedTime,
+			formattedTime,
+			formattedTime,
+			formattedTime,
 			order.SquareId,
 			order.SquareId,
 			order.SquareId,
 		)
 
 		encodedPld := url.QueryEscape(pld)
-        f := fmt.Sprintf("orders=%s&location=Default", encodedPld)
+		f := fmt.Sprintf("orders=%s&location=Default", encodedPld)
 		payload := strings.NewReader(f)
 
-        log.Printf("\n")
-        log.Printf("\n")
-        log.Printf("payload = %v\n", payload)
+		log.Printf("\n")
+		log.Printf("\n")
+		log.Printf("payload = %v\n", payload)
 		if c.DryRun {
 		} else {
 			resp, err := makeRequest(Post, linnworksUrl, payload, headers)
 			if err != nil {
 				return LinnworksCreateOrdersResponse{}, err
 			}
-            fmt.Printf("resp: %v\n", string(resp))
+			fmt.Printf("resp: %v\n", string(resp))
 			var productResps []LinnworksProductResponse
 			json.Unmarshal(resp, &productResps)
 		}
@@ -191,8 +191,8 @@ func (c *LinnworksClient) refreshToken() {
 }
 
 func formatDatePart(part int) string {
-    if part < 10 {
-        return fmt.Sprintf("0%d", part)
-    }
-    return fmt.Sprintf("%d", part)
+	if part < 10 {
+		return fmt.Sprintf("0%d", part)
+	}
+	return fmt.Sprintf("%d", part)
 }

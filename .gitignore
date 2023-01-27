@@ -3,3 +3,4 @@
 .DS_Store
 go-lsi
 public/lib
+logs

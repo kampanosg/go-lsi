@@ -40,8 +40,8 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) {
 		log.Printf("%v\n", order)
 	}
 
-    s.LinnworksClient.CreateOrders(ordersToUpsert)
-    s.Db.InsertOrders(ordersToUpsert)
+	s.LinnworksClient.CreateOrders(ordersToUpsert)
+	s.Db.InsertOrders(ordersToUpsert)
 }
 
 func buildSquareIdToOrderMap(orders []types.Order) map[string]types.Order {
