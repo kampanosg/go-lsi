@@ -185,16 +185,15 @@ type LinnworksOrder struct {
 
 type LinnworksCreateOrdersResponse []string
 
-// Date format: 2023-01-01T00:00:00.0000000+01:00
 const orderTemplate = `
     [
         {
             "UseChannelTax": true,
-            "pkOrderId": "%s"
+            "pkOrderId": "%s",
             "AutomaticallyLinkBySKU": true,
-            "Site": "Square",
-            "MatchPostalServiceTag": "",
-            "PostalServiceName": "Standard",
+            "Site": "SQUARE",
+            "MatchPostalServiceTag": "NW Guitars Shop",
+            "PostalServiceName": "SQUARE",
             "SavePostalServiceIfNotExist": false,
             "MatchPaymentMethodTag": "Main",
             "PaymentMethodName": "CreditCard",
@@ -205,15 +204,15 @@ const orderTemplate = `
             "OrderItems": %s,
             "ExtendedProperties": [],
             "Notes": [],
-            "Source": "DIRECT",
-            "SubSource": "SQUARE POS",
+            "Source": "SQUARE",
+            "SubSource": "SQUAREPOS",
             "ChannelBuyerName": "Square Order %s",
             "ReferenceNumber": "%s",
             "ExternalReference": "%s",
             "SecondaryReferenceNumber": "",
             "Currency": "GBP",
             "ConversionRate": 1,
-            "ReceivedDate": "%v"
+            "ReceivedDate": "%v",
             "DispatchBy": "%v",
             "PaidOn": "%v",
             "PostalServiceCost": 0,
@@ -222,34 +221,34 @@ const orderTemplate = `
             "Discount": 0,
             "DiscountType": "AllEvenly",
             "DiscountTaxType": "DeductAfterTax",
-            "ShippingAddress": {
-                "MatchCountryCode": "UK",
+            "DeliveryAddress": {
+                "MatchCountryCode": "GB",
                 "MatchCountryName": "United Kingdom",
                 "FullName": "Order %s",
                 "Company": "Square",
-                "Address1": "Unit A ",
+                "Address1": "Unit A",
                 "Address2": "Hoyle St",
                 "Address3": "",
                 "Town": "Warrington",
                 "Region": "Cheshire",
                 "PostCode": "WA5 0LW",
-                "Country": "UK",
+                "Country": "GB",
                 "PhoneNumber": "0700000000",
                 "EmailAddress": "orders@northwestguitars.co.uk",
                 "isEmpty": false
             },
             "BillingAddress": {
-                "MatchCountryCode": "UK",
+                "MatchCountryCode": "GB",
                 "MatchCountryName": "United Kingdom",
                 "FullName": "Order %s",
                 "Company": "Square",
-                "Address1": "Unit A ",
+                "Address1": "Unit A",
                 "Address2": "Hoyle St",
                 "Address3": "",
                 "Town": "Warrington",
                 "Region": "Cheshire",
                 "PostCode": "WA5 0LW",
-                "Country": "UK",
+                "Country": "GB",
                 "PhoneNumber": "0700000000",
                 "EmailAddress": "orders@northwestguitars.co.uk",
                 "isEmpty": false
@@ -275,7 +274,7 @@ const orderItemTemplate = `
         "ItemNumber": "%s",
         "ChannelSKU": "%s",
         "IsService": false,
-        "ItemTitle": "",
+        "ItemTitle": "%s",
         "Options": []
     }
 `

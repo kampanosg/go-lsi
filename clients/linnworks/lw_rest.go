@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	GET  string = "GET"
-	POST        = "POST"
+	Get  string = "GET"
+	Post        = "POST"
 )
 
 func makeRequest(method, url string, payload *strings.Reader, headers map[string]string) ([]byte, error) {

@@ -16,7 +16,7 @@ import (
 const (
 	LinnworksServer1 = "https://api.linnworks.net/api/"
 	LinnworksServer2 = "https://eu-ext.linnworks.net/api/"
-	DefaultDryRun    = true
+	DefaultDryRun    = false 
 )
 
 type LinnworksClient struct {
@@ -45,7 +45,7 @@ func (c *LinnworksClient) GetCategories() ([]LinnworksCategoryResponse, error) {
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = c.auth.Token
 
-	response, err := makeRequest(POST, url, payload, headers)
+	response, err := makeRequest(Post, url, payload, headers)
 	if err != nil {
 		return []LinnworksCategoryResponse{}, err
 	}
@@ -79,7 +79,7 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 		pld := fmt.Sprintf("%s&pageNumber=%d", builder.String(), pageNumber)
 		payload := strings.NewReader(pld)
 
-		resp, err := makeRequest(POST, url, payload, headers)
+		resp, err := makeRequest(Post, url, payload, headers)
 		if err != nil {
 			return products, err
 		}
@@ -122,6 +122,7 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 				product.Quantity,
 				product.ItemNumber,
 				product.SKU,
+                "Test",
 			)
 			orderProducts.WriteString(p)
 
@@ -131,30 +132,36 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 		}
 		orderProducts.WriteString("]")
 
+        formattedTime := order.CreatedAt.Format("2006-01-02T15:04:05.000000+01:00")
+
 		pld := fmt.Sprintf(orderTemplate,
 			uuid.New().String(),
 			orderProducts.String(),
 			order.SquareId,
 			order.SquareId,
 			order.SquareId,
-			order.CreatedAt,
-			order.CreatedAt,
-			order.CreatedAt,
+            formattedTime,
+            formattedTime,
+            formattedTime,
 			order.SquareId,
 			order.SquareId,
 			order.SquareId,
 		)
 
 		encodedPld := url.QueryEscape(pld)
-		payload := strings.NewReader(fmt.Sprintf("orders=%s&location=Default", encodedPld))
+        f := fmt.Sprintf("orders=%s&location=Default", encodedPld)
+		payload := strings.NewReader(f)
 
+        log.Printf("\n")
+        log.Printf("\n")
+        log.Printf("payload = %v\n", payload)
 		if c.DryRun {
-			log.Printf("payload = %v", payload)
 		} else {
-			resp, err := makeRequest(POST, linnworksUrl, payload, headers)
+			resp, err := makeRequest(Post, linnworksUrl, payload, headers)
 			if err != nil {
 				return LinnworksCreateOrdersResponse{}, err
 			}
+            fmt.Printf("resp: %v\n", string(resp))
 			var productResps []LinnworksProductResponse
 			json.Unmarshal(resp, &productResps)
 		}
@@ -175,10 +182,17 @@ func (c *LinnworksClient) refreshToken() {
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-	response, _ := makeRequest(POST, url, payload, headers)
+	response, _ := makeRequest(Post, url, payload, headers)
 
 	var authResp linnworksAuth
 	json.Unmarshal(response, &authResp)
 
 	c.auth = authResp
+}
+
+func formatDatePart(part int) string {
+    if part < 10 {
+        return fmt.Sprintf("0%d", part)
+    }
+    return fmt.Sprintf("%d", part)
 }

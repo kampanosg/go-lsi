@@ -19,7 +19,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main2() {
+func main() {
 
 	dbPath := getEnv("DB")
 
@@ -41,42 +41,42 @@ func main2() {
 	products := []types.OrderProduct{
 		{
 			Id:            1,
-			SquareOrderId: "9urRtTF6Qwzt01tEiCHs92O3Ri4F",
+			SquareOrderId: "9urRtTF6Qwzt01tEiCHs92O3Rj4C",
 			SquareVarId:   "XUALJKJOOFNXLUU47H7PWIDL",
 			Quantity:      "1",
 			ItemNumber:    "5060464363757",
 			SKU:           "JC10-BK",
-			Title:         "Very Good Coffee",
-			PricePerUnit:  7.1,
+			Title:         "1/4\" Mono Output Jack Socket - Black",
+			PricePerUnit:   2.99,
 		},
 		{
 			Id:            1,
-			SquareOrderId: "aurRtTF6Qwzt01tEiCHs92O3Ri4F",
-			SquareVarId:   "YUALJKJOOFNXLUU47H7PWIDL",
+			SquareOrderId: "aurRtTF6Qwzt01tEiCHs92O3Rj4C",
+			SquareVarId:   "YUALJKJOOFNYLUU47H7PWIDL",
 			Quantity:      "1",
-			ItemNumber:    "6060464363757",
-			SKU:           "JC11-CK",
-			Title:         "Very Medium Coffee",
-			PricePerUnit:  7.1,
+			ItemNumber:    "5060464363764",
+			SKU:           "JC10-CR",
+			Title:         "1/4\" Mono Output Jack Socket - Chrome",
+			PricePerUnit:  2.99,
 		},
 	}
 
 	orders := []types.Order{
 		{
 			Id:         1,
-			SquareId:   "9urRtTF6Qwzt01tEiCHs92O3Ri4F",
+			SquareId:   "9utRtTF6Qwzt01tEiCHs92O3Rj4C",
 			Products:   products,
 			LocationId: "Default",
 			State:      "Completed",
 			Version:    1,
-			TotalMoney: 14.2,
+			TotalMoney: 5.98,
 			CreatedAt:  time.Now(),
 		},
 	}
 	lwClient.CreateOrders(orders)
 }
 
-func main() {
+func main2() {
 
 	port := getEnv("HTTP_PORT")
 	log.Printf("Starting server at port :%s\n", port)
