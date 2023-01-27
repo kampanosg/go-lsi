@@ -19,7 +19,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func main2() {
 
 	dbPath := getEnv("DB")
 
@@ -76,7 +76,7 @@ func main() {
 	lwClient.CreateOrders(orders)
 }
 
-func main2() {
+func main() {
 
 	port := getEnv("HTTP_PORT")
 	log.Printf("Starting server at port :%s\n", port)

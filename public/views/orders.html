@@ -50,63 +50,20 @@
                     </div>
                 </div>
 
-                <!-- <div class="row mt-4"> -->
-                <!--     <div class="col"> -->
-                <!--         <h5>Filters</h5> -->
-                <!--     </div> -->
-                <!-- </div> -->
-                <!-- <div class="row" x-data="{ -->
-                <!--     barcode: '', -->
-                <!--     sku: '', -->
-                <!-- }"> -->
-                <!--     <div class="col-3"> -->
-                <!--         <div class="input-group mb-3"> -->
-                <!--             <input x-model="sku" type="text" class="form-control" placeholder="SKU" aria-label="SKU" aria-describedby="btn-filter-sku"> -->
-                <!--             <button @click="filterBySku($data.sku)" class="btn btn-outline-secondary" type="button" id="btn-filter-sku">Filter</button> -->
-                <!--         </div> -->
-                <!--     </div> -->
-                <!--     <div class="col-3"> -->
-                <!--         <div class="input-group mb-3"> -->
-                <!--             <input x-model="barcode" type="text" class="form-control" placeholder="Barcode" aria-label="Barcode" aria-describedby="btn-filter-barcode"> -->
-                <!--             <button @click="filterByBarcode($data.barcode)" class="btn btn-outline-secondary" type="button" id="btn-filter-barcode">Filter</button> -->
-                <!--         </div> -->
-                <!--     </div> -->
-                <!--     <div class="col-1"> -->
-                <!--         <button --> 
-                <!--             @click="clearFilters" --> 
-                <!--             x-show="$data.sku.length > 0 || $data.barcode.length > 0" --> 
-                <!--             class="btn btn-outline-danger">Clear</button> -->
-                <!--     </div> -->
-                <!--     <div class="col-5"> -->
-                <!--         <p class="text-end">Total Items: <span x-text="$store.filtered.length"></span></p> -->
-                <!--     </div> -->
-                <!-- </div> -->
-
                 <div class="row mt-4">
                     <div class="col">
-                        <table class="table table-striped" x-data x-show="$store.inventory.length > 0" x-animate>
+                        <table class="table table-striped" x-data x-show="$store.orders.length > 0" x-animate>
                             <thead>
                                 <tr>
-                                    <th scope="col">Linnworks</th>
-                                    <th scope="col">Square</th>
-                                    <th scope="col">Title</th>
-                                    <th scope="col">Barcode</th>
-                                    <th scope="col">SKU</th>
-                                    <th scope="col">Price</th>
-                                    <th scope="col">Category</th>
+                                    <th scope="col">Square ID</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Total Products</th>
+                                    <th scope="col">Date / Time</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="item in $store.filtered">
+                                <template x-for="item in $store.orders">
                                     <tr>
-                                        <td> 
-                                            <div class="d-flex">
-                                                <span x-text="short(item.linnworksId)" class="fw-semibold"></span>
-                                                <a @click="navigator.clipboard.writeText(item.linnworksId)" href="#" class="px-2">
-                                                    <img src="/img/copy.svg" width="11px" /> 
-                                                </a>
-                                            </div>
-                                        </td>
                                         <td> 
                                             <div class="d-flex">
                                                 <span x-text="short(item.squareId)" class="fw-semibold"></span>
@@ -115,31 +72,22 @@
                                                 </a>
                                             </div>
                                         </td>
-                                        <td x-text="item.title"></td>
-                                        <td x-text="item.barcode"></td>
-                                        <td x-text="item.sku"></td>
-                                        <td x-text="price(item.price)"></td>
-                                        <td x-text="item.categoryName"></td>
+                                        <td x-text="price(item.totalMoney)"></td>
+                                        <td x-text="item.products.length"></td>
+                                        <td x-text="df(item.createdAt)"></td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
 
                         <p  x-data="{}" 
-                            x-show="$store.inventory.length === 0"
+                            x-show="$store.orders.length === 0"
                             class="placeholder-glow">
                             <span class="placeholder col-12 placeholder-lg"></span>
                             <template x-for="_ in 50">
                                 <span class="placeholder col-12 placeholder bg-secondary"></span>
                             </template>
                         </p>
-
-
-                        <p x-data x-show="$store.inventory.length > 0" class="text-center py-4">
-                            Wow, you reached the bottom 😲. 
-                            Click the wee finger to back to the top <a href="#">👆</a>
-                        </p>
-
                     </div>
                 </div>
             </div>
@@ -153,7 +101,7 @@
         
 
         document.addEventListener('alpine:init', () => {
-            Alpine.store('inventory', [])
+            Alpine.store('orders', [])
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -162,7 +110,7 @@
             }
             Alpine.store('jwt', jwt)
 
-            fetchInventory('/api/v1/inventory', jwt)
+            fetchOrders('/api/v1/orders', jwt)
                 .then((data) => {
                     if(data.Message && data.Message == AUTH_FAILED_MSG) {
                         goToAuthPage()
@@ -172,8 +120,7 @@
                         return
                     }
 
-                    Alpine.store('inventory', data.items)
-                    Alpine.store('filtered', data.items)
+                    Alpine.store('orders', data.items)
                 });
         })
 
@@ -181,7 +128,7 @@
             window.location.replace("/views/login.html")
         }
 
-        async function fetchInventory(url = '/api/v1/orders', jwt) {
+        async function fetchOrders(url = '/api/v1/orders', jwt) {
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -199,6 +146,10 @@
 
         function price(item) {
             return `£${item}`
+        }
+
+        function df(d) {
+            return new Date(d).toLocaleString()
         }
 
     </script>
