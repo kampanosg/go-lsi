@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/kampanosg/go-lsi/clients/db/sqlite"
@@ -19,7 +20,7 @@ import (
 )
 
 func main() {
-    
+
 	dbPath := getEnv("DB")
 
 	lwAppId := getEnv("LINNWORKS_APP_ID")
@@ -35,12 +36,44 @@ func main() {
 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
 	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
-    log.Println(syncTool)
+	log.Println(syncTool)
 
-    orders := []types.Order {
-        {SquareId: "dfsdsd"},
-    }
-    lwClient.CreateOrders(orders)
+	products := []types.OrderProduct{
+		{
+			Id:            1,
+			SquareOrderId: "9urRtTF6Qwzt01tEiCHs92O3Ri4F",
+			SquareVarId:   "XUALJKJOOFNXLUU47H7PWIDL",
+			Quantity:      "1",
+			ItemNumber:    "5060464363757",
+			SKU:           "JC10-BK",
+			Title:         "Very Good Coffee",
+			PricePerUnit:  7.1,
+		},
+		{
+			Id:            1,
+			SquareOrderId: "aurRtTF6Qwzt01tEiCHs92O3Ri4F",
+			SquareVarId:   "YUALJKJOOFNXLUU47H7PWIDL",
+			Quantity:      "1",
+			ItemNumber:    "6060464363757",
+			SKU:           "JC11-CK",
+			Title:         "Very Medium Coffee",
+			PricePerUnit:  7.1,
+		},
+	}
+
+	orders := []types.Order{
+		{
+			Id:         1,
+			SquareId:   "9urRtTF6Qwzt01tEiCHs92O3Ri4F",
+			Products:   products,
+			LocationId: "Default",
+			State:      "Completed",
+			Version:    1,
+			TotalMoney: 14.2,
+			CreatedAt:  time.Now(),
+		},
+	}
+	lwClient.CreateOrders(orders)
 }
 
 func main2() {

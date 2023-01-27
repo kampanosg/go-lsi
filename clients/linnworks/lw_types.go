@@ -186,11 +186,6 @@ type LinnworksOrder struct {
 type LinnworksCreateOrdersResponse []string
 
 // Date format: 2023-01-01T00:00:00.0000000+01:00
-const (
-	orderUUIDKey     = "{{OrderUUID}}"
-	orderItemsKey    = "{{OrderItems}}"
-	orderSquareIdKey = "{{OrderSquareId}}"
-)
 const orderTemplate = `
     [
         {
@@ -207,20 +202,20 @@ const orderTemplate = `
             "MappingSource": "DIRECT",
             "OrderState": "None",
             "PaymentStatus": "Paid",
-            "OrderItems": [{{OrderItems}}],
+            "OrderItems": %s,
             "ExtendedProperties": [],
             "Notes": [],
             "Source": "DIRECT",
             "SubSource": "SQUARE POS",
-            "ChannelBuyerName": "Square Order {{OrderSquareId}}",
-            "ReferenceNumber": "{{OrderSquareId}}",
-            "ExternalReference": "{{OrderSquareId}}",
+            "ChannelBuyerName": "Square Order %s",
+            "ReferenceNumber": "%s",
+            "ExternalReference": "%s",
             "SecondaryReferenceNumber": "",
             "Currency": "GBP",
             "ConversionRate": 1,
-            "ReceivedDate": "{{OrderDate}}", 
-            "DispatchBy": "{{OrderDate}}",
-            "PaidOn": "{{OrderDate}}",
+            "ReceivedDate": "%v"
+            "DispatchBy": "%v",
+            "PaidOn": "%v",
             "PostalServiceCost": 0,
             "PostalServiceTaxRate": 0,
             "PostalServiceDiscount": 0,
@@ -230,7 +225,7 @@ const orderTemplate = `
             "ShippingAddress": {
                 "MatchCountryCode": "UK",
                 "MatchCountryName": "United Kingdom",
-                "FullName": "Order {{OrderSquareId}}",
+                "FullName": "Order %s",
                 "Company": "Square",
                 "Address1": "Unit A ",
                 "Address2": "Hoyle St",
@@ -246,7 +241,7 @@ const orderTemplate = `
             "BillingAddress": {
                 "MatchCountryCode": "UK",
                 "MatchCountryName": "United Kingdom",
-                "FullName": "Order {{SquareOrderId}}",
+                "FullName": "Order %s",
                 "Company": "Square",
                 "Address1": "Unit A ",
                 "Address2": "Hoyle St",
@@ -262,29 +257,23 @@ const orderTemplate = `
             "DeliveryStartDate": "2023-01-01T00:00:00.0000000+01:00",
             "DeliveryEndDate": "2023-01-01T00:00:00.0000000+01:00",
             "OrderIdentifierTags": [
-                "{{SquareOrderId}}"
+                "%s"
             ],
             "ForceReSaveFulfilledOrder": true
         }
     ]
 `
 
-const (
-	oderItemPricePerUnitKey = "{{ItemPricePerUnit}}"
-	orderItemQtyKey         = "{{ItemQty}}"
-	orderItemBarcodeKey     = "{{ItemBarcode}}"
-	oderItemSkuKey          = "{{ItemSku}}"
-)
 const orderItemTemplate = `
     {
         "TaxCostInclusive": true,
         "UseChannelTax": true,
-        "PricePerUnit": {{ItemPricePerUnit}},
-        "Qty": {{ItemQty}},
+        "PricePerUnit": %v,
+        "Qty": %s,
         "TaxRate": 0,
         "LineDiscount": 0,
-        "ItemNumber": "{{ItemBarcode}}",
-        "ChannelSKU": "{{ItemSku}}",
+        "ItemNumber": "%s",
+        "ChannelSKU": "%s",
         "IsService": false,
         "ItemTitle": "",
         "Options": []

@@ -1,12 +1,15 @@
 package linnworks
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/kampanosg/go-lsi/types"
 )
 
@@ -104,27 +107,56 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrdersResponse, error) {
 	c.refreshToken()
 
-	url := fmt.Sprintf("%s/Orders/CreateOrders", LinnworksServer2)
+	linnworksUrl := fmt.Sprintf("%s/Orders/CreateOrders", LinnworksServer2)
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = c.auth.Token
 
 	for _, order := range orders {
 
-		pld := fmt.Sprintf(orderTemplate, "irieiireii")
-        fmt.Println(pld)
-        fmt.Println(order)
-        
-		payload := strings.NewReader(pld)
+		var orderProducts bytes.Buffer
+		orderProducts.WriteString("[")
+		for index, product := range order.Products {
+			p := fmt.Sprintf(orderItemTemplate,
+				product.PricePerUnit,
+				product.Quantity,
+				product.ItemNumber,
+				product.SKU,
+			)
+			orderProducts.WriteString(p)
+
+			if index < len(order.Products)-1 {
+				orderProducts.WriteString(",")
+			}
+		}
+		orderProducts.WriteString("]")
+
+		pld := fmt.Sprintf(orderTemplate,
+			uuid.New().String(),
+			orderProducts.String(),
+			order.SquareId,
+			order.SquareId,
+			order.SquareId,
+			order.CreatedAt,
+			order.CreatedAt,
+			order.CreatedAt,
+			order.SquareId,
+			order.SquareId,
+			order.SquareId,
+		)
+
+		encodedPld := url.QueryEscape(pld)
+		payload := strings.NewReader(fmt.Sprintf("orders=%s&location=Default", encodedPld))
 
 		if c.DryRun {
+			log.Printf("payload = %v", payload)
 		} else {
-			resp, err := makeRequest(POST, url, payload, headers)
+			resp, err := makeRequest(POST, linnworksUrl, payload, headers)
 			if err != nil {
 				return LinnworksCreateOrdersResponse{}, err
 			}
-            var productResps []LinnworksProductResponse
-            json.Unmarshal(resp, &productResps)
+			var productResps []LinnworksProductResponse
+			json.Unmarshal(resp, &productResps)
 		}
 	}
 
