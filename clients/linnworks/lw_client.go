@@ -126,7 +126,7 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 			)
 			orderProducts.WriteString(p)
 
-			if index < len(order.Products)-1 {
+			if index < len(order.Products) - 1 {
 				orderProducts.WriteString(",")
 			}
 		}
