@@ -83,8 +83,8 @@ func main() {
 
 	port := getEnv("HTTP_PORT")
 
-    logger := logInit()
-    logger.Infow("starting http server", "port", port)
+	logger := logInit()
+	logger.Infow("starting http server", "port", port)
 
 	dbPath := getEnv("DB")
 
@@ -99,24 +99,24 @@ func main() {
 	sqApiVersion := getEnv("SQUARE_API_VERSION")
 	sqLocationId := getEnv("SQUARE_LOCATION_ID")
 
-    logger.Debugw("loaded application config", 
-        "linnworksAppId", lwAppId,
-        "linnworksAppSecret", lwAppSecret,
-        "linnworksAppToken", lwAppToken,
-        "squareAccessToken", sqAccessToken,
-        "sqHost", sqHost,
-        "sqApiVersion", sqApiVersion,
-        "sqLocationId", sqLocationId,
-        "signingKey", signingKey,
-        "db", dbPath,
-    )
+	logger.Debugw("loaded application config",
+		"linnworksAppId", lwAppId,
+		"linnworksAppSecret", lwAppSecret,
+		"linnworksAppToken", lwAppToken,
+		"squareAccessToken", sqAccessToken,
+		"sqHost", sqHost,
+		"sqApiVersion", sqApiVersion,
+		"sqLocationId", sqLocationId,
+		"signingKey", signingKey,
+		"db", dbPath,
+	)
 
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
 	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 
-	authMiddleware := middlewares.NewAuthMiddleware(signingKey)
+	authMiddleware := middlewares.NewAuthMiddleware(signingKey, logger)
 	authController := controllers.NewAuthController(sqliteDb, signingKey)
 	inventoryController := controllers.NewInventoryController(sqliteDb)
 	ordersController := controllers.NewOrdersController(sqliteDb)
@@ -141,7 +141,7 @@ func getEnv(key string) string {
 	err := godotenv.Load(".env")
 
 	if err != nil {
-        panic("cannot find .env file")
+		panic("cannot find .env file")
 	}
 
 	return os.Getenv(key)
@@ -149,10 +149,10 @@ func getEnv(key string) string {
 
 func logInit() *zap.SugaredLogger {
 
-    f, err := os.Create("logs/test.log")
-    if err != nil {
-        panic("unable to open log file")
-    }
+	f, err := os.Create("logs/test.log")
+	if err != nil {
+		panic("unable to open log file")
+	}
 
 	pe := zap.NewProductionEncoderConfig()
 
@@ -160,7 +160,7 @@ func logInit() *zap.SugaredLogger {
 
 	pe.EncodeTime = zapcore.ISO8601TimeEncoder
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
-    level := zap.DebugLevel
+	level := zap.DebugLevel
 
 	core := zapcore.NewTee(
 		zapcore.NewCore(fileEncoder, zapcore.AddSync(f), level),

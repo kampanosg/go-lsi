@@ -3,37 +3,39 @@ package middlewares
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/kampanosg/go-lsi/types"
+	"go.uber.org/zap"
 )
 
 type authMiddleware struct {
 	signingKey []byte
+	logger     *zap.SugaredLogger
 }
 
 var (
-	logger = log.Default()
-
 	errAuthFailed       = errors.New("auth failed")
 	errUserUnauthorized = errors.New("user is not authorized")
 	errBadDate          = errors.New("invalid date provided")
 	errInvalidToken     = errors.New("token is invalid")
 )
 
-func NewAuthMiddleware(signKey []byte) *authMiddleware {
-	return &authMiddleware{signingKey: signKey}
+func NewAuthMiddleware(signKey []byte, logger *zap.SugaredLogger) *authMiddleware {
+	return &authMiddleware{signingKey: signKey, logger: logger}
 }
 
 func (m *authMiddleware) ProtectedEndpoint(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := strings.Split(r.Header.Get("Authorization"), "Bearer ")
 		if len(authHeader) != 2 {
-			logger.Printf("%s malformed auth header. header=%v\n", r.RequestURI, authHeader)
+			m.logger.Debugf("malformed auth header",
+				"uri", r.RequestURI,
+				"header", authHeader,
+			)
 			unauthorised(w)
 		} else {
 			jwtToken := authHeader[1]
@@ -46,14 +48,30 @@ func (m *authMiddleware) ProtectedEndpoint(next http.Handler) http.Handler {
 				return
 			} else if ve, ok := err.(*jwt.ValidationError); ok {
 				if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-					log.Printf("auth failed: that's not even a token. err=%v\n", err)
+					m.logger.Debugw("auth failed",
+						"reason", "malformed token",
+						"token", token,
+						"error", err.Error(),
+					)
 				} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-					log.Printf("auth failed: token is either expired or not active yet. err=%v\n", err)
+					m.logger.Debugw("auth failed",
+						"reason", "token expired",
+						"token", token,
+						"error", err.Error(),
+					)
 				} else {
-					log.Printf("auth failed: couldn't handle this token. err=%v\n", err)
+					m.logger.Debugw("auth failed",
+						"reason", "couldn't handle this token",
+						"token", token,
+						"error", err.Error(),
+					)
 				}
 			} else {
-				log.Printf("auth failed: couldn't handle this token. err=%v\n", err)
+				m.logger.Debugw("auth failed",
+					"reason", "couldn't handle this token",
+					"token", token,
+					"error", err.Error(),
+				)
 			}
 			unauthorised(w)
 		}
