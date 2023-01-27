@@ -117,7 +117,7 @@ func main() {
 	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
 
 	authMiddleware := middlewares.NewAuthMiddleware(signingKey, logger)
-	authController := controllers.NewAuthController(sqliteDb, signingKey)
+	authController := controllers.NewAuthController(sqliteDb, signingKey, logger)
 	inventoryController := controllers.NewInventoryController(sqliteDb)
 	ordersController := controllers.NewOrdersController(sqliteDb)
 	pingController := controllers.NewPingController()
