@@ -92,7 +92,9 @@ func (s *SyncTool) SyncCategories() error {
 
 	categoriesToBeDeleted := getCategoriesToBeDeleted(categoriesUpsertMap)
 	if len(categoriesToBeDeleted) > 0 {
+        s.logger.Infow("found categories to be deleted", "total", len(categoriesToBeDeleted))
 		if err := s.SquareClient.BatchDeleteItems(categoriesToBeDeleted); err != nil {
+            s.logger.Errorw("unable to delete categories", reasonKey, msgSqErr, errKey, err.Error())
 			return err
 		}
 	}
