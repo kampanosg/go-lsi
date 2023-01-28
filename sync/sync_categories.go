@@ -17,13 +17,13 @@ func (s *SyncTool) SyncCategories() error {
 
 	oldCategories, err := s.Db.GetCategories()
     if err != nil {
-        s.logger.Errorw("unable to sync categories", reasonKey, msgDbErr, "error", err.Error())
+        s.logger.Errorw("unable to sync categories", reasonKey, msgDbErr, errKey, err.Error())
         return err
     }
 
 	lwCategories, err := s.LinnworksClient.GetCategories()
     if err != nil {
-        s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, "error", err.Error())
+        s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, errKey, err.Error())
         return err
     }
 
@@ -57,7 +57,7 @@ func (s *SyncTool) SyncCategories() error {
     s.logger.Infow("upserting categories to square", "total", len(categoriesToBeUpserted))
 	resp, err := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
 	if err != nil {
-        s.logger.Errorw("unable to upsert categories", reasonKey, msgSqErr, "error", err.Error())
+        s.logger.Errorw("unable to upsert categories", reasonKey, msgSqErr, errKey, err.Error())
 		return err
 	}
 
@@ -78,14 +78,14 @@ func (s *SyncTool) SyncCategories() error {
 	}
 
 	if err := s.Db.ClearCategories(); err != nil {
-        s.logger.Errorw("unable to clear database from categories", reasonKey, msgDbErr, "error", err.Error())
+        s.logger.Errorw("unable to clear database from categories", reasonKey, msgDbErr, errKey, err.Error())
 		return err
 	}
 
 	if len(categories) > 0 {
         s.logger.Infow("inserting categories to db", "total", len(categories))
 		if err := s.Db.InsertCategories(categories); err != nil {
-            s.logger.Errorw("unable to insert categories", reasonKey, msgDbErr, "error", err.Error())
+            s.logger.Errorw("unable to insert categories", reasonKey, msgDbErr, errKey, err.Error())
 			return err
 		}
 	}

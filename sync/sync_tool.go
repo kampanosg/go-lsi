@@ -9,6 +9,7 @@ import (
 
 const (
     reasonKey= "reason"
+    errKey = "error"
     msgDbErr = "db client error"
     msgLwErr = "linnworks client error"
     msgSqErr = "square client error"
