@@ -4,40 +4,42 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/kampanosg/go-lsi/types"
+	"go.uber.org/zap"
 )
 
 const (
 	LinnworksServer1 = "https://api.linnworks.net/api/"
 	LinnworksServer2 = "https://eu-ext.linnworks.net/api/"
-	DefaultDryRun    = false 
 )
 
 type LinnworksClient struct {
 	Id     string
 	Secret string
 	Token  string
-	DryRun bool
 	auth   linnworksAuth
+	logger *zap.SugaredLogger
 }
 
-func NewLinnworksClient(id, secret, token string) *LinnworksClient {
+func NewLinnworksClient(id, secret, token string, logger *zap.SugaredLogger) *LinnworksClient {
 	return &LinnworksClient{
 		Id:     id,
 		Secret: secret,
 		Token:  token,
-		DryRun: DefaultDryRun,
+		logger: logger,
 	}
 }
 
 func (c *LinnworksClient) GetCategories() ([]LinnworksCategoryResponse, error) {
-	c.refreshToken()
+	if err := c.refreshToken(); err != nil {
+		c.logger.Errorw("unable to refresh linnworks auth token")
+		return []LinnworksCategoryResponse{}, err
+	}
 
 	url := fmt.Sprintf("%s/Inventory/GetCategories", LinnworksServer2)
 	payload := strings.NewReader("=")
@@ -45,7 +47,9 @@ func (c *LinnworksClient) GetCategories() ([]LinnworksCategoryResponse, error) {
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = c.auth.Token
 
-	response, err := makeRequest(Post, url, payload, headers)
+	c.logger.Debugw("attempting to call linnworks", "url", url)
+
+	response, err := c.makeRequest(Post, url, payload, headers)
 	if err != nil {
 		return []LinnworksCategoryResponse{}, err
 	}
@@ -57,7 +61,10 @@ func (c *LinnworksClient) GetCategories() ([]LinnworksCategoryResponse, error) {
 }
 
 func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
-	c.refreshToken()
+	if err := c.refreshToken(); err != nil {
+		c.logger.Errorw("unable to refresh linnworks auth token")
+		return []LinnworksProductResponse{}, err
+	}
 
 	entriesPerPage := 200
 	pageNumber := 1
@@ -79,7 +86,9 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 		pld := fmt.Sprintf("%s&pageNumber=%d", builder.String(), pageNumber)
 		payload := strings.NewReader(pld)
 
-		resp, err := makeRequest(Post, url, payload, headers)
+		c.logger.Debugw("attempting to call linnworks", "url", url, "payload", pld)
+
+		resp, err := c.makeRequest(Post, url, payload, headers)
 		if err != nil {
 			return products, err
 		}
@@ -105,7 +114,10 @@ func (c *LinnworksClient) GetProducts() ([]LinnworksProductResponse, error) {
 }
 
 func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrdersResponse, error) {
-	c.refreshToken()
+	if err := c.refreshToken(); err != nil {
+		c.logger.Errorw("unable to refresh linnworks auth token")
+		return LinnworksCreateOrdersResponse{}, err
+	}
 
 	linnworksUrl := fmt.Sprintf("%s/Orders/CreateOrders", LinnworksServer2)
 	headers := make(map[string]string)
@@ -122,17 +134,17 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 				product.Quantity,
 				product.ItemNumber,
 				product.SKU,
-                "Test",
+				"Test",
 			)
 			orderProducts.WriteString(p)
 
-			if index < len(order.Products) - 1 {
+			if index < len(order.Products)-1 {
 				orderProducts.WriteString(",")
 			}
 		}
 		orderProducts.WriteString("]")
 
-        formattedTime := order.CreatedAt.Format("2006-01-02T15:04:05.000000+01:00")
+		formattedTime := order.CreatedAt.Format("2006-01-02T15:04:05.000000+01:00")
 
 		pld := fmt.Sprintf(orderTemplate,
 			uuid.New().String(),
@@ -140,41 +152,38 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 			order.SquareId,
 			order.SquareId,
 			order.SquareId,
-            formattedTime,
-            formattedTime,
-            formattedTime,
+			formattedTime,
+			formattedTime,
+			formattedTime,
 			order.SquareId,
 			order.SquareId,
 			order.SquareId,
 		)
 
 		encodedPld := url.QueryEscape(pld)
-        f := fmt.Sprintf("orders=%s&location=Default", encodedPld)
-		payload := strings.NewReader(f)
+		encodedOrder := fmt.Sprintf("orders=%s&location=Default", encodedPld)
+		payload := strings.NewReader(encodedOrder)
 
-        log.Printf("\n")
-        log.Printf("\n")
-        log.Printf("payload = %v\n", payload)
-		if c.DryRun {
-		} else {
-			resp, err := makeRequest(Post, linnworksUrl, payload, headers)
-			if err != nil {
-				return LinnworksCreateOrdersResponse{}, err
-			}
-            fmt.Printf("resp: %v\n", string(resp))
-			var productResps []LinnworksProductResponse
-			json.Unmarshal(resp, &productResps)
+		c.logger.Debugw("attempting to call linnworks", "url", linnworksUrl, "payload", encodedOrder)
+
+		resp, err := c.makeRequest(Post, linnworksUrl, payload, headers)
+		if err != nil {
+			return LinnworksCreateOrdersResponse{}, err
 		}
+		fmt.Printf("resp: %v\n", string(resp))
+		var productResps []LinnworksProductResponse
+		json.Unmarshal(resp, &productResps)
 	}
 
 	return LinnworksCreateOrdersResponse{}, nil
 }
 
-func (c *LinnworksClient) refreshToken() {
+func (c *LinnworksClient) refreshToken() error {
 	if c.auth.ExpirationDate.After(time.Now()) {
-		log.Printf("lw: token has not expired, no need to refresh\n")
-		return
+		return nil
 	}
+
+	c.logger.Debugw("refreshing linnworks auth token")
 
 	url := fmt.Sprintf("%s/Auth/AuthorizeByApplication", LinnworksServer1)
 	body := fmt.Sprintf("applicationId=%s&applicationSecret=%s&token=%s", c.Id, c.Secret, c.Token)
@@ -182,17 +191,16 @@ func (c *LinnworksClient) refreshToken() {
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-	response, _ := makeRequest(Post, url, payload, headers)
+	response, err := c.makeRequest(Post, url, payload, headers)
+	if err != nil {
+		return err
+	}
 
 	var authResp linnworksAuth
-	json.Unmarshal(response, &authResp)
+	if err := json.Unmarshal(response, &authResp); err != nil {
+		return err
+	}
 
 	c.auth = authResp
-}
-
-func formatDatePart(part int) string {
-    if part < 10 {
-        return fmt.Sprintf("0%d", part)
-    }
-    return fmt.Sprintf("%d", part)
+	return nil
 }

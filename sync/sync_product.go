@@ -2,7 +2,6 @@ package sync
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/kampanosg/go-lsi/transformers"
@@ -14,24 +13,36 @@ type upsertProduct struct {
 	isDeleted bool
 }
 
-func (s *SyncTool) SyncProducts() {
+func (s *SyncTool) SyncProducts() error {
+	s.logger.Infow("will start syncing products")
 
-	categories, _ := s.Db.GetCategories()
+	categories, err := s.Db.GetCategories()
+	if err != nil {
+		s.logger.Errorw("cannot get existing categories", reasonKey, msgDbErr, errKey, err.Error())
+		return err
+	}
+
 	mappedCatergoriesById := buildMappedCategoriesById(categories)
 
-	oldProducts, _ := s.Db.GetProducts()
-	lwProduts, _ := s.LinnworksClient.GetProducts()
+	oldProducts, err := s.Db.GetProducts()
+	if err != nil {
+		s.logger.Errorw("cannot get existing products", reasonKey, msgDbErr, errKey, err.Error())
+		return err
+	}
+
+	lwProduts, err := s.LinnworksClient.GetProducts()
+	if err != nil {
+		s.logger.Errorw("cannot get new products", reasonKey, msgLwErr, errKey, err.Error())
+		return err
+	}
+
 	newProducts := transformers.FromProductLinnworksResponsesToDomain(lwProduts)
-
-	// newProducts := []types.Product{
-	// 	{Id: "product-1", Title: "Very Good Coffee Beans", CategoryId: "category-1", Price: 69.42, Barcode: "999999999999", SKU: "SKU0420"},
-	// }
-
-	log.Printf("will process %d new products\n", len(newProducts))
 
 	productsUpsertMap := buildUpsertProductMap(oldProducts)
 	productsToUpsert := make([]types.Product, 0)
 	productsSquareIdMapping := make(map[string]types.Product, 0)
+
+	s.logger.Infow("will attempt to upsert products", "total", len(newProducts))
 
 	for _, newProduct := range newProducts {
 		upsert, ok := productsUpsertMap[newProduct.Id]
@@ -43,6 +54,11 @@ func (s *SyncTool) SyncProducts() {
 			newProduct.SquareVarId = upsert.product.SquareVarId
 			newProduct.Version = upsert.product.Version
 		}
+		s.logger.Debugw("assigned ids and version to product",
+			"squareId", newProduct.SquareId,
+			"var id", newProduct.SquareVarId,
+			"version", newProduct.Version,
+		)
 
 		category := mappedCatergoriesById[newProduct.CategoryId]
 		newProduct.SquareCategoryId = category.SquareId
@@ -55,9 +71,14 @@ func (s *SyncTool) SyncProducts() {
 		}
 	}
 
-	resp, _ := s.SquareClient.UpsertProducts(productsToUpsert)
+	resp, err := s.SquareClient.UpsertProducts(productsToUpsert)
+	if err != nil {
+		s.logger.Errorw("unable to upsert products", reasonKey, msgSqErr, errKey, err.Error())
+		return err
+	}
 
 	if len(resp.IDMappings) > 0 {
+		s.logger.Debugw("found new product mappings", "total", len(resp.IDMappings))
 		for _, idMapping := range resp.IDMappings {
 			if !strings.HasSuffix(idMapping.ClientObjectID, "-var") {
 				product := productsSquareIdMapping[idMapping.ClientObjectID]
@@ -80,19 +101,27 @@ func (s *SyncTool) SyncProducts() {
 	for _, object := range resp.Objects {
 		product := productsSquareIdMapping[object.ID]
 		product.Version = object.Version
-		log.Printf("adding product: %v\n", product)
 		products = append(products, product)
 	}
 
-	s.Db.ClearProducts()
+	if err := s.Db.ClearProducts(); err != nil {
+		s.logger.Errorw("unable to delete products", reasonKey, msgDbErr, errKey, err.Error())
+		return err
+	}
+
 	if len(products) > 0 {
 		s.Db.InsertProducts(products)
 	}
 
 	productsToBeDeleted := getProductsToBeDeleted(productsUpsertMap)
 	if len(productsToBeDeleted) > 0 {
-		s.SquareClient.BatchDeleteItems(productsToBeDeleted)
+		s.logger.Infow("found products to be deleted", "total", len(productsToBeDeleted))
+		if err := s.SquareClient.BatchDeleteItems(productsToBeDeleted); err != nil {
+			s.logger.Errorw("unable to delete products", reasonKey, msgSqErr, errKey, err.Error())
+			return err
+		}
 	}
+	return nil
 }
 
 func buildMappedCategoriesById(categories []types.Category) map[string]types.Category {
@@ -103,8 +132,8 @@ func buildMappedCategoriesById(categories []types.Category) map[string]types.Cat
 	return m
 }
 
-// / Takes a list of Products, converts them to UpsertProduct type and then returns a LinnworksId -> UpsertProduct mapping
-// / Assumes that all products in the mapping are to be deleted
+// Takes a list of Products, converts them to UpsertProduct type and then returns a LinnworksId -> UpsertProduct mapping
+// Assumes that all products in the mapping are to be deleted
 func buildUpsertProductMap(products []types.Product) map[string]upsertProduct {
 	m := map[string]upsertProduct{}
 	for _, p := range products {
