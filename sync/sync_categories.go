@@ -13,10 +13,22 @@ type upsertCategory struct {
 }
 
 func (s *SyncTool) SyncCategories() error {
+    s.logger.Infow("will start syncing categories")
 
-	oldCategories, _ := s.Db.GetCategories()
-	lwCategories, _ := s.LinnworksClient.GetCategories()
+	oldCategories, err := s.Db.GetCategories()
+    if err != nil {
+        s.logger.Errorw("unable to sync categories", reasonKey, msgDbErr, "error", err.Error())
+        return err
+    }
+
+	lwCategories, err := s.LinnworksClient.GetCategories()
+    if err != nil {
+        s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, "error", err.Error())
+        return err
+    }
+
 	newCategories := transformers.FromCategoryLinnworksResponsesToDomain(lwCategories)
+    s.logger.Infow("found categories from linnworks", "total", len(newCategories))
 
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
 	categoriesToBeUpserted := make([]types.Category, 0)
@@ -26,12 +38,13 @@ func (s *SyncTool) SyncCategories() error {
 
 		upsert, ok := categoriesUpsertMap[newCategory.Id]
 
-		if !ok { // new category, need to format square id to specification
+		if !ok {
 			newCategory.SquareId = fmt.Sprintf("#%s", newCategory.Id)
 		} else {
 			newCategory.SquareId = upsert.category.SquareId
 			newCategory.Version = upsert.category.Version
 		}
+        s.logger.Debugw("assigned square id and version to category", "id", newCategory.SquareId, "version", newCategory.Version)
 
 		categoriesUpsertMap[newCategory.Id] = upsertCategory{
 			category:  newCategory,
@@ -41,12 +54,15 @@ func (s *SyncTool) SyncCategories() error {
 		categoriesSquareIdMapping[newCategory.SquareId] = newCategory
 	}
 
+    s.logger.Infow("upserting categories to square", "total", len(categoriesToBeUpserted))
 	resp, err := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
 	if err != nil {
+        s.logger.Errorw("unable to upsert categories", reasonKey, msgSqErr, "error", err.Error())
 		return err
 	}
 
 	if len(resp.IDMappings) > 0 {
+        s.logger.Debugw("found new category mappings", "total", len(resp.IDMappings))
 		for _, idMapping := range resp.IDMappings {
 			category := categoriesSquareIdMapping[idMapping.ClientObjectID]
 			category.SquareId = idMapping.ObjectID
@@ -62,11 +78,14 @@ func (s *SyncTool) SyncCategories() error {
 	}
 
 	if err := s.Db.ClearCategories(); err != nil {
+        s.logger.Errorw("unable to clear database from categories", reasonKey, msgDbErr, "error", err.Error())
 		return err
 	}
 
 	if len(categories) > 0 {
+        s.logger.Infow("inserting categories to db", "total", len(categories))
 		if err := s.Db.InsertCategories(categories); err != nil {
+            s.logger.Errorw("unable to insert categories", reasonKey, msgDbErr, "error", err.Error())
 			return err
 		}
 	}
