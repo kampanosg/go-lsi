@@ -114,7 +114,7 @@ func main() {
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
-	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
+	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb, logger)
 
 	authMiddleware := middlewares.NewAuthMiddleware(signingKey, logger)
 	authController := controllers.NewAuthController(sqliteDb, signingKey, logger)

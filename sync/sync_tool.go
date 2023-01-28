@@ -8,18 +8,18 @@ import (
 )
 
 const (
-    reasonKey= "reason"
-    errKey = "error"
-    msgDbErr = "db client error"
-    msgLwErr = "linnworks client error"
-    msgSqErr = "square client error"
+	reasonKey = "reason"
+	errKey    = "error"
+	msgDbErr  = "db client error"
+	msgLwErr  = "linnworks client error"
+	msgSqErr  = "square client error"
 )
 
 type SyncTool struct {
 	LinnworksClient *linnworks.LinnworksClient
 	SquareClient    *square.SquareClient
 	Db              db.DB
-    logger *  *zap.SugaredLogger
+	logger          *zap.SugaredLogger
 }
 
 func NewSyncTool(lwClient *linnworks.LinnworksClient, sqClient *square.SquareClient, db db.DB, logger *zap.SugaredLogger) *SyncTool {
@@ -27,6 +27,6 @@ func NewSyncTool(lwClient *linnworks.LinnworksClient, sqClient *square.SquareCli
 		LinnworksClient: lwClient,
 		SquareClient:    sqClient,
 		Db:              db,
-        logger: logger,
+		logger:          logger,
 	}
 }
