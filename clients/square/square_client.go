@@ -31,8 +31,8 @@ type SquareClient struct {
 	AccessToken string
 	Host        string
 	ApiVersion  string
-	LocationId  string 
-    logger *zap.SugaredLogger
+	LocationId  string
+	logger      *zap.SugaredLogger
 }
 
 func NewSquareClient(accessToken, host, version, location string, logger *zap.SugaredLogger) *SquareClient {
@@ -41,7 +41,7 @@ func NewSquareClient(accessToken, host, version, location string, logger *zap.Su
 		Host:        host,
 		ApiVersion:  version,
 		LocationId:  location,
-        logger: logger,
+		logger:      logger,
 	}
 }
 
@@ -71,13 +71,13 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 		Batches:        []SquareCategoryBatch{squareBatch},
 	}
 
-    var squareResp SquareUpsertResponse
+	var squareResp SquareUpsertResponse
 
 	jsonReq, err := json.Marshal(batchRequest)
-    if err != nil {
-        c.logger.Errorw("unable to marshall request", "error", err)
-        return squareResp, err
-    }
+	if err != nil {
+		c.logger.Errorw("unable to marshall request", "error", err)
+		return squareResp, err
+	}
 
 	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
 	headers := make(map[string]string)
@@ -85,8 +85,8 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
-    c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
-	
+	c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
+
 	resp, err := c.makeRequest(POST, url, headers, jsonReq)
 	if err != nil {
 		return squareResp, err
@@ -171,13 +171,13 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		Batches:        batches,
 	}
 
-    var squareResp SquareUpsertResponse
+	var squareResp SquareUpsertResponse
 
 	jsonReq, err := json.Marshal(batchRequest)
-    if err != nil {
-        c.logger.Errorw("unable to marshall request", "error", err)
-        return squareResp, err
-    }
+	if err != nil {
+		c.logger.Errorw("unable to marshall request", "error", err)
+		return squareResp, err
+	}
 
 	url := fmt.Sprintf("%s/catalog/batch-upsert", c.Host)
 	headers := make(map[string]string, 0)
@@ -185,8 +185,8 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
-    c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
-	
+	c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
+
 	resp, err := c.makeRequest(POST, url, headers, jsonReq)
 	if err != nil {
 		return squareResp, err
@@ -226,12 +226,12 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 
 	for _, br := range batchRequests {
 		jsonReq, err := json.Marshal(br)
-        if err != nil {
-            c.logger.Errorw("unable to marshall request", "error", err)
-            return err
-        }
+		if err != nil {
+			c.logger.Errorw("unable to marshall request", "error", err)
+			return err
+		}
 
-        c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
+		c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
 
 		if _, err := c.makeRequest(POST, url, headers, jsonReq); err != nil {
 			return err
@@ -274,12 +274,12 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 		var squareResp SquareOrderSearchResponse
 
 		jsonReq, err := json.Marshal(searchRequest)
-        if err != nil {
-            c.logger.Errorw("unable to marshall request", "error", err)
-            return make([]SquareOrder, 0), err
-        }
+		if err != nil {
+			c.logger.Errorw("unable to marshall request", "error", err)
+			return make([]SquareOrder, 0), err
+		}
 
-        c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
+		c.logger.Debugw("attempting to call square", "url", url, "req", string(jsonReq))
 
 		resp, err := c.makeRequest(POST, url, headers, jsonReq)
 		if err != nil {
@@ -287,7 +287,7 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 		}
 
 		if err := json.Unmarshal(resp, &squareResp); err != nil {
-            c.logger.Errorw("cannot unmarshall resp", "error", err.Error())
+			c.logger.Errorw("cannot unmarshall resp", "error", err.Error())
 			return orders, err
 		}
 

@@ -22,63 +22,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// func main() {
-
-// 	dbPath := getEnv("DB")
-
-// 	lwAppId := getEnv("LINNWORKS_APP_ID")
-// 	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
-// 	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
-
-// 	sqAccessToken := getEnv("SQUARE_ACCESS_TOKEN")
-// 	sqHost := getEnv("SQUARE_HOST")
-// 	sqApiVersion := getEnv("SQUARE_API_VERSION")
-// 	sqLocationId := getEnv("SQUARE_LOCATION_ID")
-
-// 	sqliteDb := sqlite.NewSqliteDB(dbPath)
-// 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
-// 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId)
-// 	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb)
-// 	log.Println(syncTool)
-
-// 	products := []types.OrderProduct{
-// 		{
-// 			Id:            1,
-// 			SquareOrderId: "9urRtTF6Qwzt01tEiCHs92O3Rj4C",
-// 			SquareVarId:   "XUALJKJOOFNXLUU47H7PWIDL",
-// 			Quantity:      "1",
-// 			ItemNumber:    "5060464363757",
-// 			SKU:           "JC10-BK",
-// 			Title:         "1/4\" Mono Output Jack Socket - Black",
-// 			PricePerUnit:   2.99,
-// 		},
-// 		{
-// 			Id:            1,
-// 			SquareOrderId: "aurRtTF6Qwzt01tEiCHs92O3Rj4C",
-// 			SquareVarId:   "YUALJKJOOFNYLUU47H7PWIDL",
-// 			Quantity:      "1",
-// 			ItemNumber:    "5060464363764",
-// 			SKU:           "JC10-CR",
-// 			Title:         "1/4\" Mono Output Jack Socket - Chrome",
-// 			PricePerUnit:  2.99,
-// 		},
-// 	}
-
-// 	orders := []types.Order{
-// 		{
-// 			Id:         1,
-// 			SquareId:   "9utRtTF6Qwzt01tEiCHs92O3Rj4C",
-// 			Products:   products,
-// 			LocationId: "Default",
-// 			State:      "Completed",
-// 			Version:    1,
-// 			TotalMoney: 5.98,
-// 			CreatedAt:  time.Now(),
-// 		},
-// 	}
-// 	lwClient.CreateOrders(orders)
-// }
-
 func main() {
 
 	port := getEnv("HTTP_PORT")
@@ -112,7 +55,7 @@ func main() {
 	)
 
 	sqliteDb := sqlite.NewSqliteDB(dbPath)
-	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken)
+	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken, logger)
 	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId, logger)
 	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb, logger)
 

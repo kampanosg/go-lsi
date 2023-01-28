@@ -30,13 +30,13 @@ func (c *SquareClient) makeRequest(method, url string, headers map[string]string
 
 	res, err := client.Do(req)
 	if err != nil {
-        c.logger.Debugw("unable to make request", "error", err.Error())
+		c.logger.Debugw("unable to make request", "error", err.Error())
 		return []byte{}, err
 	}
 	defer res.Body.Close()
 
 	responseData, err := ioutil.ReadAll(res.Body)
-    c.logger.Debugw("http client responded", "body", string(responseData), "status", res.StatusCode)
+	c.logger.Debugw("http client responded", "body", string(responseData), "status", res.StatusCode)
 	if err != nil {
 		return responseData, err
 	}
