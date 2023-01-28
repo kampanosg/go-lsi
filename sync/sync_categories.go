@@ -12,16 +12,11 @@ type upsertCategory struct {
 	isDeleted bool
 }
 
-func (s *SyncTool) SyncCategories() {
+func (s *SyncTool) SyncCategories() error {
 
 	oldCategories, _ := s.Db.GetCategories()
 	lwCategories, _ := s.LinnworksClient.GetCategories()
 	newCategories := transformers.FromCategoryLinnworksResponsesToDomain(lwCategories)
-
-	// oldCategories := []types.Category{}
-	// newCategories := []types.Category{
-	// 	{Id: "category-1", Name: "Test Category 1"},
-	// }
 
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
 	categoriesToBeUpserted := make([]types.Category, 0)
@@ -46,7 +41,10 @@ func (s *SyncTool) SyncCategories() {
 		categoriesSquareIdMapping[newCategory.SquareId] = newCategory
 	}
 
-	resp, _ := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
+	resp, err := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
+	if err != nil {
+		return err
+	}
 
 	if len(resp.IDMappings) > 0 {
 		for _, idMapping := range resp.IDMappings {
@@ -63,15 +61,23 @@ func (s *SyncTool) SyncCategories() {
 		categories = append(categories, category)
 	}
 
-	s.Db.ClearCategories()
+	if err := s.Db.ClearCategories(); err != nil {
+		return err
+	}
+
 	if len(categories) > 0 {
-		s.Db.InsertCategories(categories)
+		if err := s.Db.InsertCategories(categories); err != nil {
+			return err
+		}
 	}
 
 	categoriesToBeDeleted := getCategoriesToBeDeleted(categoriesUpsertMap)
 	if len(categoriesToBeDeleted) > 0 {
-		s.SquareClient.BatchDeleteItems(categoriesToBeDeleted)
+		if err := s.SquareClient.BatchDeleteItems(categoriesToBeDeleted); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func getCategoriesToBeDeleted(categoriesUpsertMap map[string]upsertCategory) []string {

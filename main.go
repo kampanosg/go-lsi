@@ -121,13 +121,14 @@ func main() {
 	inventoryController := controllers.NewInventoryController(sqliteDb, logger)
 	ordersController := controllers.NewOrdersController(sqliteDb, logger)
 	pingController := controllers.NewPingController()
-	syncController := controllers.NewSyncController(syncTool)
+	syncController := controllers.NewSyncController(syncTool, logger)
 
 	router := mux.NewRouter()
 
 	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
 	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
 	router.Handle("/api/v1/orders", authMiddleware.ProtectedEndpoint(http.HandlerFunc(ordersController.HandleOrdersRequest)))
+	router.Handle("/api/v1/sync/recent", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRecentRequest)))
 	router.Handle("/api/v1/sync", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRequest)))
 	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))

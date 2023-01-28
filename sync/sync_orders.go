@@ -1,16 +1,22 @@
 package sync
 
 import (
-	"log"
 	"time"
 
 	"github.com/kampanosg/go-lsi/transformers"
 	"github.com/kampanosg/go-lsi/types"
 )
 
-func (s *SyncTool) SyncOrders(start time.Time, end time.Time) {
-	existingOrders, _ := s.Db.GetOrders()
-	newOrders, _ := s.SquareClient.SearchOrders(start, end)
+func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
+	existingOrders, err := s.Db.GetOrders()
+	if err != nil {
+		return err
+	}
+
+	newOrders, err := s.SquareClient.SearchOrders(start, end)
+	if err != nil {
+		return err
+	}
 	existingOrdersMap := buildSquareIdToOrderMap(existingOrders)
 
 	ordersToUpsert := make([]types.Order, 0)
@@ -36,12 +42,15 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) {
 		}
 	}
 
-	for _, order := range ordersToUpsert {
-		log.Printf("%v\n", order)
+	if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
+		return err
 	}
 
-	s.LinnworksClient.CreateOrders(ordersToUpsert)
-	s.Db.InsertOrders(ordersToUpsert)
+	if err := s.Db.InsertOrders(ordersToUpsert); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func buildSquareIdToOrderMap(orders []types.Order) map[string]types.Order {
