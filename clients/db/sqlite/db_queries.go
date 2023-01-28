@@ -21,4 +21,7 @@ const (
 	query_INSERT_ORDER_PRODUCTS = `
         INSERT INTO square_order_product (order_id, square_order_id, square_var_id, quantity) VALUES (?, ?, ?, ?);
     `
+
+	query_INSERT_SYNC_STATUS   = `INSERT INTO sync_status (last_run) VALUES (?);`
+	query_GET_LAST_SYNC_STATUS = `SELECT s.last_run FROM sync_status s ORDER BY s.last_run DESC LIMIT 1;`
 )

@@ -33,7 +33,7 @@
                         </ul>
                     </div>
                     <span class="navbar-text px-2">
-                        Last sync: <strong>20/01/2023 @ 19:00</strong>
+                        Last sync: <strong x-data x-text="$store.lastSync"></strong>
                     </span>
                     <button class="btn btn-outline-primary">Sync now</button>
                 </div>
@@ -46,7 +46,6 @@
                         <h1 class="text-start">Inventory</h1>
                     </div>
                     <div class="col-2">
-                        
                     </div>
                 </div>
 
@@ -72,9 +71,9 @@
                         </div>
                     </div>
                     <div class="col-1">
-                        <button 
-                            @click="clearFilters" 
-                            x-show="$data.sku.length > 0 || $data.barcode.length > 0" 
+                        <button
+                            @click="clearFilters"
+                            x-show="$data.sku.length > 0 || $data.barcode.length > 0"
                             class="btn btn-outline-danger">Clear</button>
                     </div>
                     <div class="col-5">
@@ -150,10 +149,10 @@
     <script type="text/javascript">
 
         const AUTH_FAILED_MSG = 'auth failed'
-        
 
         document.addEventListener('alpine:init', () => {
             Alpine.store('inventory', [])
+            Alpine.store('lastSync', '')
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -162,8 +161,8 @@
             }
             Alpine.store('jwt', jwt)
 
-            fetchInventory('/api/v1/inventory', jwt)
-                .then((data) => {
+            fetchHttp('/api/v1/inventory', jwt)
+                .then(data => {
                     if(data.Message && data.Message == AUTH_FAILED_MSG) {
                         goToAuthPage()
                         return
@@ -175,13 +174,16 @@
                     Alpine.store('inventory', data.items)
                     Alpine.store('filtered', data.items)
                 });
+
+            fetchHttp('/api/v1/sync/status', jwt)
+                .then(data => Alpine.store('lastSync', new Date(data.ts).toLocaleString()))
         })
 
         function goToAuthPage() {
             window.location.replace("/views/login.html")
         }
 
-        async function fetchInventory(url = '/api/v1/inventory', jwt) {
+        async function fetchHttp(url, jwt) {
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {

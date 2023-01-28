@@ -37,6 +37,22 @@ func (c *SyncController) HandleSyncRequest(w http.ResponseWriter, r *http.Reques
 	c.sync(req.From, req.To)
 }
 
+func (c *SyncController) HandleSyncStatusRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		c.logger.Errorw("request failed", "reason", "method not supported", "method", r.Method, "uri", r.RequestURI)
+		failed(w, errMethodNotSupported, http.StatusMethodNotAllowed)
+		return
+	}
+
+	status, err := c.tool.Db.GetLastSyncStatus()
+	if err != nil {
+		failed(w, err, http.StatusBadRequest)
+		return
+	}
+
+	ok(w, status)
+}
+
 func (c *SyncController) HandleSyncRecentRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		c.logger.Errorw("request failed", "reason", "method not supported", "method", r.Method, "uri", r.RequestURI)
@@ -71,4 +87,8 @@ func (c *SyncController) sync(from time.Time, to time.Time) {
 	}
 
 	c.logger.Infow("finished syncing process", "from", from, "to", to, "elapsed", time.Since(startTime))
+
+	if err := c.tool.Db.InsertSyncStatus(startTime.UnixMilli()); err != nil {
+		c.logger.Errorw("unable to save sync status to db", "error", err.Error())
+	}
 }

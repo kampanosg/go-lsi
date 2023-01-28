@@ -71,6 +71,7 @@ func main() {
 	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
 	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
 	router.Handle("/api/v1/orders", authMiddleware.ProtectedEndpoint(http.HandlerFunc(ordersController.HandleOrdersRequest)))
+	router.Handle("/api/v1/sync/status", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncStatusRequest)))
 	router.Handle("/api/v1/sync/recent", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRecentRequest)))
 	router.Handle("/api/v1/sync", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRequest)))
 	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))

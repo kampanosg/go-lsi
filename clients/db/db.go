@@ -22,4 +22,7 @@ type DB interface {
 	GetOrderProductsForCategory(categoryId int) ([]types.OrderProduct, error)
 	InsertOrders([]types.Order) error
 	InsertOrderProducts([]types.OrderProduct) error
+
+	GetLastSyncStatus() (types.SyncStatus, error)
+	InsertSyncStatus(ts int64) error
 }

@@ -33,7 +33,7 @@
                         </ul>
                     </div>
                     <span class="navbar-text px-2">
-                        Last sync: <strong>20/01/2023 @ 19:00</strong>
+                        Last sync: <strong x-data x-text="$store.lastSync"></strong>
                     </span>
                     <button class="btn btn-outline-primary">Sync now</button>
                 </div>
@@ -46,7 +46,6 @@
                         <h1 class="text-start">Orders</h1>
                     </div>
                     <div class="col-2">
-                        
                     </div>
                 </div>
 
@@ -98,10 +97,10 @@
     <script type="text/javascript">
 
         const AUTH_FAILED_MSG = 'auth failed'
-        
 
         document.addEventListener('alpine:init', () => {
             Alpine.store('orders', [])
+            Alpine.store('lastSync', '')
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -110,7 +109,7 @@
             }
             Alpine.store('jwt', jwt)
 
-            fetchOrders('/api/v1/orders', jwt)
+            fetchHttp('/api/v1/orders', jwt)
                 .then((data) => {
                     if(data.Message && data.Message == AUTH_FAILED_MSG) {
                         goToAuthPage()
@@ -122,13 +121,16 @@
 
                     Alpine.store('orders', data.items)
                 });
+
+            fetchHttp('/api/v1/sync/status', jwt)
+                .then(data => Alpine.store('lastSync', new Date(data.ts).toLocaleString()))
         })
 
         function goToAuthPage() {
             window.location.replace("/views/login.html")
         }
 
-        async function fetchOrders(url = '/api/v1/orders', jwt) {
+        async function fetchHttp(url, jwt) {
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
