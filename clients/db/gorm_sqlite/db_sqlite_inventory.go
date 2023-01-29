@@ -41,6 +41,11 @@ func (db SqliteDb) GetProductByVarId(varId string) (types.Product, error) {
 	return fromProductModelToType(result), nil
 }
 
+func (db SqliteDb) InsertProduct(product types.Product) error {
+	productModel := fromProductTypeToModel(product)
+	return db.Connection.Create(&productModel).Error
+}
+
 func (db SqliteDb) InsertProducts(products []types.Product) error {
 	productModels := fromProductTypesToModels(products)
 	return db.Connection.Create(&productModels).Error
@@ -54,10 +59,11 @@ func fromCategoryModelsToTypes(categoryModels []models.Category) []types.Categor
 	categories := make([]types.Category, len(categoryModels))
 	for index, categoryModel := range categoryModels {
 		category := types.Category{
-			ID:       categoryModel.ID,
-			SquareID: categoryModel.SquareID,
-			Name:     categoryModel.Name,
-			Version:  categoryModel.Version,
+			ID:          categoryModel.ID,
+			LinnworksID: categoryModel.LinnworksID,
+			SquareID:    categoryModel.SquareID,
+			Name:        categoryModel.Name,
+			Version:     categoryModel.Version,
 		}
 		categories[index] = category
 	}
@@ -106,20 +112,23 @@ func fromProductModelToType(productModel models.Product) types.Product {
 func fromProductTypesToModels(products []types.Product) []models.Product {
 	modelProducts := make([]models.Product, len(products))
 	for index, product := range products {
-		modelProduct := models.Product{
-			LinnworksID:         product.LinnworksID,
-			LinnworksCategoryId: product.LinnworksCategoryID,
-			SquareID:            product.SquareID,
-			SquareVarID:         product.SquareVarID,
-			SquareCategoryID:    product.SquareCategoryID,
-			CategoryID:          product.CategoryID,
-			Title:               product.Title,
-			Price:               product.Price,
-			Barcode:             product.Barcode,
-			SKU:                 product.SKU,
-			Version:             product.Version,
-		}
-		modelProducts[index] = modelProduct
+		modelProducts[index] = fromProductTypeToModel(product)
 	}
 	return modelProducts
+}
+
+func fromProductTypeToModel(product types.Product) models.Product {
+	return models.Product{
+		LinnworksID:         product.LinnworksID,
+		LinnworksCategoryId: product.LinnworksCategoryID,
+		SquareID:            product.SquareID,
+		SquareVarID:         product.SquareVarID,
+		SquareCategoryID:    product.SquareCategoryID,
+		CategoryID:          product.CategoryID,
+		Title:               product.Title,
+		Price:               product.Price,
+		Barcode:             product.Barcode,
+		SKU:                 product.SKU,
+		Version:             product.Version,
+	}
 }

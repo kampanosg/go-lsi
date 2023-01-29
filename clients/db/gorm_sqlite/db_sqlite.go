@@ -19,7 +19,7 @@ type SqliteDb struct {
 
 func NewSqliteDb(dbPath string) (SqliteDb, error) {
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		CreateBatchSize:   1000,
+		CreateBatchSize:   5000,
 		AllowGlobalUpdate: true,
 	})
 

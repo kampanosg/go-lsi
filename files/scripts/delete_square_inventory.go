@@ -14,50 +14,50 @@ import (
 	"go.uber.org/zap"
 )
 
-/// usage: go run delete_square_inventory.go ACCESS_TOKEN LOCATION_ID
+// / usage: go run delete_square_inventory.go ACCESS_TOKEN LOCATION_ID
 func main() {
 	args := os.Args[1:]
 
-    accessToken := args[0]
-    host := "https://connect.squareup.com/v2"
-    version := "2023-01-19"
-    location := args[1] 
-    logger := zap.NewExample().Sugar()
+	accessToken := args[0]
+	host := "https://connect.squareup.com/v2"
+	version := "2023-01-19"
+	location := args[1]
+	logger := zap.NewExample().Sugar()
 
 	headers := make(map[string]string)
 	headers["Square-Version"] = "2023-01-19"
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", args[0])
 
-    ids := make([]string, 0)
-    cursor := ""
+	ids := make([]string, 0)
+	cursor := ""
 
 	for {
-        url := fmt.Sprintf("%s/catalog/list?cursor=%s", host,  cursor)
+		url := fmt.Sprintf("%s/catalog/list?cursor=%s", host, cursor)
 		resp, err := makeRequest("GET", url, headers, []byte{})
 		if err != nil {
 			panic(err)
 		}
 
-        var r squareResp
+		var r squareResp
 		if err := json.Unmarshal(resp, &r); err != nil {
 			panic(err)
 		}
 
-        for _, o := range r.Objects {
-            ids = append(ids, o.ID)
-        }
+		for _, o := range r.Objects {
+			ids = append(ids, o.ID)
+		}
 
 		cursor = r.Cursor
-        if cursor == "" {
-            break
-        }
+		if cursor == "" {
+			break
+		}
 	}
 
-    fmt.Printf("total items to delete: %d\n", len(ids))
+	fmt.Printf("total items to delete: %d\n", len(ids))
 
-    client := square.NewSquareClient(accessToken, host, version, location, logger)
-    client.BatchDeleteItems(ids)
+	client := square.NewSquareClient(accessToken, host, version, location, logger)
+	client.BatchDeleteItems(ids)
 }
 
 func makeRequest(method, url string, headers map[string]string, jsonReq []byte) ([]byte, error) {

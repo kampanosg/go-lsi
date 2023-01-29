@@ -22,8 +22,8 @@ type Product struct {
 	LinnworksCategoryId string
 	SquareCategoryID    string
 	Title               string
-	Barcode             string `gorm:"uniqueIndex"`
+	Barcode             string `gorm:"index"`
 	Price               float64
-	SKU                 string `gorm:"uniqueIndex"`
+	SKU                 string `gorm:"index"`
 	Version             int64
 }

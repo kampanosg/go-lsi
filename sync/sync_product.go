@@ -111,7 +111,9 @@ func (s *SyncTool) SyncProducts() error {
 	}
 
 	if len(products) > 0 {
-		s.Db.InsertProducts(products)
+		for _, product := range products {
+			s.Db.InsertProduct(product)
+		}
 	}
 
 	productsToBeDeleted := getProductsToBeDeleted(productsUpsertMap)

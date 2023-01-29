@@ -12,6 +12,7 @@ type DB interface {
 	GetProducts() ([]types.Product, error)
 	GetProductByVarId(varId string) (types.Product, error)
 	InsertProducts(products []types.Product) error
+	InsertProduct(product types.Product) error
 	ClearProducts() error
 
 	GetUserByUsername(username string) (types.User, error)

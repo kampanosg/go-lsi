@@ -93,7 +93,7 @@ func getEnv(key string) string {
 
 func logInit() *zap.SugaredLogger {
 
-	f, err := os.Create("logs/test.log")
+	f, err := os.Create("logs/nwg.log")
 	if err != nil {
 		panic("unable to open log file")
 	}

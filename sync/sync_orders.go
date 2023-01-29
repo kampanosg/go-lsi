@@ -53,9 +53,11 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 			}
 		}
 
-		if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
-			s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
-			return err
+		if false {
+			if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
+				s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
+				return err
+			}
 		}
 
 		if err := s.Db.InsertOrders(ordersToUpsert); err != nil {
@@ -82,7 +84,7 @@ func fromSquareOrderToDomain(order square.SquareOrder) types.Order {
 		CreatedAt:  order.CreatedAt,
 		State:      order.State,
 		Version:    order.Version,
-		TotalMoney: float64(order.TotalMoney.Amount / Pence),
+		TotalMoney: order.TotalMoney.Amount / Pence,
 	}
 }
 

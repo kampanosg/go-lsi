@@ -123,8 +123,8 @@ type SquareTotalDiscountMoney struct {
 	Currency string `json:"currency"`
 }
 type SquareTotalMoney struct {
-	Amount   int    `json:"amount"`
-	Currency string `json:"currency"`
+	Amount   float64 `json:"amount"`
+	Currency string  `json:"currency"`
 }
 type SquareVariationTotalPriceMoney struct {
 	Amount   int    `json:"amount"`
