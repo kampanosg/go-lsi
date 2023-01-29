@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	// "time"
-
 	"github.com/gorilla/mux"
+	gormsqlite "github.com/kampanosg/go-lsi/clients/db/gorm_sqlite"
 	"github.com/kampanosg/go-lsi/clients/db/sqlite"
 	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
@@ -15,14 +14,20 @@ import (
 	"github.com/kampanosg/go-lsi/middlewares"
 	"github.com/kampanosg/go-lsi/sync"
 
-	// "github.com/kampanosg/go-lsi/types"
-
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
 )
 
 func main() {
+	path := "pos.db"
+	db, err := gormsqlite.NewSqliteDb(path)
+	fmt.Println(err)
+    fmt.Println(db)
+}
+
+func main2() {
 
 	port := getEnv("HTTP_PORT")
 

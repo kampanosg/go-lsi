@@ -1,5 +1,6 @@
 .env
 *.db
+*.backup
 .DS_Store
 go-lsi
 public/lib
