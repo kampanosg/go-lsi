@@ -18,6 +18,7 @@ type DB interface {
 	GetUserByUsername(username string) (types.User, error)
 
 	GetOrders() ([]types.Order, error)
+	GetOrderBySquareId(squareId string) (types.Order, error)
 	InsertOrders([]types.Order) error
 
 	GetLastSyncStatus() (types.SyncStatus, error)

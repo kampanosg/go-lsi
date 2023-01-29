@@ -14,43 +14,37 @@ const (
 func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 	s.logger.Infow("will start syncing orders")
 
-	existingOrders, err := s.Db.GetOrders()
-	if err != nil {
-		s.logger.Errorw("unable to retrieve existing orders", reasonKey, msgDbErr, errKey, err.Error())
-		return err
-	}
-
 	newOrders, err := s.SquareClient.SearchOrders(start, end)
 	if err != nil {
 		s.logger.Errorw("unable to retrieve new orders", reasonKey, msgSqErr, errKey, err.Error())
 		return err
 	}
 
-	s.logger.Infow("found orders", "existing", len(existingOrders), "new", len(newOrders))
+	s.logger.Infow("found orders", "new", len(newOrders))
 
 	if len(newOrders) > 0 {
-		existingOrdersMap := buildSquareIdToOrderMap(existingOrders)
 		ordersToUpsert := make([]types.Order, 0)
 
 		for _, newOrder := range newOrders {
-			_, ok := existingOrdersMap[newOrder.ID]
-			if !ok {
-				orderProducts := make([]types.OrderProduct, len(newOrder.LineItems))
-				for index, item := range newOrder.LineItems {
-					product, err := s.Db.GetProductByVarId(item.CatalogObjectID)
-					if err != nil {
-						s.logger.Errorw("unable to retrieve product from db", "variation", item.CatalogObjectID, errKey, err.Error())
-						return err
-					}
-					orderProduct := fromSquareLineItemToDomain(item, product)
-					orderProduct.SquareOrderId = newOrder.ID
-					orderProducts[index] = orderProduct
-				}
-
-				order := fromSquareOrderToDomain(newOrder)
-				order.Products = orderProducts
-				ordersToUpsert = append(ordersToUpsert, order)
+			_, err := s.Db.GetOrderBySquareId(newOrder.ID)
+			if err == nil {
+				continue
 			}
+			orderProducts := make([]types.OrderProduct, len(newOrder.LineItems))
+			for index, item := range newOrder.LineItems {
+				product, err := s.Db.GetProductByVarId(item.CatalogObjectID)
+				if err != nil {
+					s.logger.Errorw("unable to retrieve product from db", "variation", item.CatalogObjectID, errKey, err.Error())
+					return err
+				}
+				orderProduct := fromSquareLineItemToDomain(item, product)
+				orderProduct.SquareOrderId = newOrder.ID
+				orderProducts[index] = orderProduct
+			}
+
+			order := fromSquareOrderToDomain(newOrder)
+			order.Products = orderProducts
+			ordersToUpsert = append(ordersToUpsert, order)
 		}
 
 		if false {
@@ -67,14 +61,6 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 	}
 
 	return nil
-}
-
-func buildSquareIdToOrderMap(orders []types.Order) map[string]types.Order {
-	m := make(map[string]types.Order, 0)
-	for _, order := range orders {
-		m[order.SquareID] = order
-	}
-	return m
 }
 
 func fromSquareOrderToDomain(order square.SquareOrder) types.Order {
