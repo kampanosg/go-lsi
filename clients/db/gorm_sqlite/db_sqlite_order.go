@@ -11,16 +11,15 @@ func (db SqliteDb) GetOrders() ([]types.Order, error) {
 	if result.Error != nil {
 		return []types.Order{}, result.Error
 	}
-	return fromOrderModelsToType(orders), nil
+	return fromOrderModelsToTypes(orders), nil
 }
 
 func (db SqliteDb) InsertOrders(orders []types.Order) error {
 	orderModels := fromOrderTypesToModels(orders)
-	result := db.Connection.Create(orderModels)
-	return result.Error
+	return db.Connection.Create(orderModels).Error
 }
 
-func fromOrderModelsToType(orderModels []models.Order) []types.Order {
+func fromOrderModelsToTypes(orderModels []models.Order) []types.Order {
 	orders := make([]types.Order, len(orderModels))
 	for index, orderModel := range orderModels {
 		order := types.Order{

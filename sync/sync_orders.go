@@ -3,8 +3,12 @@ package sync
 import (
 	"time"
 
-	"github.com/kampanosg/go-lsi/transformers"
+	"github.com/kampanosg/go-lsi/clients/square"
 	"github.com/kampanosg/go-lsi/types"
+)
+
+const (
+	Pence = 100.0
 )
 
 func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
@@ -38,25 +42,22 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 						s.logger.Errorw("unable to retrieve product from db", "variation", item.CatalogObjectID, errKey, err.Error())
 						return err
 					}
-					orderProduct := transformers.FromSquareLineItemToDomain(item, product)
+					orderProduct := fromSquareLineItemToDomain(item, product)
 					orderProduct.SquareOrderId = newOrder.ID
 					orderProducts[index] = orderProduct
 				}
 
-				order := transformers.FromSquareOrderToDomain(newOrder)
+				order := fromSquareOrderToDomain(newOrder)
 				order.Products = orderProducts
 				ordersToUpsert = append(ordersToUpsert, order)
 			}
 		}
 
-		if false {
-			if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
-				s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
-				return err
-			}
+		if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
+			s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
+			return err
 		}
 
-		s.logger.Infow("i am here")
 		if err := s.Db.InsertOrders(ordersToUpsert); err != nil {
 			s.logger.Errorw("unable to insert orders", reasonKey, msgDbErr, errKey, err.Error())
 			return err
@@ -72,4 +73,26 @@ func buildSquareIdToOrderMap(orders []types.Order) map[string]types.Order {
 		m[order.SquareID] = order
 	}
 	return m
+}
+
+func fromSquareOrderToDomain(order square.SquareOrder) types.Order {
+	return types.Order{
+		SquareID:   order.ID,
+		LocationID: order.LocationID,
+		CreatedAt:  order.CreatedAt,
+		State:      order.State,
+		Version:    order.Version,
+		TotalMoney: float64(order.TotalMoney.Amount / Pence),
+	}
+}
+
+func fromSquareLineItemToDomain(item square.SquareLineItem, product types.Product) types.OrderProduct {
+	return types.OrderProduct{
+		SquareVarId:  item.CatalogObjectID,
+		Quantity:     item.Quantity,
+		ItemNumber:   product.Barcode,
+		SKU:          product.SKU,
+		Title:        product.Title,
+		PricePerUnit: product.Price,
+	}
 }

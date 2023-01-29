@@ -16,7 +16,7 @@ type Category struct {
 type Product struct {
 	gorm.Model
 	LinnworksID      string `gorm:"index"`
-	SquareId         string
+	SquareID         string
 	SquareVarID      string `gorm:"index"`
 	CategoryID       uint
 	SquareCategoryID string

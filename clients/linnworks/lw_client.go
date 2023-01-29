@@ -134,7 +134,7 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 				product.Quantity,
 				product.ItemNumber,
 				product.SKU,
-				"Test",
+				"Prod",
 			)
 			orderProducts.WriteString(p)
 
