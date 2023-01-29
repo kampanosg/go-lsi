@@ -17,7 +17,7 @@ func (db SqliteDb) GetLastSyncStatus() (types.SyncStatus, error) {
 }
 
 func (db SqliteDb) InsertSyncStatus(ts int64) error {
-	result := db.Connection.Create(models.SyncStatus{LastRun: time.UnixMilli(ts), Success: true})
+	result := db.Connection.Create(&models.SyncStatus{LastRun: time.UnixMilli(ts), Success: true})
 	return result.Error
 }
 

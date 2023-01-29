@@ -6,8 +6,8 @@ import (
 
 type Category struct {
 	gorm.Model
-	LinnworksID string
-	SquareID    string
+	LinnworksID string `gorm:"uniqueIndex"`
+	SquareID    string `gorm:"uniqueIndex"`
 	Name        string
 	Version     int64
 	Products    []Product
@@ -15,14 +15,15 @@ type Category struct {
 
 type Product struct {
 	gorm.Model
-	LinnworksID      string `gorm:"index"`
-	SquareID         string
-	SquareVarID      string `gorm:"index"`
-	CategoryID       uint
-	SquareCategoryID string
-	Title            string
-	Barcode          string `gorm:"index"`
-	Price            float64
-	SKU              string `gorm:"index"`
-	Version          int64
+	LinnworksID         string `gorm:"uniqueIndex"`
+	SquareID            string `gorm:"uniqueIndex"`
+	SquareVarID         string `gorm:"uniqueIndex"`
+	CategoryID          uint
+	LinnworksCategoryId string
+	SquareCategoryID    string
+	Title               string
+	Barcode             string `gorm:"uniqueIndex"`
+	Price               float64
+	SKU                 string `gorm:"uniqueIndex"`
+	Version             int64
 }

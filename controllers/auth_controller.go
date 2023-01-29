@@ -11,7 +11,6 @@ import (
 	"github.com/kampanosg/go-lsi/clients/db"
 	"github.com/kampanosg/go-lsi/types"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -76,7 +75,7 @@ func (c *AuthController) HandleAuthRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	resp := types.AuthResponse{
+	resp := types.AuthResp{
 		Token:     tokenString,
 		Message:   fmt.Sprintf("auth successful for user %s", req.Username),
 		Timestamp: time.Now(),
@@ -85,11 +84,6 @@ func (c *AuthController) HandleAuthRequest(w http.ResponseWriter, r *http.Reques
 	c.logger.Infow("auth ok", "user", user.Username)
 
 	ok(w, resp)
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
 }
 
 func isInvalidPassword(password, hash string) bool {

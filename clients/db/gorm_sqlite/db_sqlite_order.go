@@ -16,7 +16,7 @@ func (db SqliteDb) GetOrders() ([]types.Order, error) {
 
 func (db SqliteDb) InsertOrders(orders []types.Order) error {
 	orderModels := fromOrderTypesToModels(orders)
-	return db.Connection.Create(orderModels).Error
+	return db.Connection.Create(&orderModels).Error
 }
 
 func fromOrderModelsToTypes(orderModels []models.Order) []types.Order {

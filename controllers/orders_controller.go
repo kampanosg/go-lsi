@@ -32,7 +32,7 @@ func (c *OrdersController) HandleOrdersRequest(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	resp := types.HttpResponse{
+	resp := types.OkResp{
 		Total: len(orders),
 		Items: orders,
 	}

@@ -7,13 +7,13 @@ type ErrorResp struct {
 	Timestamp time.Time
 }
 
-type AuthResponse struct {
+type AuthResp struct {
 	Message   string
 	Token     string
 	Timestamp time.Time
 }
 
-type HttpResponse struct {
+type OkResp struct {
 	Total int `json:"total"`
 	Items any `json:"items"`
 }

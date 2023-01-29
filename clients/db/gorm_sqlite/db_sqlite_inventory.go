@@ -16,11 +16,11 @@ func (db SqliteDb) GetCategories() ([]types.Category, error) {
 
 func (db SqliteDb) InsertCategories(categories []types.Category) error {
 	categoryModels := fromCategoryTypeToModels(categories)
-	return db.Connection.Create(categoryModels).Error
+	return db.Connection.Create(&categoryModels).Error
 }
 
 func (db SqliteDb) ClearCategories() error {
-	return db.Connection.Delete(&models.Category{}).Error
+	return db.Connection.Unscoped().Delete(&models.Category{}).Error
 }
 
 func (db SqliteDb) GetProducts() ([]types.Product, error) {
@@ -43,11 +43,11 @@ func (db SqliteDb) GetProductByVarId(varId string) (types.Product, error) {
 
 func (db SqliteDb) InsertProducts(products []types.Product) error {
 	productModels := fromProductTypesToModels(products)
-	return db.Connection.Create(productModels).Error
+	return db.Connection.Create(&productModels).Error
 }
 
 func (db SqliteDb) ClearProducts() error {
-	return db.Connection.Delete(&models.Product{}).Error
+	return db.Connection.Unscoped().Delete(&models.Product{}).Error
 }
 
 func fromCategoryModelsToTypes(categoryModels []models.Category) []types.Category {
@@ -68,9 +68,10 @@ func fromCategoryTypeToModels(categories []types.Category) []models.Category {
 	categoryModels := make([]models.Category, len(categories))
 	for index, category := range categories {
 		categoryModel := models.Category{
-			SquareID: category.SquareID,
-			Name:     category.Name,
-			Version:  category.Version,
+			LinnworksID: category.LinnworksID,
+			SquareID:    category.SquareID,
+			Name:        category.Name,
+			Version:     category.Version,
 		}
 		categoryModels[index] = categoryModel
 	}
@@ -87,16 +88,18 @@ func fromProductModelsToTypes(productModels []models.Product) []types.Product {
 
 func fromProductModelToType(productModel models.Product) types.Product {
 	return types.Product{
-		ID:               productModel.ID,
-		LinnworksID:      productModel.LinnworksID,
-		SquareID:         productModel.SquareID,
-		SquareVarID:      productModel.SquareVarID,
-		SquareCategoryID: productModel.SquareCategoryID,
-		Title:            productModel.Title,
-		Price:            productModel.Price,
-		Barcode:          productModel.Barcode,
-		SKU:              productModel.SKU,
-		Version:          productModel.Version,
+		ID:                  productModel.ID,
+		LinnworksID:         productModel.LinnworksID,
+		LinnworksCategoryID: productModel.LinnworksCategoryId,
+		SquareID:            productModel.SquareID,
+		SquareVarID:         productModel.SquareVarID,
+		SquareCategoryID:    productModel.SquareCategoryID,
+		CategoryID:          productModel.CategoryID,
+		Title:               productModel.Title,
+		Price:               productModel.Price,
+		Barcode:             productModel.Barcode,
+		SKU:                 productModel.SKU,
+		Version:             productModel.Version,
 	}
 }
 
@@ -104,15 +107,17 @@ func fromProductTypesToModels(products []types.Product) []models.Product {
 	modelProducts := make([]models.Product, len(products))
 	for index, product := range products {
 		modelProduct := models.Product{
-			LinnworksID:      product.LinnworksID,
-			SquareID:         product.SquareID,
-			SquareVarID:      product.SquareVarID,
-			SquareCategoryID: product.SquareCategoryID,
-			Title:            product.Title,
-			Price:            product.Price,
-			Barcode:          product.Barcode,
-			SKU:              product.SKU,
-			Version:          product.Version,
+			LinnworksID:         product.LinnworksID,
+			LinnworksCategoryId: product.LinnworksCategoryID,
+			SquareID:            product.SquareID,
+			SquareVarID:         product.SquareVarID,
+			SquareCategoryID:    product.SquareCategoryID,
+			CategoryID:          product.CategoryID,
+			Title:               product.Title,
+			Price:               product.Price,
+			Barcode:             product.Barcode,
+			SKU:                 product.SKU,
+			Version:             product.Version,
 		}
 		modelProducts[index] = modelProduct
 	}

@@ -32,7 +32,7 @@ func (c *InventoryController) HandleInventoryRequest(w http.ResponseWriter, r *h
 		return
 	}
 
-	resp := types.HttpResponse{
+	resp := types.OkResp{
 		Total: len(items),
 		Items: items,
 	}

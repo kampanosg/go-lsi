@@ -8,7 +8,7 @@ import (
 
 type Order struct {
 	gorm.Model
-	SquareID        string
+	SquareID        string `gorm:"uniqueIndex"`
 	LocationID      string
 	State           string
 	Version         int64

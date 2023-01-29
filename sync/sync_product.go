@@ -60,8 +60,9 @@ func (s *SyncTool) SyncProducts() error {
 			"version", newProduct.Version,
 		)
 
-		category := mappedCatergoriesById[newProduct.CategoryID]
+		category := mappedCatergoriesById[newProduct.LinnworksCategoryID]
 		newProduct.SquareCategoryID = category.SquareID
+		newProduct.CategoryID = category.ID
 
 		productsToUpsert = append(productsToUpsert, newProduct)
 		productsSquareIdMapping[newProduct.SquareID] = newProduct
@@ -164,11 +165,11 @@ func fromProductLinnworksResponsesToDomain(lwProducts []linnworks.LinnworksProdu
 
 func fromProductLinnworksResponseToDomain(lwProduct linnworks.LinnworksProductResponse) types.Product {
 	return types.Product{
-		LinnworksID: lwProduct.StockItemID,
-		CategoryID:  lwProduct.CategoryID,
-		Title:       lwProduct.ItemTitle,
-		Barcode:     lwProduct.BarcodeNumber,
-		Price:       lwProduct.RetailPrice,
-		SKU:         lwProduct.SKU,
+		LinnworksID:         lwProduct.StockItemID,
+		LinnworksCategoryID: lwProduct.CategoryID,
+		Title:               lwProduct.ItemTitle,
+		Barcode:             lwProduct.BarcodeNumber,
+		Price:               lwProduct.RetailPrice,
+		SKU:                 lwProduct.SKU,
 	}
 }

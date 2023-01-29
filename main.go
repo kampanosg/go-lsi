@@ -1,9 +1,9 @@
 package main
 
 import (
-    "fmt"
-    "github.com/kampanosg/go-lsi/clients/db/gorm_sqlite"
+	"github.com/kampanosg/go-lsi/clients/db/gorm_sqlite"
 )
+
 // import (
 // 	"fmt"
 // 	"net/http"
@@ -24,13 +24,10 @@ import (
 
 func main() {
 	path := "pos.db"
-	db, err := gormsqlite.NewSqliteDb(path)
-	fmt.Println(err)
-	fmt.Println(db)
+	db, _ := gormsqlite.NewSqliteDb(path)
 
-    u, err := db.GetUserByUsername("kampanosg")
-    fmt.Printf("%v\n", u)
-    fmt.Printf("%v\n", err)
+	db.ClearCategories()
+	db.ClearProducts()
 }
 
 // func main2() {
