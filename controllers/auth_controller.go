@@ -11,6 +11,7 @@ import (
 	"github.com/kampanosg/go-lsi/clients/db"
 	"github.com/kampanosg/go-lsi/types"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
