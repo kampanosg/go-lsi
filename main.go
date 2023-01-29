@@ -17,14 +17,13 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
 )
 
 func main() {
 	path := "pos.db"
 	db, err := gormsqlite.NewSqliteDb(path)
 	fmt.Println(err)
-    fmt.Println(db)
+	fmt.Println(db)
 }
 
 func main2() {

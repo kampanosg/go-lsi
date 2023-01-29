@@ -19,9 +19,9 @@ func NewSqliteDb(dbPath string) (SqliteDb, error) {
 
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.SyncStatus{})
-    db.AutoMigrate(&models.Category{})
-    db.AutoMigrate(&models.Product{})
-    db.AutoMigrate(&models.Order{})
+	db.AutoMigrate(&models.Category{})
+	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.Order{})
 
 	return SqliteDb{Connection: db}, nil
 }

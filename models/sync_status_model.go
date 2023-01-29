@@ -7,7 +7,7 @@ import (
 )
 
 type SyncStatus struct {
-    gorm.Model
-    LastRun time.Time
-    Success bool
+	gorm.Model
+	LastRun time.Time
+	Success bool
 }
