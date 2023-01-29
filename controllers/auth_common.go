@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"time"
 
@@ -11,9 +10,7 @@ import (
 )
 
 var (
-	logger                = log.Default()
 	errMethodNotSupported = errors.New("method not supported")
-	errBadQueryParams     = errors.New("params are missing or malformed")
 )
 
 func failed(w http.ResponseWriter, err error, status int) {
