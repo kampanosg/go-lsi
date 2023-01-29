@@ -105,7 +105,7 @@ func logInit() *zap.SugaredLogger {
 
 	pe.EncodeTime = zapcore.ISO8601TimeEncoder
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
-	level := zap.DebugLevel
+	level := zap.InfoLevel
 
 	core := zapcore.NewTee(
 		zapcore.NewCore(fileEncoder, zapcore.AddSync(f), level),

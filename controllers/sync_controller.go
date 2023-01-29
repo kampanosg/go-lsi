@@ -98,7 +98,6 @@ func (c *SyncController) sync(from time.Time, to time.Time) error {
 
 	startTime := time.Now()
 
-	if false {
 		if err := c.tool.SyncCategories(); err != nil {
 			return errSyncCategories
 		}
@@ -106,7 +105,6 @@ func (c *SyncController) sync(from time.Time, to time.Time) error {
 		if err := c.tool.SyncProducts(); err != nil {
 			return errSyncProducts
 		}
-	}
 
 	if err := c.tool.SyncOrders(from, to); err != nil {
 		return errSyncOrders
