@@ -191,7 +191,7 @@ type SquareOrder struct {
 	CreatedAt               time.Time                     `json:"created_at"`
 	UpdatedAt               time.Time                     `json:"updated_at"`
 	State                   string                        `json:"state"`
-	Version                 int                           `json:"version"`
+	Version                 int64                         `json:"version"`
 	TotalTaxMoney           SquareTotalTaxMoney           `json:"total_tax_money"`
 	TotalDiscountMoney      SquareTotalDiscountMoney      `json:"total_discount_money"`
 	TotalTipMoney           SquareTotalTipMoney           `json:"total_tip_money"`

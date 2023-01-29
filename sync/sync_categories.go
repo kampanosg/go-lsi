@@ -3,7 +3,7 @@ package sync
 import (
 	"fmt"
 
-	"github.com/kampanosg/go-lsi/transformers"
+	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/types"
 )
 
@@ -27,7 +27,7 @@ func (s *SyncTool) SyncCategories() error {
 		return err
 	}
 
-	newCategories := transformers.FromCategoryLinnworksResponsesToDomain(lwCategories)
+	newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
 	s.logger.Infow("found categories from linnworks", "total", len(newCategories))
 
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
@@ -36,22 +36,22 @@ func (s *SyncTool) SyncCategories() error {
 
 	for _, newCategory := range newCategories {
 
-		upsert, ok := categoriesUpsertMap[newCategory.Id]
+		upsert, ok := categoriesUpsertMap[newCategory.LinnworksID]
 
 		if !ok {
-			newCategory.SquareId = fmt.Sprintf("#%s", newCategory.Id)
+			newCategory.SquareID = fmt.Sprintf("#%s", newCategory.LinnworksID)
 		} else {
-			newCategory.SquareId = upsert.category.SquareId
+			newCategory.SquareID = upsert.category.SquareID
 			newCategory.Version = upsert.category.Version
 		}
-		s.logger.Debugw("assigned square id and version to category", "id", newCategory.SquareId, "version", newCategory.Version)
+		s.logger.Debugw("assigned square id and version to category", "id", newCategory.SquareID, "version", newCategory.Version)
 
-		categoriesUpsertMap[newCategory.Id] = upsertCategory{
+		categoriesUpsertMap[newCategory.LinnworksID] = upsertCategory{
 			category:  newCategory,
 			isDeleted: false,
 		}
 		categoriesToBeUpserted = append(categoriesToBeUpserted, newCategory)
-		categoriesSquareIdMapping[newCategory.SquareId] = newCategory
+		categoriesSquareIdMapping[newCategory.SquareID] = newCategory
 	}
 
 	s.logger.Infow("upserting categories to square", "total", len(categoriesToBeUpserted))
@@ -65,8 +65,8 @@ func (s *SyncTool) SyncCategories() error {
 		s.logger.Debugw("found new category mappings", "total", len(resp.IDMappings))
 		for _, idMapping := range resp.IDMappings {
 			category := categoriesSquareIdMapping[idMapping.ClientObjectID]
-			category.SquareId = idMapping.ObjectID
-			categoriesSquareIdMapping[category.SquareId] = category
+			category.SquareID = idMapping.ObjectID
+			categoriesSquareIdMapping[category.SquareID] = category
 		}
 	}
 
@@ -105,7 +105,7 @@ func getCategoriesToBeDeleted(categoriesUpsertMap map[string]upsertCategory) []s
 	categoriesToBeDeleted := make([]string, 0)
 	for _, v := range categoriesUpsertMap {
 		if v.isDeleted {
-			categoriesToBeDeleted = append(categoriesToBeDeleted, v.category.SquareId)
+			categoriesToBeDeleted = append(categoriesToBeDeleted, v.category.SquareID)
 		}
 	}
 	return categoriesToBeDeleted
@@ -116,10 +116,24 @@ func getCategoriesToBeDeleted(categoriesUpsertMap map[string]upsertCategory) []s
 func buildUpsertCategoryMap(categories []types.Category) map[string]upsertCategory {
 	m := map[string]upsertCategory{}
 	for _, c := range categories {
-		m[c.Id] = upsertCategory{
+		m[c.LinnworksID] = upsertCategory{
 			category:  c,
 			isDeleted: true,
 		}
 	}
 	return m
+}
+
+func fromCategoryLinnworksResponsesToDomain(lwCategories []linnworks.LinnworksCategoryResponse) (categories []types.Category) {
+	for _, lwCategory := range lwCategories {
+		categories = append(categories, fromCategoryLinnworksResponseToDomain(lwCategory))
+	}
+	return categories
+}
+
+func fromCategoryLinnworksResponseToDomain(lwCategory linnworks.LinnworksCategoryResponse) types.Category {
+	return types.Category{
+		LinnworksID: lwCategory.Id,
+		Name:        lwCategory.Name,
+	}
 }

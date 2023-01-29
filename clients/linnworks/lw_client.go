@@ -134,7 +134,7 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 				product.Quantity,
 				product.ItemNumber,
 				product.SKU,
-				"Test",
+				"Prod",
 			)
 			orderProducts.WriteString(p)
 
@@ -149,15 +149,15 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 		pld := fmt.Sprintf(orderTemplate,
 			uuid.New().String(),
 			orderProducts.String(),
-			order.SquareId,
-			order.SquareId,
-			order.SquareId,
+			order.SquareID,
+			order.SquareID,
+			order.SquareID,
 			formattedTime,
 			formattedTime,
 			formattedTime,
-			order.SquareId,
-			order.SquareId,
-			order.SquareId,
+			order.SquareID,
+			order.SquareID,
+			order.SquareID,
 		)
 
 		encodedPld := url.QueryEscape(pld)

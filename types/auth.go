@@ -1,8 +1,7 @@
 package types
 
 type User struct {
-	Id           int
-	Username     string
-	Password     string
-	FriendlyName string
+	ID       uint
+	Username string
+	Password string
 }

@@ -25,14 +25,14 @@ func (c *InventoryController) HandleInventoryRequest(w http.ResponseWriter, r *h
 		return
 	}
 
-	items, err := c.db.GetInventory()
+	items, err := c.db.GetProducts()
 	if err != nil {
 		c.logger.Errorw("request failed", "error retrieving inventory from db", "error", err.Error())
 		failed(w, err, http.StatusBadRequest)
 		return
 	}
 
-	resp := types.HttpResponse{
+	resp := types.OkResp{
 		Total: len(items),
 		Items: items,
 	}

@@ -51,7 +51,7 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 
 	for _, category := range categories {
 		object := SquareUpsertCategoryObject{
-			Id:        category.SquareId,
+			Id:        category.SquareID,
 			Type:      TYPE_CATEGORY,
 			IsDeleted: false,
 			Version:   category.Version,
@@ -119,7 +119,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		}
 
 		variationData := SquareProductVariationData{
-			ItemID:      product.SquareId,
+			ItemID:      product.SquareID,
 			Sku:         product.SKU,
 			Upc:         product.Barcode,
 			Name:        VARIATION_NAME,
@@ -131,7 +131,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		itemVariations := []SquareProductVariation{
 			{
 				Type:                  TYPE_VARIATION,
-				ID:                    product.SquareVarId,
+				ID:                    product.SquareVarID,
 				IsDeleted:             false,
 				PresentAtAllLocations: true,
 				Version:               product.Version,
@@ -141,7 +141,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 
 		itemData := SquareProductData{
 			Name:               product.Title,
-			CategoryID:         product.SquareCategoryId,
+			CategoryID:         product.SquareCategoryID,
 			Visibility:         VISIBILITY,
 			ProductType:        PRODUCT_TYPE,
 			SkipModifierScreen: false,
@@ -151,7 +151,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 
 		object := SquareProductObject{
 			Type:                  TYPE_ITEM,
-			ID:                    product.SquareId,
+			ID:                    product.SquareID,
 			IsDeleted:             false,
 			PresentAtAllLocations: true,
 			Version:               product.Version,

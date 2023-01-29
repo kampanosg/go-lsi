@@ -1,21 +1,18 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type Order struct {
-	Id                 int            `json:"id"`
-	LinnworksId        string         `json:"linnworksId"`
-	SquareId           string         `json:"squareId"`
-	LocationId         string         `json:"locationId"`
-	State              string         `json:"state"`
-	Version            int            `json:"version"`
-	TotalMoney         float64        `json:"totalMoney"`
-	TotalTax           float64        `json:"totalTax"`
-	TotalDiscount      float64        `json:"totalDiscount"`
-	TotalTip           float64        `json:"totalTip"`
-	TotalServiceCharge float64        `json:"totalServiceCharge"`
-	CreatedAt          time.Time      `json:"createdAt"`
-	Products           []OrderProduct `json:"products"`
+	ID         uint           `json:"id"`
+	SquareID   string         `json:"squareId"`
+	LocationID string         `json:"locationId"`
+	State      string         `json:"state"`
+	Version    int64          `json:"version"`
+	TotalMoney float64        `json:"totalMoney"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	Products   []OrderProduct `json:"products"`
 }
 
 type OrderProduct struct {
