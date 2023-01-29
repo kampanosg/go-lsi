@@ -1,10 +1,16 @@
 package gormsqlite
 
 import (
+	"errors"
+
 	"github.com/kampanosg/go-lsi/models"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+)
+
+var (
+    errRecordNotFound = errors.New("query returned no results")
 )
 
 type SqliteDb struct {
