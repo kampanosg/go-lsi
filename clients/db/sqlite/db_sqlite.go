@@ -35,7 +35,7 @@ func (db SqliteDb) commitTx(query string, args [][]any) error {
 	if len(args) > 0 {
 		for _, arg := range args {
 			if _, err := tx.Stmt(stmt).Exec(arg...); err != nil {
-				break
+				return err
 			}
 		}
 	} else {

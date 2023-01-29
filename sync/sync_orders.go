@@ -22,7 +22,7 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 		return err
 	}
 
-	s.logger.Infow("found categories", "existing", len(existingOrders), "new", len(newOrders))
+	s.logger.Infow("found orders", "existing", len(existingOrders), "new", len(newOrders))
 
 	if len(newOrders) > 0 {
 		existingOrdersMap := buildSquareIdToOrderMap(existingOrders)
@@ -49,11 +49,14 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 			}
 		}
 
-		if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
-			s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
-			return err
+		if false {
+			if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
+				s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
+				return err
+			}
 		}
 
+		s.logger.Infow("i am here")
 		if err := s.Db.InsertOrders(ordersToUpsert); err != nil {
 			s.logger.Errorw("unable to insert orders", reasonKey, msgDbErr, errKey, err.Error())
 			return err

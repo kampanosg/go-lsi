@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -10,13 +11,20 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	errSyncCategories = errors.New("failed to sync categories")
+	errSyncProducts   = errors.New("failed to sync products")
+	errSyncOrders     = errors.New("failed to sync orders")
+	errSyncStatus     = errors.New("failed to add sync status")
+)
+
 type SyncController struct {
 	tool   *sync.SyncTool
 	logger *zap.SugaredLogger
 }
 
 func NewSyncController(syncTool *sync.SyncTool, logger *zap.SugaredLogger) *SyncController {
-	return &SyncController{tool: syncTool}
+	return &SyncController{tool: syncTool, logger: logger}
 }
 
 func (c *SyncController) HandleSyncRequest(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +42,16 @@ func (c *SyncController) HandleSyncRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	c.sync(req.From, req.To)
+	syncResp := types.SyncStatus{
+		Timestamp: time.Now(),
+	}
+
+	if err := c.sync(req.From, req.To); err != nil {
+		failed(w, err, http.StatusBadRequest)
+		return
+	}
+
+	ok(w, syncResp)
 }
 
 func (c *SyncController) HandleSyncStatusRequest(w http.ResponseWriter, r *http.Request) {
@@ -63,32 +80,43 @@ func (c *SyncController) HandleSyncRecentRequest(w http.ResponseWriter, r *http.
 	from := time.Now().Add(-time.Minute * 30)
 	to := time.Now()
 
-	c.sync(from, to)
+	syncResp := types.SyncStatus{
+		Timestamp: time.Now(),
+	}
+
+	if err := c.sync(from, to); err != nil {
+		c.logger.Errorw("syncing failed", "error", err.Error())
+		failed(w, err, http.StatusBadRequest)
+		return
+	}
+
+	ok(w, syncResp)
 }
 
-func (c *SyncController) sync(from time.Time, to time.Time) {
+func (c *SyncController) sync(from time.Time, to time.Time) error {
 	c.logger.Infow("start syncing process", "from", from, "to", to)
 
 	startTime := time.Now()
 
-	if err := c.tool.SyncCategories(); err != nil {
-		c.logger.Errorw("syncing failed", "reason", "syncing categories failed", "error", err.Error())
-		return
-	}
+	if false {
+		if err := c.tool.SyncCategories(); err != nil {
+			return errSyncCategories
+		}
 
-	if err := c.tool.SyncProducts(); err != nil {
-		c.logger.Errorw("syncing failed", "reason", "syncing products failed", "error", err.Error())
-		return
+		if err := c.tool.SyncProducts(); err != nil {
+			return errSyncProducts
+		}
 	}
 
 	if err := c.tool.SyncOrders(from, to); err != nil {
-		c.logger.Errorw("syncing failed", "reason", "syncing orders failed", "error", err.Error())
-		return
+		return errSyncOrders
 	}
 
 	c.logger.Infow("finished syncing process", "from", from, "to", to, "elapsed", time.Since(startTime))
 
 	if err := c.tool.Db.InsertSyncStatus(startTime.UnixMilli()); err != nil {
-		c.logger.Errorw("unable to save sync status to db", "error", err.Error())
+		return errSyncStatus
 	}
+
+	return nil
 }

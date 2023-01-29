@@ -10,6 +10,7 @@ type Order struct {
 	State              string         `json:"state"`
 	Version            int            `json:"version"`
 	TotalMoney         float64        `json:"totalMoney"`
+	TotalTax           float64        `json:"totalTax"`
 	TotalDiscount      float64        `json:"totalDiscount"`
 	TotalTip           float64        `json:"totalTip"`
 	TotalServiceCharge float64        `json:"totalServiceCharge"`

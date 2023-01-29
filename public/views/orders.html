@@ -35,7 +35,10 @@
                     <span class="navbar-text px-2">
                         Last sync: <strong x-data x-text="$store.lastSync"></strong>
                     </span>
-                    <button class="btn btn-outline-primary">Sync now</button>
+                    <button x-data @click="sync()" class="btn btn-outline-primary" :disabled="$store.isSyncing">
+                        Sync now
+                        <div class="spinner-border spinner-border-sm" x-show="$store.isSyncing" role="status"></div>
+                    </button>
                 </div>
             </nav>
 
@@ -56,30 +59,28 @@
                                 <tr>
                                     <th scope="col">Square ID</th>
                                     <th scope="col">Total</th>
-                                    <th scope="col">Total Products</th>
                                     <th scope="col">Date / Time</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-for="item in $store.orders">
                                     <tr>
-                                        <td> 
+                                        <td>
                                             <div class="d-flex">
-                                                <span x-text="short(item.squareId)" class="fw-semibold"></span>
+                                                <span x-text="item.squareId" class="fw-semibold"></span>
                                                 <a @click="navigator.clipboard.writeText(item.squareId)" href="#" class="px-2">
-                                                    <img src="/img/copy.svg" width="11px" /> 
+                                                    <img src="/img/copy.svg" width="11px" />
                                                 </a>
                                             </div>
                                         </td>
                                         <td x-text="price(item.totalMoney)"></td>
-                                        <td x-text="item.products.length"></td>
                                         <td x-text="df(item.createdAt)"></td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
 
-                        <p  x-data="{}" 
+                        <p  x-data="{}"
                             x-show="$store.orders.length === 0"
                             class="placeholder-glow">
                             <span class="placeholder col-12 placeholder-lg"></span>
@@ -94,6 +95,7 @@
 
     </body>
 
+    <script type="text/javascript" src="/js/functions.js"></script>
     <script type="text/javascript">
 
         const AUTH_FAILED_MSG = 'auth failed'
@@ -101,6 +103,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.store('orders', [])
             Alpine.store('lastSync', '')
+            Alpine.store('isSyncing', false)
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -123,36 +126,8 @@
                 });
 
             fetchHttp('/api/v1/sync/status', jwt)
-                .then(data => Alpine.store('lastSync', new Date(data.ts).toLocaleString()))
+                .then(data => Alpine.store('lastSync', df(data.ts)))
         })
-
-        function goToAuthPage() {
-            window.location.replace("/views/login.html")
-        }
-
-        async function fetchHttp(url, jwt) {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-            });
-            return response.json(); 
-        }
-
-        function short(item) {
-            let l = item.length
-            return `${item.substr(0, 4)}...${item.substr(l-4, l)}`
-        }
-
-        function price(item) {
-            return `£${item}`
-        }
-
-        function df(d) {
-            return new Date(d).toLocaleString()
-        }
 
     </script>
 

@@ -22,11 +22,6 @@ func (db SqliteDb) GetOrders() ([]types.Order, error) {
 			return orders, err
 		}
 		order := transformers.FromOrderDbRowToDomain(id, squareId, locationId, state, totalMoney, createdAt)
-		products, err := db.GetOrderProductsForCategory(order.Id)
-		if err != nil {
-			return orders, err
-		}
-		order.Products = products
 		orders = append(orders, order)
 	}
 
@@ -58,7 +53,7 @@ func (db SqliteDb) GetOrderProductsForCategory(categoryId int) ([]types.OrderPro
 func (db SqliteDb) InsertOrders(orders []types.Order) error {
 	args := make([][]any, len(orders))
 	for index, order := range orders {
-		args[index] = []any{order.SquareId, order.LocationId, order.State, order.Version, order.TotalMoney, order.CreatedAt.Unix()}
+		args[index] = []any{order.SquareId, order.LocationId, order.State, order.Version, order.TotalMoney, order.TotalTax, order.TotalDiscount, order.TotalTip, order.TotalServiceCharge, order.CreatedAt.Unix()}
 	}
 	return db.commitTx(query_INSERT_ORDERS, args)
 }

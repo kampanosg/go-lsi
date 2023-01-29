@@ -35,7 +35,10 @@
                     <span class="navbar-text px-2">
                         Last sync: <strong x-data x-text="$store.lastSync"></strong>
                     </span>
-                    <button class="btn btn-outline-primary">Sync now</button>
+                    <button x-data @click="sync()" class="btn btn-outline-primary" :disabled="$store.isSyncing">
+                        Sync now
+                        <div class="spinner-border spinner-border-sm" x-show="$store.isSyncing" role="status"></div>
+                    </button>
                 </div>
             </nav>
 
@@ -146,6 +149,7 @@
 
     </body>
 
+    <script type="text/javascript" src="/js/functions.js"></script>
     <script type="text/javascript">
 
         const AUTH_FAILED_MSG = 'auth failed'
@@ -153,6 +157,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.store('inventory', [])
             Alpine.store('lastSync', '')
+            Alpine.store('isSyncing', false)
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -176,50 +181,25 @@
                 });
 
             fetchHttp('/api/v1/sync/status', jwt)
-                .then(data => Alpine.store('lastSync', new Date(data.ts).toLocaleString()))
+                .then(data => Alpine.store('lastSync', df(data.ts)))
         })
-
-        function goToAuthPage() {
-            window.location.replace("/views/login.html")
-        }
-
-        async function fetchHttp(url, jwt) {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-            });
-            return response.json(); // parses JSON response into native JavaScript objects
-        }
-
-        function short(item) {
-            let l = item.length
-            return `${item.substr(0, 4)}...${item.substr(l-4, l)}`
-        }
-
-        function price(item) {
-            return `£${item}`
-        }
 
         function filterBySku(sku) {
             let items = Alpine.store('inventory')
-            sku.length === 0 ?  
+            sku.length === 0 ?
                 Alpine.store('filtered', items) :
                 Alpine.store('filtered', items.filter(item => item.sku === sku))
         }
 
-
         function filterByBarcode(barcode) {
             let items = Alpine.store('inventory')
-            barcode.length === 0 ?  
+            barcode.length === 0 ?
                 Alpine.store('filtered', items) :
                 Alpine.store('filtered', items.filter(item => item.barcode === barcode))
         }
 
         function clearFilters() {
-            Alpine.store('filtered', Alpine.store('inventory')) 
+            Alpine.store('filtered', Alpine.store('inventory'))
         }
 
     </script>
