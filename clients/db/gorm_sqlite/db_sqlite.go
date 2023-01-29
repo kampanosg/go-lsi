@@ -10,7 +10,7 @@ import (
 )
 
 var (
-    errRecordNotFound = errors.New("query returned no results")
+	errRecordNotFound = errors.New("query returned no results")
 )
 
 type SqliteDb struct {
@@ -18,7 +18,10 @@ type SqliteDb struct {
 }
 
 func NewSqliteDb(dbPath string) (SqliteDb, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+		CreateBatchSize: 1000,
+	})
+
 	if err != nil {
 		return SqliteDb{}, err
 	}

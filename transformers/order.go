@@ -13,9 +13,9 @@ const (
 
 func FromOrderDbRowToDomain(id int, squareId, locationId, state string, totalMoney float64, createdAt int64) types.Order {
 	return types.Order{
-		Id:         id,
-		SquareId:   squareId,
-		LocationId: locationId,
+		ID:         id,
+		SquareID:   squareId,
+		LocationID: locationId,
 		State:      state,
 		TotalMoney: totalMoney,
 		CreatedAt:  time.Unix(createdAt, 0),
@@ -33,8 +33,8 @@ func FromOrderProductDbRowToDomain(id int, squareOrderId, squareVarId, qty strin
 
 func FromSquareOrderToDomain(order square.SquareOrder) types.Order {
 	return types.Order{
-		SquareId:   order.ID,
-		LocationId: order.LocationID,
+		SquareID:   order.ID,
+		LocationID: order.LocationID,
 		CreatedAt:  order.CreatedAt,
 		State:      order.State,
 		Version:    order.Version,

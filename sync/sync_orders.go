@@ -69,7 +69,7 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 func buildSquareIdToOrderMap(orders []types.Order) map[string]types.Order {
 	m := make(map[string]types.Order, 0)
 	for _, order := range orders {
-		m[order.SquareId] = order
+		m[order.SquareID] = order
 	}
 	return m
 }
