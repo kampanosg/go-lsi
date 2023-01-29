@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func main() {
+func sync_status_main() {
 	args := os.Args[1:]
 
 	db, err := gorm.Open(sqlite.Open(args[0]), &gorm.Config{})
