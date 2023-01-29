@@ -179,7 +179,52 @@
 					"response": []
 				},
 				{
-					"name": "Inventory/GetStockItemsFullByIds",
+					"name": "Orders/GetByID",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "pkOrderIds",
+									"value": "[\"8de4f63c-e126-4b18-a045-0da4828b1b64\"]",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{LW_HOST}}/Orders/GetOrdersById",
+							"host": [
+								"{{LW_HOST}}"
+							],
+							"path": [
+								"Orders",
+								"GetOrdersById"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inventory/GetStockItemsFullByIds Copy",
 					"protocolProfileBehavior": {
 						"disabledSystemHeaders": {}
 					},
@@ -212,6 +257,148 @@
 							"path": [
 								"Stock",
 								"GetStockItemsFullByIds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create order test",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "--data-urlencode 'orders=[\n  {\n    \"UseChannelTax\": false,\n    \"pkOrderId\": \"f8a4e674-2521-458c-9d68-30b1eae14db3\",\n    \"AutomaticallyLinkBySKU\": true,\n    \"AutomaticallyLinkByBarcode\": true,\n    \"AutomaticallyLinkByASIN\": true,\n    \"Site\": \"Square POS\",\n    \"MatchPostalServiceTag\": \"SquarePOS\",\n    \"PostalServiceName\": \"Square POS\",\n    \"SavePostalServiceIfNotExist\": false,\n    \"MatchPaymentMethodTag\": \"POSPayment\",\n    \"PaymentMethodName\": \"POS Payment\",\n    \"SavePaymentMethodIfNotExist\": false,\n    \"MappingSource\": \"\",\n    \"OrderState\": \"OPEN\",\n    \"OrderStatusType\": \"Pending\",\n    \"OrderStatus\": \"Completed\",\n    \"PaymentStatus\": \"Paid\",\n    \"OrderItems\": [\n      {\n        \"TaxCostInclusive\": true,\n        \"UseChannelTax\": true,\n        \"PricePerUnit\": 2.99,\n        \"PostalServiceCost\": 0,\n        \"Qty\": 1,\n        \"TaxRate\": 0,\n        \"LineDiscount\": 0,\n        \"LineRefund\": 0,\n        \"RefundQuantity\": 0,\n        \"ShippingRefund\": 0,\n        \"TotalRefund\": 0,\n        \"ItemNumber\": \"5060464363757\",\n        \"ChannelSKU\": \"JC10-BK\",\n        \"IsService\": false,\n        \"ItemTitle\": \"150K ohm resistor\",\n        \"Options\": [\n          {\n            \"Property\": \"Square Order Id\",\n            \"Value\": \"TEST_ORDER_FROM_SQUARE\"\n          }\n        ],\n        \"Taxes\": [ ]\n      }\n    ],\n    \"ExtendedProperties\": [\n      {\n        \"Name\": \"sample string 1\",\n        \"Value\": \"sample string 2\",\n        \"Type\": \"sample string 3\"\n      }\n    ],\n    \"Notes\": [\n      {\n        \"Note\": \"sample string 1\",\n        \"NoteEntryDate\": \"2023-01-10T13:49:45.7897127+00:00\",\n        \"NoteUserName\": \"sample string 3\",\n        \"Internal\": true\n      }\n    ],\n    \"Source\": \"Square\",\n    \"SubSource\": \"Square POS\",\n    \"ChannelBuyerName\": \"Square\",\n    \"ReferenceNumber\": \"TEST_ORDER_FROM_SQUARE\",\n    \"ExternalReference\": \"TEST_ORDER_FROM_SQUARE\",\n    \"SecondaryReferenceNumber\": \"\",\n    \"Currency\": \"GBP\",\n    \"ConversionRate\": 1,\n    \"ReceivedDate\": \"2023-01-10T13:49:45.7907093+00:00\",\n    \"DispatchBy\": \"2023-01-10T13:49:45.7907093+00:00\",\n    \"PaidOn\": \"2023-01-10T13:49:45.7907093+00:00\",\n    \"PostalServiceCost\": 0,\n    \"PostalServiceTaxRate\": 0,\n    \"PostalServiceDiscount\": 0,\n    \"Discount\": 0,\n    \"ItemsRefund\": 0,\n    \"ShippingRefund\": 0,\n    \"TotalRefund\": 0,\n    \"LineRefundAllocation\": 0,\n    \"ShippingRefundAllocation\": 0,\n    \"BuyerTaxNumber\": \"\",\n    \"DiscountType\": \"AllEvenly\",\n    \"DiscountTaxType\": \"DeductAfterTax\",\n    \"BillingAddress\": {\n      \"MatchCountryCode\": \"\",\n      \"MatchCountryName\": \"\",\n      \"FullName\": \"Square POS Sale\",\n      \"Company\": \"Square\",\n      \"Address1\": \"Customer Collection ORDER_ID\",\n      \"Address2\": \"\",\n      \"Address3\": \"\",\n      \"Town\": \"Warrington\",\n      \"Region\": \"\",\n      \"PostCode\": \"WA1 3FW\",\n      \"Country\": \"UK\",\n      \"PhoneNumber\": \"00000000000\",\n      \"EmailAddress\": \"gkabanos@icloud.com\",\n      \"isEmpty\": false\n    },\n    \"DeliveryAddress\": {\n      \"MatchCountryCode\": \"\",\n      \"MatchCountryName\": \"\",\n      \"FullName\": \"Square POS Sale\",\n      \"Company\": \"Square\",\n      \"Address1\": \"Customer Collection ORDER_ID\",\n      \"Address2\": \"\",\n      \"Address3\": \"\",\n      \"Town\": \"Warrington\",\n      \"Region\": \"\",\n      \"PostCode\": \"WA1 3FW\",\n      \"Country\": \"UK\",\n      \"PhoneNumber\": \"00000000000\",\n      \"EmailAddress\": \"gkabanos@icloud.com\",\n      \"isEmpty\": false\n    },\n    \"DeliveryStartDate\": \"2023-01-10T13:49:45.8007344+00:00\",\n    \"DeliveryEndDate\": \"2023-01-10T13:49:45.8007344+00:00\",\n    \"OrderIdentifierTags\": [\n      \"sample string 1\"\n    ],\n    \"ForceReSaveFulfilledOrder\": true\n  }\n]' \\\n--data-urlencode 'location=Default'",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://eu-ext.linnworks.net/api/Orders/CreateOrders",
+							"protocol": "https",
+							"host": [
+								"eu-ext",
+								"linnworks",
+								"net"
+							],
+							"path": [
+								"api",
+								"Orders",
+								"CreateOrders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders/CreateOrders",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "orders",
+									"value": "[\n  {\n\n}\n]",
+									"type": "text"
+								},
+								{
+									"key": "location",
+									"value": "Default",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LW_HOST}}/Orders/CreateOrders",
+							"host": [
+								"{{LW_HOST}}"
+							],
+							"path": [
+								"Orders",
+								"CreateOrders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders/CreateNewOrder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "fulfilmentCenter",
+									"value": "Default",
+									"type": "default"
+								},
+								{
+									"key": "createAsDraft",
+									"value": "true",
+									"type": "default"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LW_HOST}}/Orders/CreateNewOrder",
+							"host": [
+								"{{LW_HOST}}"
+							],
+							"path": [
+								"Orders",
+								"CreateNewOrder"
 							]
 						}
 					},
@@ -249,7 +436,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{SQUARE_HOST}}/catalog/list?types=ITEM",
+							"raw": "{{SQUARE_HOST}}/catalog/list",
 							"host": [
 								"{{SQUARE_HOST}}"
 							],
@@ -260,7 +447,8 @@
 							"query": [
 								{
 									"key": "types",
-									"value": "ITEM"
+									"value": "ITEM",
+									"disabled": true
 								}
 							]
 						}
@@ -391,7 +579,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"object_ids\": [\n        \"2AS7YYRSG2QJV7SEWSM4CMBP\"\n     ]\n  }",
+							"raw": "{\n    \"object_ids\": [\n        \"WMNR7Y5YCEPPDQ6KXTCI4BEG\",\n        \"MUT3XQ3OU2VK2WJULQWB3RUW\"\n     ]\n  }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -410,8 +598,310 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Orders/CreateOrder",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SQUARE_ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Square-Version",
+								"value": "2023-01-19",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idempotency_key\": \"363a6e52-6838-4950-a713-f97685ffb47e\",\n    \"order\": {\n      \"location_id\": \"LPG7XHXNDYSEW\",\n      \"line_items\": [\n        {\n          \"quantity\": \"1\",\n          \"item_type\": \"ITEM\",\n          \"catalog_object_id\": \"N4SFDBOUXKVN3MITA35PUGL5\",\n          \"note\": \"POS test order 7\"\n        },\n        {\n          \"quantity\": \"2\",\n          \"item_type\": \"ITEM\",\n          \"catalog_object_id\": \"3ZYTQHKEHULUTMYPO3AQDKYO\",\n          \"note\": \"POS test order 7\"\n        }\n      ]\n    }\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SQUARE_HOST}}/orders",
+							"host": [
+								"{{SQUARE_HOST}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders/SearchOrders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SQUARE_ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Square-Version",
+								"value": "2023-01-19",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"return_entries\": false,\n    \"limit\": 1,\n    \"query\": {\n      \"sort\": {\n        \"sort_field\": \"CREATED_AT\",\n        \"sort_order\": \"ASC\"\n      },\n      \"filter\": {\n        \"date_time_filter\": {\n          \"created_at\": {\n            \"start_at\": \"2023-01-28T12:00:00Z\",\n            \"end_at\": \"2023-01-28T23:00:00Z\"\n          }\n        }\n      }\n    },\n    \"location_ids\": [\n      \"LW9PBXGZCAX1P\"\n    ],\n    \"cursor\": \"\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SQUARE_HOST}}/orders/search",
+							"host": [
+								"{{SQUARE_HOST}}"
+							],
+							"path": [
+								"orders",
+								"search"
+							]
+						}
+					},
+					"response": []
 				}
 			]
+		},
+		{
+			"name": "POS Server",
+			"item": [
+				{
+					"name": "Auth",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"kampanosg\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ping",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/ping",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"ping"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/sync/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"sync",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from\": \"2023-01-28T12:00:00+01:00\",\n    \"to\": \"2023-01-28T23:00:00+01:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/sync",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"sync"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Recent (last 30')",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/sync/recent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"sync",
+								"recent"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "POS_JWT",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzQyNjA1ODQ4NDgsImlhdCI6MTY3NDE3NDE5MCwic3ViIjoia2FtcGFub3NnIn0.nZwK8-x4xBaCBZ5ghG6lvsjQWp0A6kxzgsOvdJP7g2o"
 		}
 	]
 }
