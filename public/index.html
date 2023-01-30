@@ -57,30 +57,30 @@
                 }">
                     <div class="col-3">
                         <div class="input-group mb-3">
-                            <input x-model="sku" type="text" class="form-control" placeholder="SKU" aria-label="SKU" aria-describedby="btn-filter-sku">
-                            <button @click="filterBySku($data.sku)" class="btn btn-outline-secondary" type="button" id="btn-filter-sku">Filter</button>
+                            <input x-model="sku" type="text" class="form-control" placeholder="SKU" aria-label="SKU" aria-describedby="btn-filter-sku" :disabled="$store.isSyncing || $store.isSearching">
+                            <button @click="filterBySku($data.sku)" class="btn btn-outline-secondary" type="button" id="btn-filter-sku" :disabled="$store.isSyncing || $store.isSearching">Filter</button>
                         </div>
                     </div>
                     <div class="col-3">
                         <div class="input-group mb-3">
-                            <input x-model="barcode" type="text" class="form-control" placeholder="Barcode" aria-label="Barcode" aria-describedby="btn-filter-barcode">
-                            <button @click="filterByBarcode($data.barcode)" class="btn btn-outline-secondary" type="button" id="btn-filter-barcode">Filter</button>
+                            <input x-model="barcode" type="text" class="form-control" placeholder="Barcode" aria-label="Barcode" aria-describedby="btn-filter-barcode" :disabled="$store.isSyncing || $store.isSearching">
+                            <button @click="filterByBarcode($data.barcode)" class="btn btn-outline-secondary" type="button" id="btn-filter-barcode" :disabled="$store.isSyncing || $store.isSearching">Filter</button>
                         </div>
-                    </div>
-                    <div class="col-1">
-                        <button
-                            @click="clearFilters"
-                            x-show="$data.sku.length > 0 || $data.barcode.length > 0"
-                            class="btn btn-outline-danger">Clear</button>
-                    </div>
-                    <div class="col-5">
-                        <p class="text-end">Total Items: <span x-text="$store.filtered.length"></span></p>
                     </div>
                 </div>
 
-                <div class="row mt-4">
+                <div class="row mt-4" x-data>
                     <div class="col">
-                        <table class="table table-striped" x-data x-show="$store.inventory.length > 0" x-animate>
+
+                        <div class="text-center" x-show="$store.isSearching">
+                            <div class="spinner-border text-secondary" style="width: 1.5rem; height: 1.5rem;" role="status">
+                                  <span class="sr-only"><span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info" x-show="!$store.isSearching && $store.products.length === 0" x-text="$store.noProductsMsg"></div>
+
+                        <table class="table" x-show="!$store.isSearching && $store.products.length > 0" x-animate>
                             <thead>
                                 <tr>
                                     <th scope="col">Linnworks</th>
@@ -89,10 +89,11 @@
                                     <th scope="col">Barcode</th>
                                     <th scope="col">SKU</th>
                                     <th scope="col">Price</th>
+                                    <th scope="col">Synced</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="item in $store.filtered">
+                                <template x-for="item in $store.products">
                                     <tr>
                                         <td> 
                                             <div class="d-flex">
@@ -114,26 +115,11 @@
                                         <td x-text="item.barcode"></td>
                                         <td x-text="item.sku"></td>
                                         <td x-text="price(item.price)"></td>
+                                        <td x-text="df(item.updatedAt)"></td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
-
-                        <p  x-data="{}" 
-                            x-show="$store.inventory.length === 0"
-                            class="placeholder-glow">
-                            <span class="placeholder col-12 placeholder-lg"></span>
-                            <template x-for="_ in 50">
-                                <span class="placeholder col-12 placeholder bg-secondary"></span>
-                            </template>
-                        </p>
-
-
-                        <p x-data x-show="$store.inventory.length > 0" class="text-center py-4">
-                            Wow, you reached the bottom 😲. 
-                            Click the wee finger to back to the top <a href="#">👆</a>
-                        </p>
-
                     </div>
                 </div>
             </div>
@@ -147,9 +133,11 @@
         const AUTH_FAILED_MSG = 'auth failed'
 
         document.addEventListener('alpine:init', () => {
-            Alpine.store('inventory', [])
+            Alpine.store('noProductsMsg', 'Hey 👋! Use the fields to search for products 👆.')
+            Alpine.store('products', [])
             Alpine.store('lastSync', '')
             Alpine.store('isSyncing', false)
+            Alpine.store('isSearching', false)
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -158,40 +146,36 @@
             }
             Alpine.store('jwt', jwt)
 
-            fetchHttp('/api/v1/inventory', jwt)
-                .then(data => {
-                    if(data.Message && data.Message == AUTH_FAILED_MSG) {
-                        goToAuthPage()
-                        return
-                    } else if(!data.items) {
-                        console.log(data.Message)
-                        return
-                    }
-
-                    Alpine.store('inventory', data.items)
-                    Alpine.store('filtered', data.items)
-                });
-
             fetchHttp('/api/v1/sync/status', jwt)
                 .then(data => Alpine.store('lastSync', df(data.ts)))
         })
 
         function filterBySku(sku) {
-            let items = Alpine.store('inventory')
-            sku.length === 0 ?
-                Alpine.store('filtered', items) :
-                Alpine.store('filtered', items.filter(item => item.sku === sku))
+            if (sku.length === 0) {
+                return
+            }
+            Alpine.store('isSearching', true)
+            fetchHttp(`/api/v1/inventory?sku=${sku}`, Alpine.store('jwt'))
+                .then(data => handleSearchResult(data))
         }
 
         function filterByBarcode(barcode) {
-            let items = Alpine.store('inventory')
-            barcode.length === 0 ?
-                Alpine.store('filtered', items) :
-                Alpine.store('filtered', items.filter(item => item.barcode === barcode))
+            if (barcode.length === 0) {
+                return
+            }
+            Alpine.store('isSearching', true)
+            fetchHttp(`/api/v1/inventory?barcode=${barcode}`, Alpine.store('jwt'))
+                .then(data => handleSearchResult(data))
         }
 
-        function clearFilters() {
-            Alpine.store('filtered', Alpine.store('inventory'))
+        function handleSearchResult(resp) {
+            if (!resp.items) {
+                Alpine.store('noProductsMsg', 'No product found with the above criteria 🤔')
+                Alpine.store('products', [])
+            } else {
+                Alpine.store('products', resp.items)
+            }
+            Alpine.store('isSearching', false)
         }
 
     </script>

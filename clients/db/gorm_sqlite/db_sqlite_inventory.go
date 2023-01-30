@@ -122,6 +122,7 @@ func fromProductModelToType(productModel models.Product) types.Product {
 		Barcode:             productModel.Barcode,
 		SKU:                 productModel.SKU,
 		Version:             productModel.Version,
+		UpdatedAt:           productModel.UpdatedAt,
 	}
 }
 
