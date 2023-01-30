@@ -47,12 +47,10 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 			ordersToUpsert = append(ordersToUpsert, order)
 		}
 
-		if false {
 			if _, err := s.LinnworksClient.CreateOrders(ordersToUpsert); err != nil {
 				s.logger.Errorw("unable to create orders", reasonKey, msgLwErr, errKey, err.Error())
 				return err
 			}
-		}
 
 		if err := s.Db.InsertOrders(ordersToUpsert); err != nil {
 			s.logger.Errorw("unable to insert orders", reasonKey, msgDbErr, errKey, err.Error())
