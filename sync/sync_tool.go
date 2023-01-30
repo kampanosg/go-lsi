@@ -1,6 +1,8 @@
 package sync
 
 import (
+	"time"
+
 	"github.com/kampanosg/go-lsi/clients/db"
 	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
@@ -29,4 +31,29 @@ func NewSyncTool(lwClient *linnworks.LinnworksClient, sqClient *square.SquareCli
 		Db:              db,
 		logger:          logger,
 	}
+}
+
+func (s *SyncTool) Sync(from time.Time, to time.Time) error {
+	s.logger.Infow("start syncing process", "from", from, "to", to)
+
+	startTime := time.Now()
+	if err := s.SyncCategories(); err != nil {
+		return err
+	}
+
+	if err := s.SyncProducts(); err != nil {
+		return err
+	}
+
+	if err := s.SyncOrders(from, to); err != nil {
+		return err
+	}
+
+	s.logger.Infow("finished syncing process", "from", from, "to", to, "elapsed", time.Since(startTime))
+
+	if err := s.Db.InsertSyncStatus(startTime.UnixMilli()); err != nil {
+		return err
+	}
+
+	return nil
 }

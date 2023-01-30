@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	gormsqlite "github.com/kampanosg/go-lsi/clients/db/gorm_sqlite"
@@ -64,6 +65,8 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, logger)
 
+	setSyncLoop(logger, syncTool)
+
 	router := mux.NewRouter()
 
 	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
@@ -95,4 +98,25 @@ func logInit() *zap.SugaredLogger {
 	l := zap.New(core)
 
 	return l.Sugar()
+}
+
+func setSyncLoop(logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
+	ticker := time.NewTicker(30 * time.Minute)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				logger.Infow("will start auto syncing")
+				to := time.Now()
+				from := to.Add(-time.Minute * 30)
+				if err := syncTool.Sync(to, from); err != nil {
+					logger.Errorw("could not run sync job", "error", err)
+				}
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
