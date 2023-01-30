@@ -52,6 +52,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Square ID</th>
+                                    <th scope="col">Location ID</th>
                                     <th scope="col">Total</th>
                                     <th scope="col">Date / Time</th>
                                 </tr>
@@ -67,6 +68,7 @@
                                                 </a>
                                             </div>
                                         </td>
+                                        <td x-text="item.locationId"></td>
                                         <td x-text="price(item.totalMoney)"></td>
                                         <td x-text="df(item.createdAt)"></td>
                                     </tr>
