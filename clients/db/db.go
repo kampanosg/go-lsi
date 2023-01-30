@@ -10,6 +10,8 @@ type DB interface {
 	ClearCategories() error
 
 	GetProducts() ([]types.Product, error)
+	GetProductByBarcode(barcode string) (types.Product, error)
+	GetProductBySku(sku string) (types.Product, error)
 	GetProductByVarId(varId string) (types.Product, error)
 	InsertProducts(products []types.Product) error
 	InsertProduct(product types.Product) error

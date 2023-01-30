@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func main() {
+func create_user_main() {
 	args := os.Args[1:]
 
 	username := args[1]

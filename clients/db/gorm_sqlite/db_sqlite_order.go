@@ -39,7 +39,7 @@ func fromOrderModelsToTypes(orderModels []models.Order) []types.Order {
 func fromOrderModelToType(orderModel models.Order) types.Order {
 	return types.Order{
 		ID:         orderModel.ID,
-        SquareID: orderModel.SquareID,
+		SquareID:   orderModel.SquareID,
 		LocationID: orderModel.LocationID,
 		State:      orderModel.State,
 		Version:    orderModel.Version,

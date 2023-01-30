@@ -15,7 +15,7 @@ import (
 )
 
 // / usage: go run delete_square_inventory.go ACCESS_TOKEN LOCATION_ID
-func delete_square_inventory_main() {
+func main() {
 	args := os.Args[1:]
 
 	accessToken := args[0]

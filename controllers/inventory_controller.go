@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/kampanosg/go-lsi/clients/db"
@@ -12,6 +13,10 @@ type InventoryController struct {
 	db     db.DB
 	logger *zap.SugaredLogger
 }
+
+var (
+	errParamsNotProvided = errors.New("required params not provided")
+)
 
 func NewInventoryController(db db.DB, logger *zap.SugaredLogger) InventoryController {
 	return InventoryController{db: db, logger: logger}
@@ -25,17 +30,29 @@ func (c *InventoryController) HandleInventoryRequest(w http.ResponseWriter, r *h
 		return
 	}
 
-	items, err := c.db.GetProducts()
-	if err != nil {
-		c.logger.Errorw("request failed", "error retrieving inventory from db", "error", err.Error())
-		failed(w, err, http.StatusBadRequest)
+	foundSku := r.URL.Query().Has("sku")
+	foundBarcode := r.URL.Query().Has("barcode")
+
+	if !foundSku && !foundBarcode {
+		failed(w, errParamsNotProvided, http.StatusBadRequest)
 		return
 	}
 
-	resp := types.OkResp{
-		Total: len(items),
-		Items: items,
+	var product types.Product
+	var err error
+
+	if foundBarcode {
+		product, err = c.db.GetProductByBarcode(r.URL.Query().Get("barcode"))
+	} else {
+		product, err = c.db.GetProductBySku(r.URL.Query().Get("sku"))
 	}
+
+	if err != nil {
+		failed(w, err, http.StatusNotFound)
+		return
+	}
+
+	resp := types.OkResp{Items: []types.Product{product}, Total: 1}
 
 	ok(w, resp)
 }

@@ -32,13 +32,22 @@ func (db SqliteDb) GetProducts() ([]types.Product, error) {
 	return fromProductModelsToTypes(products), nil
 }
 
+func (db SqliteDb) GetProductBySku(sku string) (types.Product, error) {
+	var result models.Product
+	db.Connection.Where(&models.Product{SKU: sku}).First(&result)
+	return transformResult(result)
+}
+
+func (db SqliteDb) GetProductByBarcode(barcode string) (types.Product, error) {
+	var result models.Product
+	db.Connection.Where(&models.Product{Barcode: barcode}).First(&result)
+	return transformResult(result)
+}
+
 func (db SqliteDb) GetProductByVarId(varId string) (types.Product, error) {
 	var result models.Product
 	db.Connection.Where(&models.Product{SquareVarID: varId}).First(&result)
-	if result.ID == 0 {
-		return types.Product{}, errRecordNotFound
-	}
-	return fromProductModelToType(result), nil
+	return transformResult(result)
 }
 
 func (db SqliteDb) InsertProduct(product types.Product) error {
@@ -53,6 +62,13 @@ func (db SqliteDb) InsertProducts(products []types.Product) error {
 
 func (db SqliteDb) ClearProducts() error {
 	return db.Connection.Unscoped().Delete(&models.Product{}).Error
+}
+
+func transformResult(result models.Product) (types.Product, error) {
+	if result.ID == 0 {
+		return types.Product{}, errRecordNotFound
+	}
+	return fromProductModelToType(result), nil
 }
 
 func fromCategoryModelsToTypes(categoryModels []models.Category) []types.Category {
