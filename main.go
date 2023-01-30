@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	gormsqlite "github.com/kampanosg/go-lsi/clients/db/gorm_sqlite"
 	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/clients/square"
@@ -19,23 +18,23 @@ import (
 
 func main() {
 
-	port := getEnv("HTTP_PORT")
+	port := os.Getenv("PORT")
 
 	logger := logInit()
 	logger.Infow("starting http server", "port", port)
 
-	dbPath := getEnv("DB")
+	dbPath := os.Getenv("DB")
 
-	signingKey := []byte(getEnv("SIGNING_KEY"))
+	signingKey := []byte(os.Getenv("SIGNING_KEY"))
 
-	lwAppId := getEnv("LINNWORKS_APP_ID")
-	lwAppSecret := getEnv("LINNWORKS_APP_SECRET")
-	lwAppToken := getEnv("LINNWORKS_APP_TOKEN")
+	lwAppId := os.Getenv("LINNWORKS_APP_ID")
+	lwAppSecret := os.Getenv("LINNWORKS_APP_SECRET")
+	lwAppToken := os.Getenv("LINNWORKS_APP_TOKEN")
 
-	sqAccessToken := getEnv("SQUARE_ACCESS_TOKEN")
-	sqHost := getEnv("SQUARE_HOST")
-	sqApiVersion := getEnv("SQUARE_API_VERSION")
-	sqLocationId := getEnv("SQUARE_LOCATION_ID")
+	sqAccessToken := os.Getenv("SQUARE_ACCESS_TOKEN")
+	sqHost := os.Getenv("SQUARE_HOST")
+	sqApiVersion := os.Getenv("SQUARE_API_VERSION")
+	sqLocationId := os.Getenv("SQUARE_LOCATION_ID")
 
 	logger.Debugw("loaded application config",
 		"linnworksAppId", lwAppId,
@@ -81,33 +80,15 @@ func main() {
 	}
 }
 
-func getEnv(key string) string {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		panic("cannot find .env file")
-	}
-
-	return os.Getenv(key)
-}
-
 func logInit() *zap.SugaredLogger {
 
-	f, err := os.Create("logs/nwg.log")
-	if err != nil {
-		panic("unable to open log file")
-	}
-
 	pe := zap.NewProductionEncoderConfig()
-
-	fileEncoder := zapcore.NewJSONEncoder(pe)
 
 	pe.EncodeTime = zapcore.ISO8601TimeEncoder
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
 	level := zap.InfoLevel
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, zapcore.AddSync(f), level),
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),
 	)
 

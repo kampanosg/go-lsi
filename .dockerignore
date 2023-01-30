@@ -1,0 +1,9 @@
+# flyctl launch added from .gitignore
+**/.env
+**/*.db
+**/*.backup
+**/.DS_Store
+**/go-lsi
+**/public/lib
+**/logs
+fly.toml
