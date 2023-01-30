@@ -1,5 +1,5 @@
 function goToAuthPage() {
-    window.location.replace("/views/login.html")
+    window.location.replace("/login.html")
 }
 
 function sync() {

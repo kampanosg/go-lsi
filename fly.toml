@@ -1,6 +1,4 @@
-# fly.toml file generated for quiet-dust-2703 on 2023-01-30T15:57:44Z
-
-app = "quiet-dust-2703"
+app = "nwg-pos-integration"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -14,6 +12,10 @@ processes = []
 
 [experimental]
   auto_rollback = true
+
+[mounts]
+  destination = "/mnt/db"
+  source = "db"
 
 [[services]]
   http_checks = []
@@ -40,3 +42,6 @@ processes = []
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
+
+[build.args]
+  BP_KEEP_FILES = "public/*"

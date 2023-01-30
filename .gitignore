@@ -1,7 +1,9 @@
 .env
 *.db
 *.backup
+db
 .DS_Store
 go-lsi
 public/lib
 logs
+run.sh
