@@ -110,7 +110,7 @@ func setSyncLoop(logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
 				logger.Infow("will start auto syncing")
 				to := time.Now()
 				from := to.Add(-time.Minute * 30)
-				if err := syncTool.Sync(to, from); err != nil {
+				if err := syncTool.Sync(from, to); err != nil {
 					logger.Errorw("could not run sync job", "error", err)
 				}
 			case <-quit:
