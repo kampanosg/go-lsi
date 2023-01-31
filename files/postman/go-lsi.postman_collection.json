@@ -205,7 +205,7 @@
 							"urlencoded": [
 								{
 									"key": "pkOrderIds",
-									"value": "[\"8de4f63c-e126-4b18-a045-0da4828b1b64\"]",
+									"value": "[\"45470e37-58ef-4298-94fe-5c613d13cce6\"]",
 									"type": "default"
 								}
 							]
@@ -627,7 +627,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"idempotency_key\": \"363a6e52-6838-4950-a713-f97685ffb47e\",\n    \"order\": {\n      \"location_id\": \"LPG7XHXNDYSEW\",\n      \"line_items\": [\n        {\n          \"quantity\": \"1\",\n          \"item_type\": \"ITEM\",\n          \"catalog_object_id\": \"N4SFDBOUXKVN3MITA35PUGL5\",\n          \"note\": \"POS test order 7\"\n        },\n        {\n          \"quantity\": \"2\",\n          \"item_type\": \"ITEM\",\n          \"catalog_object_id\": \"3ZYTQHKEHULUTMYPO3AQDKYO\",\n          \"note\": \"POS test order 7\"\n        }\n      ]\n    }\n  }",
+							"raw": "{\n    \"idempotency_key\": \"453a6e51-7838-4950-a713-f97685aab46e\",\n    \"order\": {\n      \"location_id\": \"LPG7XHXNDYSEW\",\n      \"line_items\": [\n        {\n          \"quantity\": \"10\",\n          \"item_type\": \"ITEM\",\n          \"catalog_object_id\": \"25LHH4EE6WZWLCTRPIBQPWUJ\",\n          \"note\": \"POS test order 13\"\n        },\n        {\n          \"quantity\": \"5\",\n          \"item_type\": \"ITEM\",\n          \"catalog_object_id\": \"PIFXKDJAURENPJEFWXB4O3TO\",\n          \"note\": \"POS test order 13\"\n        }\n      ]\n    }\n  }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -674,7 +674,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"return_entries\": false,\n    \"limit\": 1,\n    \"query\": {\n      \"sort\": {\n        \"sort_field\": \"CREATED_AT\",\n        \"sort_order\": \"ASC\"\n      },\n      \"filter\": {\n        \"date_time_filter\": {\n          \"created_at\": {\n            \"start_at\": \"2023-01-28T12:00:00Z\",\n            \"end_at\": \"2023-01-28T23:00:00Z\"\n          }\n        }\n      }\n    },\n    \"location_ids\": [\n      \"LW9PBXGZCAX1P\"\n    ],\n    \"cursor\": \"\"\n  }",
+							"raw": "{\n    \"return_entries\": false,\n    \"limit\": 1,\n    \"query\": {\n      \"sort\": {\n        \"sort_field\": \"CREATED_AT\",\n        \"sort_order\": \"ASC\"\n      },\n      \"filter\": {\n        \"date_time_filter\": {\n          \"created_at\": {\n            \"start_at\": \"2023-01-30T12:00:00Z\",\n            \"end_at\": \"2023-01-30T23:45:00Z\"\n          }\n        }\n      }\n    },\n    \"location_ids\": [\n      \"LPG7XHXNDYSEW\"\n    ],\n    \"cursor\": \"\"\n  }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -706,7 +706,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"kampanosg\",\n    \"password\": \"password123\"\n}",
+							"raw": "{\n    \"username\": \"kampanosg\",\n    \"password\": \"ALLOY-sparse-navigate-okra-1353\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -714,12 +714,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/auth",
-							"protocol": "http",
+							"raw": "{{POS_URL}}/api/v1/auth",
 							"host": [
-								"localhost"
+								"{{POS_URL}}"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -745,12 +743,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/ping",
-							"protocol": "http",
+							"raw": "{{POS_URL}}/api/v1/ping",
 							"host": [
-								"localhost"
+								"{{POS_URL}}"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -776,12 +772,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/sync/status",
-							"protocol": "http",
+							"raw": "{{POS_URL}}/api/v1/sync/status",
 							"host": [
-								"localhost"
+								"{{POS_URL}}"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -809,7 +803,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"from\": \"2023-01-28T12:00:00+01:00\",\n    \"to\": \"2023-01-28T23:00:00+01:00\"\n}",
+							"raw": "{\n    \"from\": \"2023-01-30T23:30:00Z\",\n    \"to\": \"2023-01-30T23:55:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -817,12 +811,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/v1/sync",
-							"protocol": "http",
+							"raw": "{{POS_URL}}/api/v1/sync",
 							"host": [
-								"localhost"
+								"{{POS_URL}}"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -848,12 +840,10 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/sync/recent",
-							"protocol": "http",
+							"raw": "{{POS_URL}}/api/v1/sync/recent",
 							"host": [
-								"localhost"
+								"{{POS_URL}}"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
@@ -865,7 +855,7 @@
 					"response": []
 				},
 				{
-					"name": "Inventory",
+					"name": "Get Product By SKU",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -880,16 +870,84 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/v1/inventory",
-							"protocol": "http",
+							"raw": "{{POS_URL}}/api/v1/inventory?sku=08B11",
 							"host": [
-								"localhost"
+								"{{POS_URL}}"
 							],
-							"port": "8080",
 							"path": [
 								"api",
 								"v1",
 								"inventory"
+							],
+							"query": [
+								{
+									"key": "sku",
+									"value": "08B11"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product By Barcode",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{POS_URL}}/api/v1/inventory?barcode=5060721226351",
+							"host": [
+								"{{POS_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"inventory"
+							],
+							"query": [
+								{
+									"key": "barcode",
+									"value": "5060721226351"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{POS_JWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{POS_URL}}/api/v1/orders",
+							"host": [
+								"{{POS_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orders"
 							]
 						}
 					},
