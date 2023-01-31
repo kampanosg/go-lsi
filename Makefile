@@ -7,3 +7,5 @@ build:
 
 run:
 	docker run --env-file .env -p 8080:8080  go-lsi:latest
+
+.PHONY: build run
