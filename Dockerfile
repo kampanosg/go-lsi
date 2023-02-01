@@ -22,5 +22,6 @@ ENV SQUARE_ACCESS_TOKEN=square-access-token
 ENV SQUARE_HOST=square-host
 ENV SQUARE_API_VERSION=2023-01-19
 ENV SQUARE_LOCATION_ID=square-location-id
+ENV SQUARE_TEAM_MEMBER_IDS=id1,id2,id3
 
 CMD ["./go-lsi"]

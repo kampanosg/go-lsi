@@ -27,24 +27,63 @@ const (
 	VARIATION_ORDINAL = 1
 	VARIATION_NAME    = "Regular"
 	VARIATION_PRICING = "FIXED_PRICING"
+
+	SERVICE_SKU_SUFFIX = "GTR-"
+
+	ORDER_LIMIT = 50
 )
 
 type SquareClient struct {
-	AccessToken string
-	Host        string
-	ApiVersion  string
-	LocationId  string
-	logger      *zap.SugaredLogger
+	AccessToken   string
+	Host          string
+	ApiVersion    string
+	LocationId    string
+	TeamMemberIds []string
+	logger        *zap.SugaredLogger
 }
 
-func NewSquareClient(accessToken, host, version, location string, logger *zap.SugaredLogger) *SquareClient {
+func NewSquareClient(accessToken, host, version, location string, teamMembers []string, logger *zap.SugaredLogger) *SquareClient {
 	return &SquareClient{
-		AccessToken: accessToken,
-		Host:        host,
-		ApiVersion:  version,
-		LocationId:  location,
-		logger:      logger,
+		AccessToken:   accessToken,
+		Host:          host,
+		ApiVersion:    version,
+		LocationId:    location,
+		TeamMemberIds: teamMembers,
+		logger:        logger,
 	}
+}
+
+func (c *SquareClient) GetItemsVersions(itemType string) (map[string]int64, error) {
+	headers := make(map[string]string)
+	headers["Square-Version"] = c.ApiVersion
+	headers["Content-Type"] = "application/json"
+	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
+
+	versions := make(map[string]int64, 0)
+	cursor := ""
+
+	for {
+		url := fmt.Sprintf("%s/catalog/list?types=%s&cursor=%s", c.Host, itemType, cursor)
+		resp, err := c.makeRequest("GET", url, headers, []byte{})
+		if err != nil {
+			panic(err)
+		}
+
+		var r SquareItemResponse
+		if err := json.Unmarshal(resp, &r); err != nil {
+			panic(err)
+		}
+
+		for _, o := range r.Objects {
+			versions[o.ID] = o.Version
+		}
+
+		cursor = r.Cursor
+		if cursor == "" {
+			break
+		}
+	}
+	return versions, nil
 }
 
 func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpsertResponse, error) {
@@ -116,7 +155,13 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		}
 
 		serviceDuration := c.getServiceDuration(product)
-		availableForBooking := strings.HasPrefix(product.SKU, "GTR-")
+		availableForBooking := false
+		teamMemberIds := make([]string, 0)
+
+		if strings.HasPrefix(product.SKU, SERVICE_SKU_SUFFIX) {
+			availableForBooking = true
+			teamMemberIds = c.TeamMemberIds
+		}
 
 		itemMoney := SquarePriceMoney{
 			Amount:   int(product.Price * PENCE_MULTIPLIER),
@@ -133,6 +178,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 			PriceMoney:          itemMoney,
 			ServiceDuration:     serviceDuration,
 			AvailableForBooking: availableForBooking,
+			TeamMemberIds:       teamMemberIds,
 		}
 
 		itemVariations := []SquareProductVariation{
@@ -268,7 +314,7 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 	for {
 		searchRequest := SquareSearchOrdersRequest{
 			ReturnEntries: false,
-			Limit:         1,
+			Limit:         ORDER_LIMIT,
 			Query: SquareQuery{
 				Filter: SquareFilter{
 					DateTimeFilter: SquareDateTimeFilter{
@@ -307,9 +353,6 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 			break
 		}
 
-		// for _, order := range squareResp.Orders {
-		// 	orders = append(orders, order)
-		// }
 		orders = append(orders, squareResp.Orders...)
 
 		cursor = squareResp.Cursor

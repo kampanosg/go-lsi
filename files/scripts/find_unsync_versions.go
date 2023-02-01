@@ -10,26 +10,23 @@ import (
 	"os"
 	"time"
 
-	"github.com/kampanosg/go-lsi/clients/square"
-	"go.uber.org/zap"
+	"github.com/kampanosg/go-lsi/models"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // / usage: go run delete_square_inventory.go ACCESS_TOKEN LOCATION_ID
-func main() {
+func norun_main() {
 	args := os.Args[1:]
 
-	accessToken := args[0]
 	host := "https://connect.squareup.com/v2"
-	version := "2023-01-19"
-	location := args[1]
-	logger := zap.NewExample().Sugar()
 
 	headers := make(map[string]string)
 	headers["Square-Version"] = "2023-01-19"
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", args[0])
 
-	ids := make([]string, 0)
+	ids := make(map[string]int64, 0)
 	cursor := ""
 
 	for {
@@ -45,7 +42,7 @@ func main() {
 		}
 
 		for _, o := range r.Objects {
-			ids = append(ids, o.ID)
+			ids[o.ID] = o.Version
 		}
 
 		cursor = r.Cursor
@@ -54,10 +51,25 @@ func main() {
 		}
 	}
 
-	fmt.Printf("total items to delete: %d\n", len(ids))
+	db, err := gorm.Open(sqlite.Open(args[1]), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
 
-	client := square.NewSquareClient(accessToken, host, version, location, make([]string, 0), logger)
-	client.BatchDeleteItems(ids)
+	total := 0
+	for k, v := range ids {
+		var res models.Product
+		db.Where(&models.Product{SquareID: k}).First(&res)
+		if res.Version != v {
+			fmt.Printf("%s - %d - %d\n", k, res.Version, v)
+			total += 1
+			res.Version = v
+			// db.Save(&res)
+		}
+	}
+
+	fmt.Printf("total: %d\n", total)
+
 }
 
 func makeRequest(method, url string, headers map[string]string, jsonReq []byte) ([]byte, error) {

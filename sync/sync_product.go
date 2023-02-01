@@ -38,6 +38,12 @@ func (s *SyncTool) SyncProducts() error {
 
 	newProducts := fromProductLinnworksResponsesToDomain(lwProduts)
 
+	newItemVersions, err := s.SquareClient.GetItemsVersions("ITEM")
+	if err != nil {
+		s.logger.Errorw("unable to retrieve new square version ids", "error", err.Error())
+		return err
+	}
+
 	productsUpsertMap := buildUpsertProductMap(oldProducts)
 	productsToUpsert := make([]types.Product, 0)
 	productsSquareIdMapping := make(map[string]types.Product, 0)
@@ -53,6 +59,10 @@ func (s *SyncTool) SyncProducts() error {
 			newProduct.SquareID = upsert.product.SquareID
 			newProduct.SquareVarID = upsert.product.SquareVarID
 			newProduct.Version = upsert.product.Version
+			newerVersion := newItemVersions[upsert.product.SquareID]
+			if newProduct.Version != newerVersion {
+				newProduct.Version = newerVersion
+			}
 		}
 		s.logger.Debugw("assigned ids and version to product",
 			"squareId", newProduct.SquareID,

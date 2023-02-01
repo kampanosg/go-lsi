@@ -46,10 +46,8 @@ func (s *SyncTool) Sync(from time.Time, to time.Time) error {
 		return err
 	}
 
-	if false {
-		if err := s.SyncOrders(from, to); err != nil {
-			return err
-		}
+	if err := s.SyncOrders(from, to); err != nil {
+		return err
 	}
 
 	s.logger.Infow("finished syncing process", "from", from, "to", to, "elapsed", time.Since(startTime))

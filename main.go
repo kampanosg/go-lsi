@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -36,6 +37,7 @@ func main() {
 	sqHost := os.Getenv("SQUARE_HOST")
 	sqApiVersion := os.Getenv("SQUARE_API_VERSION")
 	sqLocationId := os.Getenv("SQUARE_LOCATION_ID")
+	sqTeamMemberIds := strings.Split(os.Getenv("SQUARE_TEAM_MEMBER_IDS"), ",")
 
 	logger.Debugw("loaded application config",
 		"linnworksAppId", lwAppId,
@@ -43,6 +45,7 @@ func main() {
 		"linnworksAppToken", lwAppToken,
 		"squareAccessToken", sqAccessToken,
 		"sqHost", sqHost,
+		"sqTeamMemberIds", sqTeamMemberIds,
 		"sqApiVersion", sqApiVersion,
 		"sqLocationId", sqLocationId,
 		"signingKey", signingKey,
@@ -55,7 +58,7 @@ func main() {
 	}
 
 	lwClient := linnworks.NewLinnworksClient(lwAppId, lwAppSecret, lwAppToken, logger)
-	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId, logger)
+	sqClient := square.NewSquareClient(sqAccessToken, sqHost, sqApiVersion, sqLocationId, sqTeamMemberIds, logger)
 	syncTool := sync.NewSyncTool(lwClient, sqClient, sqliteDb, logger)
 
 	authMiddleware := middlewares.NewAuthMiddleware(signingKey, logger)
@@ -65,7 +68,7 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, logger)
 
-	// setSyncLoop(logger, syncTool)
+	setSyncLoop(logger, syncTool)
 
 	router := mux.NewRouter()
 

@@ -75,6 +75,7 @@ type SquareProductVariationData struct {
 	ServiceDuration     int              `json:"service_duration"`
 	PriceMoney          SquarePriceMoney `json:"price_money"`
 	AvailableForBooking bool             `json:"available_for_booking"`
+	TeamMemberIds       []string         `json:"team_member_ids"`
 }
 
 type SquarePriceMoney struct {
@@ -223,4 +224,48 @@ type SquareFilter struct {
 }
 type SquareQuery struct {
 	Filter SquareFilter `json:"filter"`
+}
+
+type SquareItemResponse struct {
+	Cursor  string `json:"cursor"`
+	Objects []struct {
+		Type                  string    `json:"type"`
+		ID                    string    `json:"id"`
+		UpdatedAt             time.Time `json:"updated_at"`
+		CreatedAt             time.Time `json:"created_at"`
+		Version               int64     `json:"version"`
+		IsDeleted             bool      `json:"is_deleted"`
+		PresentAtAllLocations bool      `json:"present_at_all_locations"`
+		ItemData              struct {
+			Name       string `json:"name"`
+			IsTaxable  bool   `json:"is_taxable"`
+			Visibility string `json:"visibility"`
+			CategoryID string `json:"category_id"`
+			Variations []struct {
+				Type                  string    `json:"type"`
+				ID                    string    `json:"id"`
+				UpdatedAt             time.Time `json:"updated_at"`
+				CreatedAt             time.Time `json:"created_at"`
+				Version               int64     `json:"version"`
+				IsDeleted             bool      `json:"is_deleted"`
+				PresentAtAllLocations bool      `json:"present_at_all_locations"`
+				ItemVariationData     struct {
+					ItemID      string `json:"item_id"`
+					Name        string `json:"name"`
+					Sku         string `json:"sku"`
+					Upc         string `json:"upc"`
+					Ordinal     int    `json:"ordinal"`
+					PricingType string `json:"pricing_type"`
+					PriceMoney  struct {
+						Amount   int    `json:"amount"`
+						Currency string `json:"currency"`
+					} `json:"price_money"`
+					Sellable  bool `json:"sellable"`
+					Stockable bool `json:"stockable"`
+				} `json:"item_variation_data"`
+			} `json:"variations"`
+			ProductType        string `json:"product_type"`
+			SkipModifierScreen bool   `json:"skip_modifier_screen"`
+		} `json:"item_data"`
+	} `json:"objects"`
 }

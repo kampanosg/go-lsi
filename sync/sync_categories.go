@@ -30,6 +30,12 @@ func (s *SyncTool) SyncCategories() error {
 	newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
 	s.logger.Infow("found categories from linnworks", "total", len(newCategories))
 
+	newCategoryVersions, err := s.SquareClient.GetItemsVersions("CATEGORY")
+	if err != nil {
+		s.logger.Errorw("unable to retrieve new square version ids", "error", err.Error())
+		return err
+	}
+
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
 	categoriesToBeUpserted := make([]types.Category, 0)
 	categoriesSquareIdMapping := make(map[string]types.Category)
@@ -43,6 +49,10 @@ func (s *SyncTool) SyncCategories() error {
 		} else {
 			newCategory.SquareID = upsert.category.SquareID
 			newCategory.Version = upsert.category.Version
+			newerVersion := newCategoryVersions[upsert.category.SquareID]
+			if newCategory.Version != newerVersion {
+				newCategory.Version = newerVersion
+			}
 		}
 		s.logger.Debugw("assigned square id and version to category", "id", newCategory.SquareID, "version", newCategory.Version)
 
