@@ -46,9 +46,21 @@
                     </div>
                 </div>
 
-                <div class="row mt-4">
+                <div class="row mt-4" x-data>
                     <div class="col">
-                        <table class="table table-striped" x-data x-show="$store.orders.length > 0" x-animate>
+                         <p x-show="$store.isLoading"
+                            class="placeholder-glow">
+                            <span class="placeholder col-12 placeholder-lg"></span>
+                            <template x-for="_ in 50">
+                                <span class="placeholder col-12 placeholder bg-secondary"></span>
+                            </template>
+                        </p>
+
+                        <div class="alert alert-info" x-show="!$store.isLoading && $store.orders.length === 0">
+                            No orders found 🤔
+                        </div>
+
+                        <table class="table table-striped" x-show="!$store.isLoading && $store.orders.length > 0" x-animate>
                             <thead>
                                 <tr>
                                     <th scope="col">Square ID</th>
@@ -75,15 +87,6 @@
                                 </template>
                             </tbody>
                         </table>
-
-                        <p  x-data="{}"
-                            x-show="$store.orders.length === 0"
-                            class="placeholder-glow">
-                            <span class="placeholder col-12 placeholder-lg"></span>
-                            <template x-for="_ in 50">
-                                <span class="placeholder col-12 placeholder bg-secondary"></span>
-                            </template>
-                        </p>
                     </div>
                 </div>
             </div>
@@ -100,6 +103,7 @@
             Alpine.store('orders', [])
             Alpine.store('lastSync', '')
             Alpine.store('isSyncing', false)
+            Alpine.store('isLoading', true)
 
             let jwt = localStorage.getItem("jwt")
             if (!jwt) {
@@ -119,6 +123,7 @@
                     }
 
                     Alpine.store('orders', data.items)
+                    Alpine.store('isLoading', false)
                 });
 
             fetchHttp('/api/v1/sync/status', jwt)

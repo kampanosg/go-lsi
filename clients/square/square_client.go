@@ -116,7 +116,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		}
 
 		serviceDuration := c.getServiceDuration(product)
-		availableForBooking := strings.HasPrefix(product.Barcode, "GTR-")
+		availableForBooking := strings.HasPrefix(product.SKU, "GTR-")
 
 		itemMoney := SquarePriceMoney{
 			Amount:   int(product.Price * PENCE_MULTIPLIER),
@@ -124,14 +124,14 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		}
 
 		variationData := SquareProductVariationData{
-			ItemID:          product.SquareID,
-			Sku:             product.SKU,
-			Upc:             product.Barcode,
-			Name:            VARIATION_NAME,
-			PricingType:     VARIATION_PRICING,
-			Ordinal:         VARIATION_ORDINAL,
-			PriceMoney:      itemMoney,
-			ServiceDuration: serviceDuration,
+			ItemID:              product.SquareID,
+			Sku:                 product.SKU,
+			Upc:                 product.Barcode,
+			Name:                VARIATION_NAME,
+			PricingType:         VARIATION_PRICING,
+			Ordinal:             VARIATION_ORDINAL,
+			PriceMoney:          itemMoney,
+			ServiceDuration:     serviceDuration,
 			AvailableForBooking: availableForBooking,
 		}
 
