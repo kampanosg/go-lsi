@@ -57,13 +57,13 @@
                 }">
                     <div class="col-3">
                         <div class="input-group mb-3">
-                            <input x-model="sku" type="text" class="form-control" placeholder="SKU" aria-label="SKU" aria-describedby="btn-filter-sku" :disabled="$store.isSyncing || $store.isSearching">
+                            <input x-model="sku" type="text" class="form-control" placeholder="SKU" aria-label="SKU" aria-describedby="btn-filter-sku" :disabled="$store.isSyncing || $store.isSearching" @keyup.enter="filterBySku($data.sku)">
                             <button @click="filterBySku($data.sku)" class="btn btn-outline-secondary" type="button" id="btn-filter-sku" :disabled="$store.isSyncing || $store.isSearching">Filter</button>
                         </div>
                     </div>
                     <div class="col-3">
                         <div class="input-group mb-3">
-                            <input x-model="barcode" type="text" class="form-control" placeholder="Barcode" aria-label="Barcode" aria-describedby="btn-filter-barcode" :disabled="$store.isSyncing || $store.isSearching">
+                            <input x-model="barcode" type="text" class="form-control" placeholder="Barcode" aria-label="Barcode" aria-describedby="btn-filter-barcode" :disabled="$store.isSyncing || $store.isSearching" @keyup.enter="filterBySku($data.barcode)">
                             <button @click="filterByBarcode($data.barcode)" class="btn btn-outline-secondary" type="button" id="btn-filter-barcode" :disabled="$store.isSyncing || $store.isSearching">Filter</button>
                         </div>
                     </div>
@@ -155,7 +155,7 @@
                 return
             }
             Alpine.store('isSearching', true)
-            fetchHttp(`/api/v1/inventory?sku=${sku}`, Alpine.store('jwt'))
+            fetchHttp(`/api/v1/inventory?sku=${sku.toUpperCase()}`, Alpine.store('jwt'))
                 .then(data => handleSearchResult(data))
         }
 
@@ -163,8 +163,9 @@
             if (barcode.length === 0) {
                 return
             }
+
             Alpine.store('isSearching', true)
-            fetchHttp(`/api/v1/inventory?barcode=${barcode}`, Alpine.store('jwt'))
+            fetchHttp(`/api/v1/inventory?barcode=${barcode.toUpperCase()}`, Alpine.store('jwt'))
                 .then(data => handleSearchResult(data))
         }
 
