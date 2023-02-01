@@ -3,6 +3,7 @@ package square
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,12 +15,13 @@ const (
 	TYPE_CATEGORY  = "CATEGORY"
 	TYPE_ITEM      = "ITEM"
 	TYPE_VARIATION = "ITEM_VARIATION"
+	TYPE_SERVICE   = "APPOINTMENTS_SERVICE"
 
 	VISIBILITY   = "PRIVATE"
 	PRODUCT_TYPE = "REGULAR"
 
 	PENCE_MULTIPLIER = 100
-	BATCH_SIZE       = 500
+	BATCH_SIZE       = 100
 	CURRENCY         = "GBP"
 
 	VARIATION_ORDINAL = 1
@@ -113,19 +115,24 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 			objects = make([]SquareProductObject, 0)
 		}
 
+		serviceDuration := c.getServiceDuration(product)
+		availableForBooking := strings.HasPrefix(product.Barcode, "GTR-")
+
 		itemMoney := SquarePriceMoney{
 			Amount:   int(product.Price * PENCE_MULTIPLIER),
 			Currency: CURRENCY,
 		}
 
 		variationData := SquareProductVariationData{
-			ItemID:      product.SquareID,
-			Sku:         product.SKU,
-			Upc:         product.Barcode,
-			Name:        VARIATION_NAME,
-			PricingType: VARIATION_PRICING,
-			Ordinal:     VARIATION_ORDINAL,
-			PriceMoney:  itemMoney,
+			ItemID:          product.SquareID,
+			Sku:             product.SKU,
+			Upc:             product.Barcode,
+			Name:            VARIATION_NAME,
+			PricingType:     VARIATION_PRICING,
+			Ordinal:         VARIATION_ORDINAL,
+			PriceMoney:      itemMoney,
+			ServiceDuration: serviceDuration,
+			AvailableForBooking: availableForBooking,
 		}
 
 		itemVariations := []SquareProductVariation{
@@ -139,11 +146,16 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 			},
 		}
 
+		productType := PRODUCT_TYPE
+		if strings.HasPrefix(product.SKU, "GTR-") {
+			productType = "APPOINTMENTS_SERVICE"
+		}
+
 		itemData := SquareProductData{
 			Name:               product.Title,
 			CategoryID:         product.SquareCategoryID,
 			Visibility:         VISIBILITY,
-			ProductType:        PRODUCT_TYPE,
+			ProductType:        productType,
 			SkipModifierScreen: false,
 			IsTaxable:          true,
 			Variations:         itemVariations,
@@ -295,12 +307,44 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 			break
 		}
 
-		for _, order := range squareResp.Orders {
-			orders = append(orders, order)
-		}
+		// for _, order := range squareResp.Orders {
+		// 	orders = append(orders, order)
+		// }
+		orders = append(orders, squareResp.Orders...)
 
 		cursor = squareResp.Cursor
 	}
 
 	return orders, nil
+}
+
+func (c *SquareClient) getServiceDuration(product types.Product) int {
+	var duration int
+	switch product.SKU {
+	case "GTR-001":
+		duration = 40
+	case "GTR-002":
+		duration = 40
+	case "GTR-003":
+		duration = 30
+	case "GTR-004":
+		duration = 30
+	case "GTR-005":
+		duration = 40
+	case "GTR-006":
+		duration = 40
+	case "GTR-007":
+		duration = 30
+	case "GTR-008":
+		duration = 40
+	case "GTR-009":
+		duration = 40
+	case "GTR-010":
+		duration = 40
+	default:
+		return 0
+	}
+	durationMillis := duration * 60 * 1000
+	c.logger.Debugw("will retrieve service duration", "sku", product.SKU, "durationMins", duration, "durationMillis", durationMillis)
+	return durationMillis
 }

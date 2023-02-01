@@ -72,7 +72,9 @@ type SquareProductVariationData struct {
 	Ordinal     int              `json:"ordinal"`
 	PricingType string           `json:"pricing_type"`
 	Upc         string           `json:"upc"`
+	ServiceDuration int `json:"service_duration"`
 	PriceMoney  SquarePriceMoney `json:"price_money"`
+	AvailableForBooking bool `json:"available_for_booking"`
 }
 
 type SquarePriceMoney struct {

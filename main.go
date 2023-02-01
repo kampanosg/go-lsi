@@ -65,7 +65,7 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, logger)
 
-	setSyncLoop(logger, syncTool)
+	// setSyncLoop(logger, syncTool)
 
 	router := mux.NewRouter()
 
