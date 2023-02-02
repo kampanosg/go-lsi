@@ -15,7 +15,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// / usage: go run delete_square_inventory.go ACCESS_TOKEN LOCATION_ID
 func norun_main() {
 	args := os.Args[1:]
 

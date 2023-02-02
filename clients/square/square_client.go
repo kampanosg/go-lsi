@@ -356,9 +356,9 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 		orders = append(orders, squareResp.Orders...)
 
 		cursor = squareResp.Cursor
-        if cursor == "" {
-            break
-        }
+		if cursor == "" {
+			break
+		}
 	}
 
 	return orders, nil
