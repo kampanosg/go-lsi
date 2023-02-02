@@ -7,7 +7,7 @@ import (
 
 func (db SqliteDb) GetUserByUsername(username string) (types.User, error) {
 	var result models.User
-	db.Connection.Where(&models.User{Username: username}).First(&result)
+	db.Connection.Where("username = ?", username).First(&result)
 	if result.ID == 0 {
 		return types.User{}, errRecordNotFound
 	}

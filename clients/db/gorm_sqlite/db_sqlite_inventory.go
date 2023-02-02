@@ -34,13 +34,13 @@ func (db SqliteDb) GetProducts() ([]types.Product, error) {
 
 func (db SqliteDb) GetProductBySku(sku string) (types.Product, error) {
 	var result models.Product
-	db.Connection.Where(&models.Product{SKU: sku}).First(&result)
+	db.Connection.Where("sku = ?", sku).First(&result)
 	return transformResult(result)
 }
 
 func (db SqliteDb) GetProductByBarcode(barcode string) (types.Product, error) {
 	var result models.Product
-	db.Connection.Where(&models.Product{Barcode: barcode}).First(&result)
+	db.Connection.Where("barcode = ?", barcode).First(&result)
 	return transformResult(result)
 }
 
