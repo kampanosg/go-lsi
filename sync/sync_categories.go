@@ -47,62 +47,63 @@ func (s *SyncTool) SyncCategories() error {
 		if !ok {
 			newCategory.SquareID = fmt.Sprintf("#%s", newCategory.LinnworksID)
 		} else {
-			newCategory.SquareID = upsert.category.SquareID
-			newCategory.Version = upsert.category.Version
-			newerVersion := newCategoryVersions[upsert.category.SquareID]
-			if newCategory.Version != newerVersion {
-				newCategory.Version = newerVersion
+
+			if isCategoryUnchanged(newCategory, upsert.category) {
+				categoriesUpsertMap[newCategory.LinnworksID] = upsertCategory{
+					category:  newCategory,
+					isDeleted: false,
+				}
+				continue
 			}
+
+			newCategory.SquareID = upsert.category.SquareID
+			newCategory.Version = newCategoryVersions[upsert.category.SquareID]
 		}
-		s.logger.Debugw("assigned square id and version to category", "id", newCategory.SquareID, "version", newCategory.Version)
 
 		categoriesUpsertMap[newCategory.LinnworksID] = upsertCategory{
 			category:  newCategory,
 			isDeleted: false,
 		}
+
 		categoriesToBeUpserted = append(categoriesToBeUpserted, newCategory)
 		categoriesSquareIdMapping[newCategory.SquareID] = newCategory
 	}
 
-	s.logger.Infow("upserting categories to square", "total", len(categoriesToBeUpserted))
-	resp, err := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
-	if err != nil {
-		s.logger.Errorw("unable to upsert categories", reasonKey, msgSqErr, errKey, err.Error())
-		return err
-	}
-
-	if len(resp.IDMappings) > 0 {
-		s.logger.Debugw("found new category mappings", "total", len(resp.IDMappings))
-		for _, idMapping := range resp.IDMappings {
-			category := categoriesSquareIdMapping[idMapping.ClientObjectID]
-			category.SquareID = idMapping.ObjectID
-			categoriesSquareIdMapping[category.SquareID] = category
-		}
-	}
-
-	categories := make([]types.Category, 0)
-	for _, object := range resp.Objects {
-		category := categoriesSquareIdMapping[object.ID]
-		category.Version = object.Version
-		categories = append(categories, category)
-	}
-
-	if err := s.Db.ClearCategories(); err != nil {
-		s.logger.Errorw("unable to clear database from categories", reasonKey, msgDbErr, errKey, err.Error())
-		return err
-	}
-
-	if len(categories) > 0 {
-		s.logger.Infow("inserting categories to db", "total", len(categories))
-		if err := s.Db.InsertCategories(categories); err != nil {
-			s.logger.Errorw("unable to insert categories", reasonKey, msgDbErr, errKey, err.Error())
+	s.logger.Infow("found categories to be upserted", "total", len(categoriesToBeUpserted))
+	if len(categoriesToBeUpserted) > 0 {
+		resp, err := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
+		if err != nil {
+			s.logger.Errorw("unable to upsert categories", reasonKey, msgSqErr, errKey, err.Error())
 			return err
+		}
+
+		if len(resp.IDMappings) > 0 {
+			s.logger.Debugw("found new category mappings", "total", len(resp.IDMappings))
+			for _, idMapping := range resp.IDMappings {
+				category := categoriesSquareIdMapping[idMapping.ClientObjectID]
+				category.SquareID = idMapping.ObjectID
+				categoriesSquareIdMapping[category.SquareID] = category
+			}
+		}
+
+		categories := make([]types.Category, 0)
+		for _, object := range resp.Objects {
+			category := categoriesSquareIdMapping[object.ID]
+			category.Version = object.Version
+			categories = append(categories, category)
+			s.Db.UpsertCategory(category)
 		}
 	}
 
 	categoriesToBeDeleted := getCategoriesToBeDeleted(categoriesUpsertMap)
 	if len(categoriesToBeDeleted) > 0 {
 		s.logger.Infow("found categories to be deleted", "total", len(categoriesToBeDeleted))
+
+		if err := s.DeleteCategoriesBySquareIds(categoriesToBeDeleted); err != nil {
+			s.logger.Errorw("unable to delete categories", reasonKey, msgDbErr, errKey, err.Error())
+			return err
+		}
+
 		if err := s.SquareClient.BatchDeleteItems(categoriesToBeDeleted); err != nil {
 			s.logger.Errorw("unable to delete categories", reasonKey, msgSqErr, errKey, err.Error())
 			return err
@@ -146,4 +147,8 @@ func fromCategoryLinnworksResponseToDomain(lwCategory linnworks.LinnworksCategor
 		LinnworksID: lwCategory.Id,
 		Name:        lwCategory.Name,
 	}
+}
+
+func isCategoryUnchanged(newCategory, oldCategory types.Category) bool {
+	return newCategory.Name == oldCategory.Name
 }

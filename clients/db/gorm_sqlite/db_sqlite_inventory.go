@@ -19,8 +19,17 @@ func (db SqliteDb) InsertCategories(categories []types.Category) error {
 	return db.Connection.Create(&categoryModels).Error
 }
 
-func (db SqliteDb) ClearCategories() error {
-	return db.Connection.Unscoped().Delete(&models.Category{}).Error
+func (db SqliteDb) UpsertCategory(category types.Category) error {
+	var existingCategory models.Category
+	upsertCategory := fromCategoryTypeToModel(category)
+	if err := db.Connection.Where("square_id = ?", category.SquareID).First(&existingCategory); err == nil {
+		upsertCategory.ID = existingCategory.ID
+	}
+	return db.Connection.Save(&upsertCategory).Error
+}
+
+func (db SqliteDb) DeleteCategoriesBySquareIds(squareIds []string) error {
+	return db.Connection.Where("square_id in ?", squareIds).Delete(&models.Category{})
 }
 
 func (db SqliteDb) GetProducts() ([]types.Product, error) {
@@ -89,15 +98,18 @@ func fromCategoryModelsToTypes(categoryModels []models.Category) []types.Categor
 func fromCategoryTypeToModels(categories []types.Category) []models.Category {
 	categoryModels := make([]models.Category, len(categories))
 	for index, category := range categories {
-		categoryModel := models.Category{
-			LinnworksID: category.LinnworksID,
-			SquareID:    category.SquareID,
-			Name:        category.Name,
-			Version:     category.Version,
-		}
-		categoryModels[index] = categoryModel
+		categoryModels[index] = fromCategoryTypeToModel(category)
 	}
 	return categoryModels
+}
+
+func fromCategoryTypeToModel(category types.Category) models.Category {
+	return models.Category{
+		LinnworksID: category.LinnworksID,
+		SquareID:    category.SquareID,
+		Name:        category.Name,
+		Version:     category.Version,
+	}
 }
 
 func fromProductModelsToTypes(productModels []models.Product) []types.Product {
