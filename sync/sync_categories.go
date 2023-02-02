@@ -30,12 +30,6 @@ func (s *SyncTool) SyncCategories() error {
 	newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
 	s.logger.Infow("found categories from linnworks", "total", len(newCategories))
 
-	newCategoryVersions, err := s.SquareClient.GetItemsVersions("CATEGORY")
-	if err != nil {
-		s.logger.Errorw("unable to retrieve new square version ids", "error", err.Error())
-		return err
-	}
-
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
 	categoriesToBeUpserted := make([]types.Category, 0)
 	categoriesSquareIdMapping := make(map[string]types.Category)
@@ -57,7 +51,11 @@ func (s *SyncTool) SyncCategories() error {
 			}
 
 			newCategory.SquareID = upsert.category.SquareID
-			newCategory.Version = newCategoryVersions[upsert.category.SquareID]
+			newCategory.Version = upsert.category.Version
+			categoryNewerVersion, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
+			if err != nil {
+				newCategory.Version = categoryNewerVersion
+			}
 		}
 
 		categoriesUpsertMap[newCategory.LinnworksID] = upsertCategory{
@@ -99,7 +97,7 @@ func (s *SyncTool) SyncCategories() error {
 	if len(categoriesToBeDeleted) > 0 {
 		s.logger.Infow("found categories to be deleted", "total", len(categoriesToBeDeleted))
 
-		if err := s.DeleteCategoriesBySquareIds(categoriesToBeDeleted); err != nil {
+		if err := s.Db.DeleteCategoriesBySquareIds(categoriesToBeDeleted); err != nil {
 			s.logger.Errorw("unable to delete categories", reasonKey, msgDbErr, errKey, err.Error())
 			return err
 		}
