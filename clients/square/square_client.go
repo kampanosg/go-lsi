@@ -21,7 +21,7 @@ const (
 	PRODUCT_TYPE = "REGULAR"
 
 	PENCE_MULTIPLIER = 100
-	BATCH_SIZE       = 100
+	BATCH_SIZE       = 50
 	CURRENCY         = "GBP"
 
 	VARIATION_ORDINAL = 1
@@ -356,6 +356,9 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 		orders = append(orders, squareResp.Orders...)
 
 		cursor = squareResp.Cursor
+        if cursor == "" {
+            break
+        }
 	}
 
 	return orders, nil
