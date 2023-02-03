@@ -26,16 +26,22 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 		ordersToUpsert := make([]types.Order, 0)
 
 		for _, newOrder := range newOrders {
-			_, err := s.Db.GetOrderBySquareId(newOrder.ID)
-			if err == nil {
+			if _, err := s.Db.GetOrderBySquareId(newOrder.ID); err == nil {
 				continue
 			}
+
 			orderProducts := make([]types.OrderProduct, len(newOrder.LineItems))
 			for index, item := range newOrder.LineItems {
-				product, err := s.Db.GetProductByVarId(item.CatalogObjectID)
+				var product types.Product
+				product, err = s.Db.GetProductByVarId(item.CatalogObjectID)
 				if err != nil {
 					s.logger.Errorw("unable to retrieve product from db", "variation", item.CatalogObjectID, errKey, err.Error())
-					return err
+					s.logger.Infow("will attempt to retrieve product by name", "name", item.Name)
+					product, err = s.Db.GetProductByTitle(item.Name)
+					if err != nil {
+						s.logger.Errorw("unable to retrieve product from db", "name", item.Name, errKey, err.Error())
+						return err
+					}
 				}
 				orderProduct := fromSquareLineItemToDomain(item, product)
 				orderProduct.SquareOrderId = newOrder.ID

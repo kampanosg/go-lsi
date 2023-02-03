@@ -43,20 +43,26 @@ func (db SqliteDb) GetProducts() ([]types.Product, error) {
 
 func (db SqliteDb) GetProductBySku(sku string) (types.Product, error) {
 	var result models.Product
-	db.Connection.Where("sku = ?", sku).First(&result)
-	return transformResult(result)
+	err := db.Connection.Where("sku = ?", sku).First(&result).Error
+	return transformResult(result), err
 }
 
 func (db SqliteDb) GetProductByBarcode(barcode string) (types.Product, error) {
 	var result models.Product
-	db.Connection.Where("barcode = ?", barcode).First(&result)
-	return transformResult(result)
+	err := db.Connection.Where("barcode = ?", barcode).First(&result).Error
+	return transformResult(result), err
 }
 
 func (db SqliteDb) GetProductByVarId(varId string) (types.Product, error) {
 	var result models.Product
-	db.Connection.Where(&models.Product{SquareVarID: varId}).First(&result)
-	return transformResult(result)
+	err := db.Connection.Where("square_var_id = ?", varId).First(&result).Error
+	return transformResult(result), err
+}
+
+func (db SqliteDb) GetProductByTitle(title string) (types.Product, error) {
+	var result models.Product
+	err := db.Connection.Where("title = ?", title).First(&result).Error
+	return transformResult(result), err
 }
 
 func (db SqliteDb) InsertProduct(product types.Product) error {
@@ -82,11 +88,8 @@ func (db SqliteDb) DeleteProductsBySquareIds(squareIds []string) error {
 	return db.Connection.Where("square_id IN ?", squareIds).Unscoped().Delete(&models.Product{}).Error
 }
 
-func transformResult(result models.Product) (types.Product, error) {
-	if result.ID == 0 {
-		return types.Product{}, errRecordNotFound
-	}
-	return fromProductModelToType(result), nil
+func transformResult(result models.Product) types.Product {
+	return fromProductModelToType(result)
 }
 
 func fromCategoryModelsToTypes(categoryModels []models.Category) []types.Category {
