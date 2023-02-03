@@ -67,7 +67,7 @@ func (c *SquareClient) GetItemVersion(squareId string) (int64, error) {
 
 	var r SquareCatalogItemResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
-        c.logger.Errorw("failed to parse object", "error", err.Error())
+		c.logger.Errorw("failed to parse object", "error", err.Error())
 		return 0, err
 	}
 

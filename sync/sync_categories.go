@@ -21,16 +21,13 @@ func (s *SyncTool) SyncCategories() error {
 		return err
 	}
 
-	// lwCategories, err := s.LinnworksClient.GetCategories()
-	// if err != nil {
-	// 	s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, errKey, err.Error())
-	// 	return err
-	// }
+	lwCategories, err := s.LinnworksClient.GetCategories()
+	if err != nil {
+		s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, errKey, err.Error())
+		return err
+	}
 
-	// newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
-    newCategories := []types.Category{
-        {Name: "Beans", LinnworksID: "test-category-1"},
-    }
+	newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
 
 	s.logger.Infow("found categories from linnworks", "total", len(newCategories))
 
@@ -56,14 +53,14 @@ func (s *SyncTool) SyncCategories() error {
 
 			newCategory.SquareID = upsert.category.SquareID
 			newCategory.Version = upsert.category.Version
-            newerVersion, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
-            if err != nil {
-                s.logger.Debugw("using existing version", "id", newCategory.SquareID, "version", newCategory.Version)
-			    newCategory.Version = upsert.category.Version
-            } else {
-                s.logger.Debugw("found newer version", "id", newCategory.SquareID, "version", newerVersion)
-                newCategory.Version = newerVersion
-            }
+			newerVersion, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
+			if err != nil {
+				s.logger.Debugw("using existing version", "id", newCategory.SquareID, "version", newCategory.Version)
+				newCategory.Version = upsert.category.Version
+			} else {
+				s.logger.Debugw("found newer version", "id", newCategory.SquareID, "version", newerVersion)
+				newCategory.Version = newerVersion
+			}
 		}
 
 		categoriesUpsertMap[newCategory.LinnworksID] = upsertCategory{

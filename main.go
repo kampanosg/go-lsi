@@ -68,7 +68,7 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, logger)
 
-	// setSyncLoop(logger, syncTool)
+	setSyncLoop(logger, syncTool)
 
 	router := mux.NewRouter()
 
@@ -92,7 +92,7 @@ func logInit() *zap.SugaredLogger {
 
 	pe.EncodeTime = zapcore.ISO8601TimeEncoder
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
-	level := zap.DebugLevel
+	level := zap.InfoLevel
 
 	core := zapcore.NewTee(
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),
