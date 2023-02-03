@@ -7,7 +7,8 @@ import (
 type DB interface {
 	GetCategories() ([]types.Category, error)
 	InsertCategories(categories []types.Category) error
-	ClearCategories() error
+	UpsertCategory(category types.Category) error
+	DeleteCategoriesBySquareIds(squareIds []string) error
 
 	GetProducts() ([]types.Product, error)
 	GetProductByBarcode(barcode string) (types.Product, error)
@@ -15,7 +16,8 @@ type DB interface {
 	GetProductByVarId(varId string) (types.Product, error)
 	InsertProducts(products []types.Product) error
 	InsertProduct(product types.Product) error
-	ClearProducts() error
+	UpsertProduct(product types.Product) error
+	DeleteProductsBySquareIds(squareIds []string) error
 
 	GetUserByUsername(username string) (types.User, error)
 

@@ -226,9 +226,8 @@ type SquareQuery struct {
 	Filter SquareFilter `json:"filter"`
 }
 
-type SquareItemResponse struct {
-	Cursor  string `json:"cursor"`
-	Objects []struct {
+type SquareCatalogItemResponse struct {
+	Object struct {
 		Type                  string    `json:"type"`
 		ID                    string    `json:"id"`
 		UpdatedAt             time.Time `json:"updated_at"`
@@ -260,12 +259,16 @@ type SquareItemResponse struct {
 						Amount   int    `json:"amount"`
 						Currency string `json:"currency"`
 					} `json:"price_money"`
-					Sellable  bool `json:"sellable"`
-					Stockable bool `json:"stockable"`
+					ServiceDuration     int  `json:"service_duration"`
+					AvailableForBooking bool `json:"available_for_booking"`
+					Sellable            bool `json:"sellable"`
+					Stockable           bool `json:"stockable"`
 				} `json:"item_variation_data"`
 			} `json:"variations"`
 			ProductType        string `json:"product_type"`
 			SkipModifierScreen bool   `json:"skip_modifier_screen"`
+			EcomAvailable      bool   `json:"ecom_available"`
+			EcomVisibility     string `json:"ecom_visibility"`
 		} `json:"item_data"`
-	} `json:"objects"`
+	} `json:"object"`
 }

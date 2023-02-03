@@ -53,37 +53,25 @@ func NewSquareClient(accessToken, host, version, location string, teamMembers []
 	}
 }
 
-func (c *SquareClient) GetItemsVersions(itemType string) (map[string]int64, error) {
+func (c *SquareClient) GetItemVersion(squareId string) (int64, error) {
 	headers := make(map[string]string)
 	headers["Square-Version"] = c.ApiVersion
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
-	versions := make(map[string]int64, 0)
-	cursor := ""
-
-	for {
-		url := fmt.Sprintf("%s/catalog/list?types=%s&cursor=%s", c.Host, itemType, cursor)
-		resp, err := c.makeRequest("GET", url, headers, []byte{})
-		if err != nil {
-			panic(err)
-		}
-
-		var r SquareItemResponse
-		if err := json.Unmarshal(resp, &r); err != nil {
-			panic(err)
-		}
-
-		for _, o := range r.Objects {
-			versions[o.ID] = o.Version
-		}
-
-		cursor = r.Cursor
-		if cursor == "" {
-			break
-		}
+	url := fmt.Sprintf("%s/catalog/object/%s", c.Host, squareId)
+	resp, err := c.makeRequest("GET", url, headers, []byte{})
+	if err != nil {
+		return 0, err
 	}
-	return versions, nil
+
+	var r SquareCatalogItemResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		c.logger.Errorw("failed to parse object", "error", err.Error())
+		return 0, err
+	}
+
+	return r.Object.Version, nil
 }
 
 func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpsertResponse, error) {

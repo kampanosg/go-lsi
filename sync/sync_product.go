@@ -37,13 +37,6 @@ func (s *SyncTool) SyncProducts() error {
 	}
 
 	newProducts := fromProductLinnworksResponsesToDomain(lwProduts)
-
-	newItemVersions, err := s.SquareClient.GetItemsVersions("ITEM")
-	if err != nil {
-		s.logger.Errorw("unable to retrieve new square version ids", "error", err.Error())
-		return err
-	}
-
 	productsUpsertMap := buildUpsertProductMap(oldProducts)
 	productsToUpsert := make([]types.Product, 0)
 	productsSquareIdMapping := make(map[string]types.Product, 0)
@@ -56,19 +49,27 @@ func (s *SyncTool) SyncProducts() error {
 			newProduct.SquareID = fmt.Sprintf("#%s", newProduct.LinnworksID)
 			newProduct.SquareVarID = fmt.Sprintf("#%s-var", newProduct.LinnworksID)
 		} else {
+
+			if isProductUnchanged(newProduct, upsert.product) {
+				productsUpsertMap[newProduct.LinnworksID] = upsertProduct{
+					product:   newProduct,
+					isDeleted: false,
+				}
+				continue
+			}
+
 			newProduct.SquareID = upsert.product.SquareID
 			newProduct.SquareVarID = upsert.product.SquareVarID
-			newProduct.Version = upsert.product.Version
-			newerVersion := newItemVersions[upsert.product.SquareID]
-			if newProduct.Version != newerVersion {
+			newProduct.SquareCategoryID = upsert.product.SquareCategoryID
+			newerVersion, err := s.SquareClient.GetItemVersion(newProduct.SquareID)
+			if err != nil {
+				s.logger.Debugw("using existing version", "id", newProduct.SquareID, "version", newProduct.Version)
+				newProduct.Version = upsert.product.Version
+			} else {
+				s.logger.Debugw("found newer version", "id", newProduct.SquareID, "version", newerVersion)
 				newProduct.Version = newerVersion
 			}
 		}
-		s.logger.Debugw("assigned ids and version to product",
-			"squareId", newProduct.SquareID,
-			"var id", newProduct.SquareVarID,
-			"version", newProduct.Version,
-		)
 
 		category := mappedCatergoriesById[newProduct.LinnworksCategoryID]
 		newProduct.SquareCategoryID = category.SquareID
@@ -82,53 +83,50 @@ func (s *SyncTool) SyncProducts() error {
 		}
 	}
 
-	resp, err := s.SquareClient.UpsertProducts(productsToUpsert)
-	if err != nil {
-		s.logger.Errorw("unable to upsert products", reasonKey, msgSqErr, errKey, err.Error())
-		return err
-	}
+	s.logger.Infow("found updated or new products", "total", len(productsToUpsert))
+	if len(productsToUpsert) > 0 {
 
-	if len(resp.IDMappings) > 0 {
-		s.logger.Debugw("found new product mappings", "total", len(resp.IDMappings))
-		for _, idMapping := range resp.IDMappings {
-			if !strings.HasSuffix(idMapping.ClientObjectID, "-var") {
-				product := productsSquareIdMapping[idMapping.ClientObjectID]
-				product.SquareID = idMapping.ObjectID
-				for _, varIdMapping := range resp.IDMappings {
-					clientObjectId := varIdMapping.ClientObjectID
-					clientObjectIdLen := len(clientObjectId)
-					productId := clientObjectId[1 : clientObjectIdLen-4]
-					if strings.HasSuffix(clientObjectId, "-var") && productId == product.LinnworksID {
-						product.SquareVarID = varIdMapping.ObjectID
-						break
+		resp, err := s.SquareClient.UpsertProducts(productsToUpsert)
+		if err != nil {
+			s.logger.Errorw("unable to upsert products", reasonKey, msgSqErr, errKey, err.Error())
+			return err
+		}
+
+		if len(resp.IDMappings) > 0 {
+			s.logger.Debugw("found new product mappings", "total", len(resp.IDMappings))
+			for _, idMapping := range resp.IDMappings {
+				if !strings.HasSuffix(idMapping.ClientObjectID, "-var") {
+					product := productsSquareIdMapping[idMapping.ClientObjectID]
+					product.SquareID = idMapping.ObjectID
+					for _, varIdMapping := range resp.IDMappings {
+						clientObjectId := varIdMapping.ClientObjectID
+						clientObjectIdLen := len(clientObjectId)
+						productId := clientObjectId[1 : clientObjectIdLen-4]
+						if strings.HasSuffix(clientObjectId, "-var") && productId == product.LinnworksID {
+							product.SquareVarID = varIdMapping.ObjectID
+							break
+						}
 					}
+					productsSquareIdMapping[product.SquareID] = product
 				}
-				productsSquareIdMapping[product.SquareID] = product
 			}
 		}
-	}
 
-	products := make([]types.Product, 0)
-	for _, object := range resp.Objects {
-		product := productsSquareIdMapping[object.ID]
-		product.Version = object.Version
-		products = append(products, product)
-	}
-
-	if err := s.Db.ClearProducts(); err != nil {
-		s.logger.Errorw("unable to delete products", reasonKey, msgDbErr, errKey, err.Error())
-		return err
-	}
-
-	if len(products) > 0 {
-		for _, product := range products {
-			s.Db.InsertProduct(product)
+		for _, object := range resp.Objects {
+			product := productsSquareIdMapping[object.ID]
+			product.Version = object.Version
+			s.Db.UpsertProduct(product)
 		}
 	}
 
 	productsToBeDeleted := getProductsToBeDeleted(productsUpsertMap)
 	if len(productsToBeDeleted) > 0 {
 		s.logger.Infow("found products to be deleted", "total", len(productsToBeDeleted))
+
+		if err := s.Db.DeleteProductsBySquareIds(productsToBeDeleted); err != nil {
+			s.logger.Errorw("unabled to delete products", reasonKey, msgDbErr, errKey, err.Error())
+		}
+
 		if err := s.SquareClient.BatchDeleteItems(productsToBeDeleted); err != nil {
 			s.logger.Errorw("unable to delete products", reasonKey, msgSqErr, errKey, err.Error())
 			return err
@@ -184,4 +182,12 @@ func fromProductLinnworksResponseToDomain(lwProduct linnworks.LinnworksProductRe
 		Price:               lwProduct.RetailPrice,
 		SKU:                 lwProduct.SKU,
 	}
+}
+
+func isProductUnchanged(newProduct, oldProduct types.Product) bool {
+	return newProduct.Title == oldProduct.Title &&
+		newProduct.Barcode == oldProduct.Barcode &&
+		newProduct.SKU == oldProduct.SKU &&
+		newProduct.Price == oldProduct.Price &&
+		newProduct.LinnworksCategoryID == oldProduct.LinnworksCategoryID
 }
