@@ -21,13 +21,17 @@ func (s *SyncTool) SyncCategories() error {
 		return err
 	}
 
-	lwCategories, err := s.LinnworksClient.GetCategories()
-	if err != nil {
-		s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, errKey, err.Error())
-		return err
-	}
+	// lwCategories, err := s.LinnworksClient.GetCategories()
+	// if err != nil {
+	// 	s.logger.Errorw("unable to sync categories", reasonKey, msgLwErr, errKey, err.Error())
+	// 	return err
+	// }
 
-	newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
+	// newCategories := fromCategoryLinnworksResponsesToDomain(lwCategories)
+    newCategories := []types.Category{
+        {Name: "Beans", LinnworksID: "test-category-1"},
+    }
+
 	s.logger.Infow("found categories from linnworks", "total", len(newCategories))
 
 	categoriesUpsertMap := buildUpsertCategoryMap(oldCategories)
@@ -52,10 +56,14 @@ func (s *SyncTool) SyncCategories() error {
 
 			newCategory.SquareID = upsert.category.SquareID
 			newCategory.Version = upsert.category.Version
-			categoryNewerVersion, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
-			if err != nil {
-				newCategory.Version = categoryNewerVersion
-			}
+            newerVersion, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
+            if err != nil {
+                s.logger.Debugw("using existing version", "id", newCategory.SquareID, "version", newCategory.Version)
+			    newCategory.Version = upsert.category.Version
+            } else {
+                s.logger.Debugw("found newer version", "id", newCategory.SquareID, "version", newerVersion)
+                newCategory.Version = newerVersion
+            }
 		}
 
 		categoriesUpsertMap[newCategory.LinnworksID] = upsertCategory{
@@ -67,7 +75,7 @@ func (s *SyncTool) SyncCategories() error {
 		categoriesSquareIdMapping[newCategory.SquareID] = newCategory
 	}
 
-	s.logger.Infow("found categories to be upserted", "total", len(categoriesToBeUpserted))
+	s.logger.Infow("found updated or new categories", "total", len(categoriesToBeUpserted))
 	if len(categoriesToBeUpserted) > 0 {
 		resp, err := s.SquareClient.UpsertCategories(categoriesToBeUpserted)
 		if err != nil {
@@ -84,11 +92,9 @@ func (s *SyncTool) SyncCategories() error {
 			}
 		}
 
-		categories := make([]types.Category, 0)
 		for _, object := range resp.Objects {
 			category := categoriesSquareIdMapping[object.ID]
 			category.Version = object.Version
-			categories = append(categories, category)
 			s.Db.UpsertCategory(category)
 		}
 	}

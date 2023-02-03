@@ -33,7 +33,7 @@ func main() {
 	cursor := ""
 
 	for {
-		url := fmt.Sprintf("%s/catalog/list?types=ITEM&cursor=%s", host, cursor)
+		url := fmt.Sprintf("%s/catalog/list?types=CATEGORY&cursor=%s", host, cursor)
 		resp, err := makeRequest("GET", url, headers, []byte{})
 		if err != nil {
 			panic(err)

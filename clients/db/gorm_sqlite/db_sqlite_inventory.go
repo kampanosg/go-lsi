@@ -1,6 +1,8 @@
 package gormsqlite
 
 import (
+
+
 	"github.com/kampanosg/go-lsi/models"
 	"github.com/kampanosg/go-lsi/types"
 )
@@ -21,15 +23,15 @@ func (db SqliteDb) InsertCategories(categories []types.Category) error {
 
 func (db SqliteDb) UpsertCategory(category types.Category) error {
 	var existingCategory models.Category
-	upsertCategory := fromCategoryTypeToModel(category)
-	if err := db.Connection.Where("square_id = ?", category.SquareID).First(&existingCategory); err == nil {
-		upsertCategory.ID = existingCategory.ID
+	if err := db.Connection.Where("square_id = ?", category.SquareID).First(&existingCategory).Error; err == nil {
+        db.Connection.Unscoped().Delete(&existingCategory)
 	}
+	upsertCategory := fromCategoryTypeToModel(category)
 	return db.Connection.Save(&upsertCategory).Error
 }
 
 func (db SqliteDb) DeleteCategoriesBySquareIds(squareIds []string) error {
-	return db.Connection.Where("square_id in ?", squareIds).Delete(&models.Category{})
+	return db.Connection.Where("square_id IN ?", squareIds).Unscoped().Delete(&models.Category{}).Error
 }
 
 func (db SqliteDb) GetProducts() ([]types.Product, error) {
@@ -69,8 +71,17 @@ func (db SqliteDb) InsertProducts(products []types.Product) error {
 	return db.Connection.Create(&productModels).Error
 }
 
-func (db SqliteDb) ClearProducts() error {
-	return db.Connection.Unscoped().Delete(&models.Product{}).Error
+func (db SqliteDb) UpsertProduct(product types.Product) error {
+	var existingProduct models.Product
+	if err := db.Connection.Where("square_id = ?", product.SquareID).First(&existingProduct).Error; err == nil {
+        db.Connection.Unscoped().Delete(&existingProduct)
+	}
+	upsertProduct := fromProductTypeToModel(product)
+	return db.Connection.Save(&upsertProduct).Error
+}
+
+func (db SqliteDb) DeleteProductsBySquareIds(squareIds []string) error {
+    return db.Connection.Where("square_id IN ?", squareIds).Unscoped().Delete(&models.Product{}).Error
 }
 
 func transformResult(result models.Product) (types.Product, error) {
