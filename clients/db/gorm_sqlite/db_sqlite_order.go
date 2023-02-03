@@ -7,11 +7,8 @@ import (
 
 func (db SqliteDb) GetOrders() ([]types.Order, error) {
 	orders := make([]models.Order, 0)
-	result := db.Connection.Find(&orders)
-	if result.Error != nil {
-		return []types.Order{}, result.Error
-	}
-	return fromOrderModelsToTypes(orders), nil
+	err := db.Connection.Order("created_at_square desc").Find(&orders).Error
+	return fromOrderModelsToTypes(orders), err
 }
 
 func (db SqliteDb) InsertOrders(orders []types.Order) error {

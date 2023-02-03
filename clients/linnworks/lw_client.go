@@ -124,6 +124,8 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = c.auth.Token
 
+	ordersResp := make(LinnworksCreateOrdersResponse, 0)
+
 	for _, order := range orders {
 
 		var orderProducts bytes.Buffer
@@ -168,14 +170,19 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 
 		resp, err := c.makeRequest(Post, linnworksUrl, payload, headers)
 		if err != nil {
-			return LinnworksCreateOrdersResponse{}, err
+			return ordersResp, err
 		}
-		fmt.Printf("resp: %v\n", string(resp))
-		var productResps []LinnworksProductResponse
-		json.Unmarshal(resp, &productResps)
+
+		c.logger.Debugw("linnworks finished processing new order", "response", resp)
+		var productResps LinnworksCreateOrdersResponse
+		if err := json.Unmarshal(resp, &productResps); err != nil {
+			return ordersResp, err
+		}
+
+		ordersResp = append(ordersResp, productResps...)
 	}
 
-	return LinnworksCreateOrdersResponse{}, nil
+	return ordersResp, nil
 }
 
 func (c *LinnworksClient) refreshToken() error {

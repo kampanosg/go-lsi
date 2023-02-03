@@ -104,7 +104,7 @@ func logInit() *zap.SugaredLogger {
 }
 
 func setSyncLoop(logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(10 * time.Minute)
 	quit := make(chan struct{})
 	go func() {
 		for {
