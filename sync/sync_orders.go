@@ -1,6 +1,8 @@
 package sync
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/kampanosg/go-lsi/clients/square"
@@ -30,8 +32,8 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 				continue
 			}
 
-			orderProducts := make([]types.OrderProduct, len(newOrder.LineItems))
-			for index, item := range newOrder.LineItems {
+			orderProductsMap := make(map[string]types.OrderProduct, 0)
+			for _, item := range newOrder.LineItems {
 				var product types.Product
 				product, err = s.Db.GetProductByVarId(item.CatalogObjectID)
 				if err != nil {
@@ -43,9 +45,25 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 						return err
 					}
 				}
-				orderProduct := fromSquareLineItemToDomain(item, product)
-				orderProduct.SquareOrderId = newOrder.ID
-				orderProducts[index] = orderProduct
+
+				orderProduct, ok := orderProductsMap[item.CatalogObjectID]
+				if ok {
+					orderProduct.PricePerUnit += item.TotalMoney.Amount
+					orderProduct.Quantity = updateOrderProductQty(orderProduct.Quantity, item.Quantity)
+					orderProductsMap[item.CatalogObjectID] = orderProduct
+					continue
+				}
+
+				orderProductsMap[item.CatalogObjectID] = fromSquareLineItemToDomain(item, product)
+			}
+
+			s.logger.Debugw("products map", "map", orderProductsMap)
+
+			orderProducts := make([]types.OrderProduct, len(orderProductsMap))
+			index := 0
+			for _, v := range orderProductsMap {
+				orderProducts[index] = v
+				index += 1
 			}
 
 			order := fromSquareOrderToDomain(newOrder)
@@ -90,4 +108,18 @@ func fromSquareLineItemToDomain(item square.SquareLineItem, product types.Produc
 		Title:        product.Title,
 		PricePerUnit: product.Price,
 	}
+}
+
+func updateOrderProductQty(oldQty, newQty string) string {
+	qty1, err := strconv.Atoi(oldQty)
+	if err != nil {
+		return oldQty
+	}
+
+	qty2, err := strconv.Atoi(newQty)
+	if err != nil {
+		return oldQty
+	}
+
+	return fmt.Sprintf("%d", (qty1 + qty2))
 }

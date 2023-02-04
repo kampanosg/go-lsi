@@ -37,7 +37,6 @@ func (s *SyncTool) Sync(from time.Time, to time.Time) error {
 	s.logger.Infow("start syncing process", "from", from, "to", to)
 
 	startTime := time.Now()
-
 	if err := s.SyncCategories(); err != nil {
 		return err
 	}

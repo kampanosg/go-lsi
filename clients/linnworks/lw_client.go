@@ -173,7 +173,7 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 			return ordersResp, err
 		}
 
-		c.logger.Debugw("linnworks finished processing new order", "response", resp)
+		c.logger.Debugw("linnworks finished processing new order", "response", string(resp))
 		var productResps LinnworksCreateOrdersResponse
 		if err := json.Unmarshal(resp, &productResps); err != nil {
 			return ordersResp, err
