@@ -57,8 +57,6 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 				orderProductsMap[item.CatalogObjectID] = fromSquareLineItemToDomain(item, product)
 			}
 
-			s.logger.Debugw("products map", "map", orderProductsMap)
-
 			orderProducts := make([]types.OrderProduct, len(orderProductsMap))
 			index := 0
 			for _, v := range orderProductsMap {
