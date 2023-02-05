@@ -7,11 +7,8 @@ import (
 
 func (db SqliteDb) GetCategories() ([]types.Category, error) {
 	categories := make([]models.Category, 0)
-	result := db.Connection.Find(&categories)
-	if result.Error != nil {
-		return []types.Category{}, result.Error
-	}
-	return fromCategoryModelsToTypes(categories), nil
+	err := db.Connection.Find(&categories).Error
+	return fromCategoryModelsToTypes(categories), err
 }
 
 func (db SqliteDb) InsertCategories(categories []types.Category) error {
