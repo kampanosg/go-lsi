@@ -7,11 +7,8 @@ import (
 
 func (db SqliteDb) GetUserByUsername(username string) (types.User, error) {
 	var result models.User
-	db.Connection.Where("username = ?", username).First(&result)
-	if result.ID == 0 {
-		return types.User{}, errRecordNotFound
-	}
-	return fromUserDbRowToType(result), nil
+	err := db.Connection.Where("username = ?", username).First(&result).Error
+	return fromUserDbRowToType(result), err
 }
 
 func fromUserDbRowToType(user models.User) types.User {

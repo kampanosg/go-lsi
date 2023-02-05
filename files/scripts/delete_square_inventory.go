@@ -34,12 +34,12 @@ func main() {
 
 	for {
 		url := fmt.Sprintf("%s/catalog/list?types=ITEM&cursor=%s", host, cursor)
-		resp, err := makeRequest("GET", url, headers, []byte{})
+		resp, err := makeRequest2("GET", url, headers, []byte{})
 		if err != nil {
 			panic(err)
 		}
 
-		var r squareResp
+		var r squareResp2
 		if err := json.Unmarshal(resp, &r); err != nil {
 			panic(err)
 		}
@@ -60,7 +60,7 @@ func main() {
 	client.BatchDeleteItems(ids)
 }
 
-func makeRequest(method, url string, headers map[string]string, jsonReq []byte) ([]byte, error) {
+func makeRequest2(method, url string, headers map[string]string, jsonReq []byte) ([]byte, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonReq))
 
@@ -90,7 +90,7 @@ func makeRequest(method, url string, headers map[string]string, jsonReq []byte) 
 	return responseData, nil
 }
 
-type squareResp struct {
+type squareResp2 struct {
 	Cursor  string `json:"cursor"`
 	Objects []struct {
 		Type                  string    `json:"type"`
