@@ -120,3 +120,43 @@ func TestDbInventory_UpsertCategory(t *testing.T) {
 		})
 	}
 }
+
+func TestDbInventory_DeleteCategoriesBySquareIds(t *testing.T) {
+	tests := []struct {
+		name        string
+		squareIds   []string
+		expectedLen int
+	}{
+		{"doesn't delete - squareIds is empty", []string{}, 3},
+		{"doesn't delete - squareIds are not valid", []string{"bad-square-id-1", "bad-square-id-2"}, 3},
+		{"deletes only the correct categories", []string{"square-id-1", "square-id-2"}, 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setup()
+			defer teardown()
+
+			db, err := NewSqliteDb(tmpDb)
+			if err != nil {
+				t.Errorf("failed to open db, err=%s", err.Error())
+			}
+
+			db.Connection.Save(&models.Category{Name: "Existing Category 1", LinnworksID: "test-id-1", SquareID: "square-id-1"})
+			db.Connection.Save(&models.Category{Name: "Existing Category 2", LinnworksID: "test-id-2", SquareID: "square-id-2"})
+			db.Connection.Save(&models.Category{Name: "Existing Category 3", LinnworksID: "test-id-3", SquareID: "square-id-3"})
+
+			db.DeleteCategoriesBySquareIds(tt.squareIds)
+
+			res, err := db.GetCategories()
+			if err != nil {
+				t.Errorf("threw, unexpected error, got %s", err.Error())
+			}
+
+			if len(res) != tt.expectedLen {
+				t.Errorf("returned wrong res, got %v, want %d", len(res), tt.expectedLen)
+			}
+
+		})
+	}
+}
