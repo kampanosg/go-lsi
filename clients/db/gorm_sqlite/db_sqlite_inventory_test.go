@@ -160,3 +160,36 @@ func TestDbInventory_DeleteCategoriesBySquareIds(t *testing.T) {
 		})
 	}
 }
+
+func TestDbInventory_GetProducts(t *testing.T) {
+	tests := []struct {
+		name        string
+		expextedLen int
+		hasError    bool
+	}{
+		{"return all products", 1, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setup()
+			defer teardown()
+
+			db, err := NewSqliteDb(tmpDb)
+			if err != nil {
+				t.Errorf("failed to open db, err=%s", err.Error())
+			}
+
+			db.Connection.Save(&models.Product{Title: "Test Product"})
+
+			products, err := db.GetProducts()
+			if tt.hasError && err == nil {
+				t.Errorf("expecting to throw error")
+			}
+
+			if len(products) != tt.expextedLen {
+				t.Errorf("got %d, want %d", len(products), tt.expextedLen)
+			}
+		})
+	}
+}
