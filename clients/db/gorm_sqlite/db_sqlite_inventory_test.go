@@ -228,3 +228,38 @@ func TestDbInventory_GetProductBySku(t *testing.T) {
 		})
 	}
 }
+
+func TestDbInventory_GetProductByBarcode(t *testing.T) {
+	tests := []struct {
+		name            string
+		barcode         string
+		hasError        bool
+		expectedProduct types.Product
+	}{
+		{"returns error for invalid sku", "bad-barcode", true, types.Product{}},
+		{"returns correct product for ok barcode", "barcode-001", false, types.Product{Title: "Test Product 1"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setup()
+			defer teardown()
+
+			db, err := NewSqliteDb(tmpDb)
+			if err != nil {
+				t.Errorf("failed to open db, err=%s", err.Error())
+			}
+
+			db.Connection.Save(&models.Product{Title: "Test Product 1", Barcode: "barcode-001"})
+
+			product, err := db.GetProductByBarcode(tt.barcode)
+			if tt.hasError && err == nil {
+				t.Errorf("expecting to throw error")
+			}
+
+			if tt.expectedProduct.Title != product.Title {
+				t.Errorf("returned wrong product, got %s, want %s", product.Title, tt.expectedProduct.Title)
+			}
+		})
+	}
+}
