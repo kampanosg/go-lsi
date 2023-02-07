@@ -62,16 +62,6 @@ func (db SqliteDb) GetProductByTitle(title string) (types.Product, error) {
 	return transformResult(result), err
 }
 
-func (db SqliteDb) InsertProduct(product types.Product) error {
-	productModel := fromProductTypeToModel(product)
-	return db.Connection.Create(&productModel).Error
-}
-
-func (db SqliteDb) InsertProducts(products []types.Product) error {
-	productModels := fromProductTypesToModels(products)
-	return db.Connection.Create(&productModels).Error
-}
-
 func (db SqliteDb) UpsertProduct(product types.Product) error {
 	var existingProduct models.Product
 	if err := db.Connection.Where("square_id = ?", product.SquareID).First(&existingProduct).Error; err == nil {

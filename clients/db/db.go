@@ -15,8 +15,6 @@ type DB interface {
 	GetProductBySku(sku string) (types.Product, error)
 	GetProductByVarId(varId string) (types.Product, error)
 	GetProductByTitle(title string) (types.Product, error)
-	InsertProducts(products []types.Product) error
-	InsertProduct(product types.Product) error
 	UpsertProduct(product types.Product) error
 	DeleteProductsBySquareIds(squareIds []string) error
 

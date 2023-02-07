@@ -334,15 +334,14 @@ func TestDbInventory_GetProductByTitle(t *testing.T) {
 	}
 }
 
-func TestDbInventory_InsertProduct(t *testing.T) {
+func TestDbInventory_UpsertProduct(t *testing.T) {
 	tests := []struct {
-		name        string
-		product     types.Product
-		hasError    bool
-		expectedLen int
+		name     string
+		product  types.Product
+		hasError bool
 	}{
-		{"inserts product", types.Product{Title: "test", LinnworksID: "test-id-1", SquareID: "square-id-1", SquareVarID: "square-var-id-1"}, false, 2},
-		{"returns error for duplicate keys", types.Product{Title: "test 2", LinnworksID: "test-id-2", SquareID: "square-id-2", SquareVarID: "square-var-id-2"}, true, 1},
+		{"inserts new product", types.Product{Title: "test", LinnworksID: "test-id-1", SquareID: "square-id-1", SquareVarID: "square-var-id-1", Price: 4.20}, false},
+		{"updates existing product", types.Product{Title: "test", LinnworksID: "test-id-2", SquareID: "square-id-2", SquareVarID: "square-var-id-2", Price: 6.9}, false},
 	}
 
 	for _, tt := range tests {
@@ -355,22 +354,21 @@ func TestDbInventory_InsertProduct(t *testing.T) {
 				t.Errorf("failed to open db, err=%s", err.Error())
 			}
 
-			db.Connection.Save(&models.Product{LinnworksID: "test-id-2", SquareID: "square-id-2", SquareVarID: "square-var-id-2"})
+			db.Connection.Save(&models.Product{Title: "test", LinnworksID: "test-id-2", SquareID: "square-id-2", SquareVarID: "square-var-id-2", Price: 69.99})
 
-			err = db.InsertProduct(tt.product)
+			err = db.UpsertProduct(tt.product)
 			if tt.hasError && err == nil {
 				t.Errorf("expecting to throw error")
 			}
 
-			products, err := db.GetProducts()
-			if err != nil {
-				t.Errorf("unexpected error, got %v", err.Error())
+			var res models.Product
+			if err := db.Connection.Where("square_id = ?", tt.product.SquareID).First(&res).Error; err != nil {
+				t.Errorf("threw unexpected error, got %s", err.Error())
 			}
 
-			if len(products) != tt.expectedLen {
-				t.Errorf("got %d, want %d", len(products), tt.expectedLen)
+			if res.Title != tt.product.Title || res.Price != tt.product.Price {
+				t.Errorf("category has not been upserted, title = { got %s, want %s }, price = { got %v, want %v }", res.Title, tt.product.Title, res.Price, tt.product.Price)
 			}
 		})
 	}
-
 }
