@@ -333,3 +333,44 @@ func TestDbInventory_GetProductByTitle(t *testing.T) {
 		})
 	}
 }
+
+func TestDbInventory_InsertProduct(t *testing.T) {
+	tests := []struct {
+		name        string
+		product     types.Product
+		hasError    bool
+		expectedLen int
+	}{
+		{"inserts product", types.Product{Title: "test", LinnworksID: "test-id-1", SquareID: "square-id-1", SquareVarID: "square-var-id-1"}, false, 2},
+		{"returns error for duplicate keys", types.Product{Title: "test 2", LinnworksID: "test-id-2", SquareID: "square-id-2", SquareVarID: "square-var-id-2"}, true, 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setup()
+			defer teardown()
+
+			db, err := NewSqliteDb(tmpDb)
+			if err != nil {
+				t.Errorf("failed to open db, err=%s", err.Error())
+			}
+
+			db.Connection.Save(&models.Product{LinnworksID: "test-id-2", SquareID: "square-id-2", SquareVarID: "square-var-id-2"})
+
+			err = db.InsertProduct(tt.product)
+			if tt.hasError && err == nil {
+				t.Errorf("expecting to throw error")
+			}
+
+			products, err := db.GetProducts()
+			if err != nil {
+				t.Errorf("unexpected error, got %v", err.Error())
+			}
+
+			if len(products) != tt.expectedLen {
+				t.Errorf("got %d, want %d", len(products), tt.expectedLen)
+			}
+		})
+	}
+
+}
