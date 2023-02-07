@@ -22,8 +22,6 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 		return err
 	}
 
-	s.logger.Infow("found orders", "new", len(newOrders))
-
 	if len(newOrders) > 0 {
 		ordersToUpsert := make([]types.Order, 0)
 
@@ -31,6 +29,8 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 			if _, err := s.Db.GetOrderBySquareId(newOrder.ID); err == nil {
 				continue
 			}
+
+			s.logger.Infow("detected new square order", "squareId", newOrder.ID)
 
 			orderProductsMap := make(map[string]types.OrderProduct, 0)
 			for _, item := range newOrder.LineItems {

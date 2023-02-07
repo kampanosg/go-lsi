@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,10 @@ import (
 	"github.com/kampanosg/go-lsi/sync"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+)
+
+const (
+	DefaultSyncInterval = 10
 )
 
 func main() {
@@ -39,6 +44,8 @@ func main() {
 	sqLocationId := os.Getenv("SQUARE_LOCATION_ID")
 	sqTeamMemberIds := strings.Split(os.Getenv("SQUARE_TEAM_MEMBER_IDS"), ",")
 
+	syncInterval := getSyncInterval()
+
 	logger.Debugw("loaded application config",
 		"linnworksAppId", lwAppId,
 		"linnworksAppSecret", lwAppSecret,
@@ -50,6 +57,7 @@ func main() {
 		"sqLocationId", sqLocationId,
 		"signingKey", signingKey,
 		"db", dbPath,
+		"syncInterval", syncInterval,
 	)
 
 	sqliteDb, err := gormsqlite.NewSqliteDb(dbPath)
@@ -68,7 +76,7 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, logger)
 
-	setSyncLoop(logger, syncTool)
+	setSyncLoop(syncInterval, logger, syncTool)
 
 	router := mux.NewRouter()
 
@@ -103,8 +111,8 @@ func logInit() *zap.SugaredLogger {
 	return l.Sugar()
 }
 
-func setSyncLoop(logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
-	ticker := time.NewTicker(10 * time.Minute)
+func setSyncLoop(interval int, logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
+	ticker := time.NewTicker(time.Minute * time.Duration(interval))
 	quit := make(chan struct{})
 	go func() {
 		for {
@@ -112,7 +120,7 @@ func setSyncLoop(logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
 			case <-ticker.C:
 				logger.Infow("will start auto syncing")
 				to := time.Now()
-				from := to.Add(-time.Minute * 30)
+				from := to.Add(-time.Minute * time.Duration(interval))
 				if err := syncTool.Sync(from, to); err != nil {
 					logger.Errorw("could not run sync job", "error", err)
 				}
@@ -122,4 +130,22 @@ func setSyncLoop(logger *zap.SugaredLogger, syncTool *sync.SyncTool) {
 			}
 		}
 	}()
+}
+
+func getSyncInterval() int {
+	interval := os.Getenv("SYNC_INTERVAL")
+	if interval == "" {
+		return DefaultSyncInterval
+	}
+
+	syncInterval, err := strconv.Atoi(interval)
+	if err != nil {
+		panic(err)
+	}
+
+	if syncInterval < 1 {
+		return DefaultSyncInterval
+	}
+
+	return syncInterval
 }

@@ -41,7 +41,7 @@ SQUARE_HOST=string
 SQUARE_API_VERSION=string
 SQUARE_LOCATION_ID=string
 SQUARE_TEAM_MEMBER_IDS=comma,separated,list,of,user,ids
-
+SYNC_INTERVAL=non-zero-int
 ```
 
 ### Run with docker
