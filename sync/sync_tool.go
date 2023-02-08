@@ -18,13 +18,13 @@ const (
 )
 
 type SyncTool struct {
-	LinnworksClient *linnworks.LinnworksClient
-	SquareClient    *square.SquareClient
+	LinnworksClient linnworks.LW
+	SquareClient    square.SQ
 	Db              db.DB
 	logger          *zap.SugaredLogger
 }
 
-func NewSyncTool(lwClient *linnworks.LinnworksClient, sqClient *square.SquareClient, db db.DB, logger *zap.SugaredLogger) *SyncTool {
+func NewSyncTool(lwClient linnworks.LW, sqClient square.SQ, db db.DB, logger *zap.SugaredLogger) *SyncTool {
 	return &SyncTool{
 		LinnworksClient: lwClient,
 		SquareClient:    sqClient,

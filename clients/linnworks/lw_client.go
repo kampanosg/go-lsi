@@ -18,6 +18,12 @@ const (
 	LinnworksServer2 = "https://eu-ext.linnworks.net/api/"
 )
 
+type LW interface {
+	GetCategories() ([]LinnworksCategoryResponse, error)
+	GetProducts() ([]LinnworksProductResponse, error)
+	CreateOrders(orders []types.Order) (LinnworksCreateOrdersResponse, error)
+}
+
 type LinnworksClient struct {
 	Id     string
 	Secret string

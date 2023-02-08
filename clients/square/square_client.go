@@ -33,6 +33,14 @@ const (
 	ORDER_LIMIT = 50
 )
 
+type SQ interface {
+	GetItemVersion(squareId string) (int64, error)
+	UpsertCategories(categories []types.Category) (SquareUpsertResponse, error)
+	UpsertProducts(products []types.Product) (SquareUpsertResponse, error)
+	BatchDeleteItems(itemIds []string) error
+	SearchOrders(start time.Time, end time.Time) ([]SquareOrder, error)
+}
+
 type SquareClient struct {
 	AccessToken   string
 	Host          string
