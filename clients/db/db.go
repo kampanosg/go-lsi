@@ -6,7 +6,7 @@ import (
 
 type DB interface {
 	GetCategories() ([]types.Category, error)
-	InsertCategories(categories []types.Category) error
+	InsertCategories([]types.Category) error
 	UpsertCategory(category types.Category) error
 	DeleteCategoriesBySquareIds(squareIds []string) error
 
@@ -22,7 +22,7 @@ type DB interface {
 
 	GetOrders() ([]types.Order, error)
 	GetOrderBySquareId(squareId string) (types.Order, error)
-	InsertOrders([]types.Order) error
+	InsertOrders(order []types.Order) error
 
 	GetLastSyncStatus() (types.SyncStatus, error)
 	InsertSyncStatus(ts int64) error

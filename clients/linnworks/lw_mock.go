@@ -20,6 +20,6 @@ func (c *LinnworksMockClient) GetProducts() ([]LinnworksProductResponse, error) 
 }
 
 func (c *LinnworksMockClient) CreateOrders(orders []types.Order) (LinnworksCreateOrdersResponse, error) {
-    args := c.Called(orders)
-    return args.Get(0).(LinnworksCreateOrdersResponse), args.Error(1)
+	args := c.Called(orders)
+	return args.Get(0).(LinnworksCreateOrdersResponse), args.Error(1)
 }
