@@ -60,6 +60,12 @@ export PORT=8080
 go run main.go
 ```
 
+## Unit tests
+Tests can be ran with the following command
+```
+make test
+```
+
 ## License
 Since this built to address specific needs and business cases, it might not be useful to others. 
 
