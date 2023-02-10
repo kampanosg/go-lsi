@@ -76,3 +76,34 @@ func TestDbOrders_InsertOrders(t *testing.T) {
 		})
 	}
 }
+
+func TestDbOrders_GetOrderBySquareId(t *testing.T) {
+	tests := []struct {
+		name     string
+		squareId string
+		hasErr   bool
+	}{
+		{"fails for id that doesnt exist", "square-id-2", true},
+		{"succeeds for id that exists", "square-id-1", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setup()
+			defer teardown()
+
+			db, err := NewSqliteDb(tmpDb)
+			if err != nil {
+				t.Errorf("failed to open db, err=%s", err.Error())
+			}
+
+			db.Connection.Save(&models.Order{SquareID: "square-id-1"})
+
+			_, err = db.GetOrderBySquareId(tt.squareId)
+			if tt.hasErr && err == nil {
+				t.Errorf("was expecting error, got %v", err)
+			}
+
+		})
+	}
+}
