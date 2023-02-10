@@ -128,15 +128,16 @@
                 setup(picker) {
                     picker.on('select', (e) => {
                         const { view, date, target } = e.detail;
-                        console.log(date.toISOString())
                         let startDate = date
                         let endDate = buildEndDate(startDate)
-                        showOrders(startDate.toISOString(), endDate.toISOString())
+                        showOrders(startDate.toISOString(), endDate.toISOString(), Alpine.store('jwt'))
                     });
                 },
             });
 
-            showOrders(picker.getDate().toISOString(), buildEndDate(picker.getDate()).toISOString(), Alpine.store('jwt'))
+            let startDate = picker.getDate().toISOString()
+            let endDate = buildEndDate(picker.getDate()).toISOString()
+            showOrders(startDate, endDate, Alpine.store('jwt'))
 
             fetchHttp('/api/v1/sync/status', jwt)
                 .then(data => Alpine.store('lastSync', df(data.ts)))
