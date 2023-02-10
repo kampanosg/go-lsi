@@ -90,6 +90,7 @@ func TestSyncRequest(t *testing.T) {
 		{"fail when receive PUT req", http.MethodPut, types.SyncRequest{}, nil, http.StatusMethodNotAllowed},
 		{"fail when receive TRACE req", http.MethodTrace, types.SyncRequest{}, nil, http.StatusMethodNotAllowed},
 		{"fail when sync tool returns error", http.MethodPost, types.SyncRequest{From: from, To: to}, errSyncFailed, http.StatusBadRequest},
+		{"ok when sync succeeds", http.MethodPost, types.SyncRequest{From: from, To: to}, nil, http.StatusOK},
 	}
 
 	for _, tt := range tests {
@@ -112,6 +113,52 @@ func TestSyncRequest(t *testing.T) {
 			}
 
 			req, err := http.NewRequest(tt.method, "/", bytes.NewBuffer(b))
+			if err != nil {
+				t.Errorf("threw error when calling endpoint, got %s", err.Error())
+			}
+
+			rr := httptest.NewRecorder()
+
+			router.ServeHTTP(rr, req)
+
+			if status := rr.Code; status != tt.status {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.status)
+			}
+		})
+	}
+}
+
+func TestSyncRecentRequest(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		method  string
+		toolErr error
+		status  int
+	}{
+		{"fail when receive GET req", http.MethodGet, nil, http.StatusMethodNotAllowed},
+		{"fail when receive CONNECT req", http.MethodConnect, nil, http.StatusMethodNotAllowed},
+		{"fail when receive DELETE req", http.MethodDelete, nil, http.StatusMethodNotAllowed},
+		{"fail when receive HEAD req", http.MethodHead, nil, http.StatusMethodNotAllowed},
+		{"fail when receive OPTIONS req", http.MethodOptions, nil, http.StatusMethodNotAllowed},
+		{"fail when receive PATCH req", http.MethodPatch, nil, http.StatusMethodNotAllowed},
+		{"fail when receive PUT req", http.MethodPut, nil, http.StatusMethodNotAllowed},
+		{"fail when receive TRACE req", http.MethodTrace, nil, http.StatusMethodNotAllowed},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			logger, _ := zap.NewDevelopment()
+			db := new(mock.MockDb)
+			st := new(sync.MockSyncTool)
+
+			ctrl := NewSyncController(st, db, logger.Sugar())
+
+			router := mux.NewRouter()
+			router.HandleFunc("/", ctrl.HandleSyncRecentRequest)
+
+			req, err := http.NewRequest(tt.method, "/", nil)
 			if err != nil {
 				t.Errorf("threw error when calling endpoint, got %s", err.Error())
 			}
