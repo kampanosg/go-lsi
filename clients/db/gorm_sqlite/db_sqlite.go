@@ -2,7 +2,6 @@ package gormsqlite
 
 import (
 	"errors"
-	"time"
 
 	"github.com/kampanosg/go-lsi/models"
 
