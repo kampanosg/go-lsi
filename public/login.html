@@ -17,11 +17,11 @@
                 <img class="mb-4" src="https://cdn11.bigcommerce.com/s-16baa/images/stencil/250x100/logo_1514025292__07155.original.png" alt="" width="230" height="57">
                 <h1 class="h5 mb-3 fw-normal">Welcome Back</h1>
                 <div class="form-floating">
-                    <input type="text" class="form-control" id="floatingUsername" placeholder="Username" x-model="username" />
+                    <input type="text" class="form-control" id="floatingUsername" placeholder="Username" x-model="username" @keyup.enter="signIn($data)" />
                     <label for="floatingUsername">Username</label>
                 </div>
                 <div class="form-floating" >
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password" x-model="password" />
+                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password" x-model="password" @keyup.enter="signIn($data)" />
                     <label for="floatingPassword">Password</label>
                 </div>
                 <button class="w-100 btn btn-lg btn-primary" @click="signIn($data)" :disabled="$store.isLoading">
@@ -37,7 +37,7 @@
     <script type="text/javascript">
         function signIn({username, password}) {
             Alpine.store('isLoading', true)
-        
+
             fetch('/api/v1/auth', {
                 method: 'POST',
                 headers: {

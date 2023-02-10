@@ -76,7 +76,7 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, sqliteDb, logger)
 
-	setSyncLoop(syncInterval, logger, syncTool)
+	//setSyncLoop(syncInterval, logger, syncTool)
 
 	router := mux.NewRouter()
 
