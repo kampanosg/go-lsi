@@ -61,7 +61,7 @@ func (db *MockDb) UpsertProduct(product types.Product) error {
 
 func (db *MockDb) DeleteProductsBySquareIds(squareIds []string) error {
 	args := db.Called(squareIds)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (db *MockDb) GetUserByUsername(username string) (types.User, error) {
@@ -81,7 +81,7 @@ func (db *MockDb) GetOrderBySquareId(squareId string) (types.Order, error) {
 
 func (db *MockDb) InsertOrders(orders []types.Order) error {
 	args := db.Called(orders)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (db *MockDb) GetLastSyncStatus() (types.SyncStatus, error) {
@@ -91,5 +91,5 @@ func (db *MockDb) GetLastSyncStatus() (types.SyncStatus, error) {
 
 func (db *MockDb) InsertSyncStatus(ts int64) error {
 	args := db.Called(ts)
-	return args.Error(1)
+	return args.Error(0)
 }

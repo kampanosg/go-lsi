@@ -80,5 +80,4 @@ func (c *SyncController) handleSync(w http.ResponseWriter, from time.Time, to ti
 	}
 
 	ok(w, syncResp)
-
 }
