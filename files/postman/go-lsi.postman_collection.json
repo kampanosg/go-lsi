@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "9a52ac16-34ea-41aa-b7da-14e2a7caa307",
+		"_postman_id": "b9876967-76c8-4a6e-ab3b-57dc99d2d1e1",
 		"name": "go-lsi",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22838338"
 	},
 	"item": [
 		{
@@ -42,12 +43,7 @@
 									"value": "{{APP_TOKEN}}",
 									"type": "default"
 								}
-							],
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							]
 						},
 						"url": {
 							"raw": "https://api.linnworks.net/api/Auth/AuthorizeByApplication",
@@ -337,12 +333,7 @@
 									"value": "Default",
 									"type": "text"
 								}
-							],
-							"options": {
-								"raw": {
-									"language": "text"
-								}
-							}
+							]
 						},
 						"url": {
 							"raw": "{{LW_HOST}}/Orders/CreateOrders",
@@ -384,12 +375,7 @@
 									"value": "true",
 									"type": "default"
 								}
-							],
-							"options": {
-								"raw": {
-									"language": "text"
-								}
-							}
+							]
 						},
 						"url": {
 							"raw": "{{LW_HOST}}/Orders/CreateNewOrder",
@@ -940,7 +926,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{POS_URL}}/api/v1/orders",
+							"raw": "{{POS_URL}}/api/v1/orders?start=2023-01-30T12:30:00Z&end=2023-01-30T23:30:00Z",
 							"host": [
 								"{{POS_URL}}"
 							],
@@ -948,6 +934,16 @@
 								"api",
 								"v1",
 								"orders"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "2023-01-30T12:30:00Z"
+								},
+								{
+									"key": "end",
+									"value": "2023-01-30T23:30:00Z"
+								}
 							]
 						}
 					},

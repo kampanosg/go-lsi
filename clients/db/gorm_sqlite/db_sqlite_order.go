@@ -1,13 +1,17 @@
 package gormsqlite
 
 import (
+	"time"
+
 	"github.com/kampanosg/go-lsi/models"
 	"github.com/kampanosg/go-lsi/types"
 )
 
-func (db SqliteDb) GetOrders() ([]types.Order, error) {
+func (db SqliteDb) GetOrdersWithinRange(start, end time.Time) ([]types.Order, error) {
 	orders := make([]models.Order, 0)
-	err := db.Connection.Order("created_at_square desc").Find(&orders).Error
+	err := db.Connection.
+		Order("created_at_square desc").
+		Where("created_at_square BETWEEN ? AND ?", start, end).Find(&orders).Error
 	return fromOrderModelsToTypes(orders), err
 }
 

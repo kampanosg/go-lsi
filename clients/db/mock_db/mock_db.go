@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"time"
+
 	"github.com/kampanosg/go-lsi/types"
 	"github.com/stretchr/testify/mock"
 )
@@ -71,6 +73,11 @@ func (db *MockDb) GetUserByUsername(username string) (types.User, error) {
 
 func (db *MockDb) GetOrders() ([]types.Order, error) {
 	args := db.Called()
+	return args.Get(0).([]types.Order), args.Error(1)
+}
+
+func (db *MockDb) GetOrdersWithinRange(start, end time.Time) ([]types.Order, error) {
+	args := db.Called(start, end)
 	return args.Get(0).([]types.Order), args.Error(1)
 }
 

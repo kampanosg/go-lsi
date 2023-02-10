@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/kampanosg/go-lsi/types"
 )
 
@@ -20,7 +22,7 @@ type DB interface {
 
 	GetUserByUsername(username string) (types.User, error)
 
-	GetOrders() ([]types.Order, error)
+	GetOrdersWithinRange(start, end time.Time) ([]types.Order, error)
 	GetOrderBySquareId(squareId string) (types.Order, error)
 	InsertOrders(order []types.Order) error
 

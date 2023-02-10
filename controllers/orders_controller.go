@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/kampanosg/go-lsi/clients/db"
 	"github.com/kampanosg/go-lsi/types"
@@ -25,7 +26,27 @@ func (c *OrdersController) HandleOrdersRequest(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	orders, err := c.db.GetOrders()
+	foundStartDate := r.URL.Query().Has("start")
+	foundEndDate := r.URL.Query().Has("end")
+
+	if !foundStartDate || !foundEndDate {
+		failed(w, errParamsNotProvided, http.StatusBadRequest)
+		return
+	}
+
+	start, err := parseDateTime(r.URL.Query().Get("start"))
+	if err != nil {
+		failed(w, err, http.StatusBadRequest)
+		return
+	}
+
+	end, err := parseDateTime(r.URL.Query().Get("end"))
+	if err != nil {
+		failed(w, err, http.StatusBadRequest)
+		return
+	}
+
+	orders, err := c.db.GetOrdersWithinRange(start, end)
 	if err != nil {
 		c.logger.Errorw("request failed", "error retrieving orders from db", "error", err.Error())
 		failed(w, err, http.StatusBadRequest)
@@ -38,4 +59,13 @@ func (c *OrdersController) HandleOrdersRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	ok(w, resp)
+}
+
+func parseDateTime(s string) (time.Time, error) {
+	dateFormat := "2006-01-02T15:04:05Z0700"
+	date, err := time.Parse(dateFormat, s)
+	if err != nil {
+		return time.Now(), err
+	}
+	return date, nil
 }
