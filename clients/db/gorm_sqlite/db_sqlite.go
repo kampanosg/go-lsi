@@ -34,9 +34,5 @@ func NewSqliteDb(dbPath string) (SqliteDb, error) {
 	db.AutoMigrate(&models.Product{})
 	db.AutoMigrate(&models.Order{})
 
-	db.Save(&models.Order{SquareID: "sample-id-1", LocationID: "location-1", TotalMoney: 100, CreatedAtSquare: time.Now()})
-	db.Save(&models.Order{SquareID: "sample-id-2", LocationID: "location-1", TotalMoney: 99, CreatedAtSquare: time.Now()})
-	db.Save(&models.Order{SquareID: "sample-id-3", LocationID: "location-1", TotalMoney: 98, CreatedAtSquare: time.Now()})
-
 	return SqliteDb{Connection: db}, nil
 }
