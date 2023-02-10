@@ -17,6 +17,13 @@ const (
 	msgSqErr  = "square client error"
 )
 
+type ST interface {
+	Sync(from time.Time, to time.Time) error
+	SyncCategories() error
+	SyncProducts() error
+	SyncOrders(start time.Time, end time.Time) error
+}
+
 type SyncTool struct {
 	LinnworksClient linnworks.LW
 	SquareClient    square.SQ

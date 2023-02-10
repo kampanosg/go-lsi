@@ -5,18 +5,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kampanosg/go-lsi/clients/db"
 	"github.com/kampanosg/go-lsi/sync"
 	"github.com/kampanosg/go-lsi/types"
 	"go.uber.org/zap"
 )
 
 type SyncController struct {
-	tool   *sync.SyncTool
+	tool   sync.ST
+	db     db.DB
 	logger *zap.SugaredLogger
 }
 
-func NewSyncController(syncTool *sync.SyncTool, logger *zap.SugaredLogger) *SyncController {
-	return &SyncController{tool: syncTool, logger: logger}
+func NewSyncController(syncTool sync.ST, db db.DB, logger *zap.SugaredLogger) *SyncController {
+	return &SyncController{tool: syncTool, db: db, logger: logger}
 }
 
 func (c *SyncController) HandleSyncRequest(w http.ResponseWriter, r *http.Request) {
@@ -34,16 +36,7 @@ func (c *SyncController) HandleSyncRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	syncResp := types.SyncStatus{
-		Timestamp: time.Now(),
-	}
-
-	if err := c.tool.Sync(req.From, req.To); err != nil {
-		failed(w, err, http.StatusBadRequest)
-		return
-	}
-
-	ok(w, syncResp)
+	c.handleSync(w, req.From, req.To)
 }
 
 func (c *SyncController) HandleSyncStatusRequest(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +46,7 @@ func (c *SyncController) HandleSyncStatusRequest(w http.ResponseWriter, r *http.
 		return
 	}
 
-	status, err := c.tool.Db.GetLastSyncStatus()
+	status, err := c.db.GetLastSyncStatus()
 	if err != nil {
 		failed(w, err, http.StatusBadRequest)
 		return
@@ -72,6 +65,10 @@ func (c *SyncController) HandleSyncRecentRequest(w http.ResponseWriter, r *http.
 	from := time.Now().Add(-time.Minute * 30)
 	to := time.Now()
 
+	c.handleSync(w, from, to)
+}
+
+func (c *SyncController) handleSync(w http.ResponseWriter, from time.Time, to time.Time) {
 	syncResp := types.SyncStatus{
 		Timestamp: time.Now(),
 	}
@@ -83,4 +80,5 @@ func (c *SyncController) HandleSyncRecentRequest(w http.ResponseWriter, r *http.
 	}
 
 	ok(w, syncResp)
+
 }

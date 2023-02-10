@@ -74,7 +74,7 @@ func main() {
 	inventoryController := controllers.NewInventoryController(sqliteDb, logger)
 	ordersController := controllers.NewOrdersController(sqliteDb, logger)
 	pingController := controllers.NewPingController()
-	syncController := controllers.NewSyncController(syncTool, logger)
+	syncController := controllers.NewSyncController(syncTool, sqliteDb, logger)
 
 	setSyncLoop(syncInterval, logger, syncTool)
 
