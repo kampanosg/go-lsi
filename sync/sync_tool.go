@@ -44,13 +44,17 @@ func (s *SyncTool) Sync(from time.Time, to time.Time) error {
 	s.logger.Infow("start syncing process", "from", from, "to", to)
 
 	startTime := time.Now()
+    if false {
 	if err := s.SyncCategories(); err != nil {
 		return err
 	}
+}
 
+if false {
 	if err := s.SyncProducts(); err != nil {
 		return err
 	}
+}
 
 	if err := s.SyncOrders(from, to); err != nil {
 		return err

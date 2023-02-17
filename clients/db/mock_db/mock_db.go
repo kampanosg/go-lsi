@@ -71,6 +71,11 @@ func (db *MockDb) GetUserByUsername(username string) (types.User, error) {
 	return args.Get(0).(types.User), args.Error(1)
 }
 
+func (db *MockDb) UpdateUserPassword(userId uint, password string) error {
+    args := db.Called(userId, password)
+    return args.Error(0)
+}
+
 func (db *MockDb) GetOrders() ([]types.Order, error) {
 	args := db.Called()
 	return args.Get(0).([]types.Order), args.Error(1)

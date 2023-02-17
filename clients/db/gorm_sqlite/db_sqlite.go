@@ -33,7 +33,10 @@ func NewSqliteDb(dbPath string) (SqliteDb, error) {
 	db.AutoMigrate(&models.Product{})
 	db.AutoMigrate(&models.Order{})
 
-    db.Save(&models.User{ Username: "kampanosg", Password: "testtest" })
+
+    db.Unscoped().Delete(&models.User{})
+    db.Save(&models.User{ Username: "geroge", Password: "reset-password" })
+    db.Save(&models.User{ Username: "kev", Password: "reset-password" })
 
 	return SqliteDb{Connection: db}, nil
 }

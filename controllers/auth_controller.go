@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+    "strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/kampanosg/go-lsi/clients/db"
@@ -109,21 +110,28 @@ func (c *AuthController) HandlePasswordChangeRequest(w http.ResponseWriter, r *h
 		return
 	}
 
-	hashedPword, err := hashPassword(req.Password)
+    newPassword := strings.Trim(req.Password, " ")
+    if len(newPassword) == 0 {
+		c.logger.Errorw("request failed", "reason", "invalid password", "uri", r.RequestURI, "error", err.Error())
+		failed(w, err, http.StatusBadRequest)
+		return
+    }
+
+	hashedPword, err := hashPassword(newPassword)
 	if err != nil {
 		c.logger.Errorw("request failed", "reason", "unable to hash password", "uri", r.RequestURI, "error", err.Error())
-		failed(w, err, http.StatusUnauthorized)
+		failed(w, err, http.StatusBadRequest)
 		return
 	}
 
-	if err := c.db.UpdateUserPassword(int64(user.ID), string(hashedPword)); err != nil {
+	if err := c.db.UpdateUserPassword(user.ID, string(hashedPword)); err != nil {
 		c.logger.Errorw("request failed", "reason", "unable to update password", "uri", r.RequestURI, "error", err.Error())
-		failed(w, err, http.StatusUnauthorized)
+		failed(w, err, http.StatusBadRequest)
 		return
 	}
 
 	resp := types.AuthResp{
-		Token:     "",
+		Token:     "login-again",
 		Message:   fmt.Sprintf("password change successful for user %s", req.Username),
 		Timestamp: time.Now(),
 	}
