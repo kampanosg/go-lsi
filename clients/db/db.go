@@ -21,7 +21,7 @@ type DB interface {
 	DeleteProductsBySquareIds(squareIds []string) error
 
 	GetUserByUsername(username string) (types.User, error)
-    UpdateUserPassword(userId uint, password string) error
+	UpdateUserPassword(userId uint, password string) error
 
 	GetOrdersWithinRange(start, end time.Time) ([]types.Order, error)
 	GetOrderBySquareId(squareId string) (types.Order, error)

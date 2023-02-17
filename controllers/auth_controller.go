@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
-    "strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/kampanosg/go-lsi/clients/db"
@@ -110,12 +110,12 @@ func (c *AuthController) HandlePasswordChangeRequest(w http.ResponseWriter, r *h
 		return
 	}
 
-    newPassword := strings.Trim(req.Password, " ")
-    if len(newPassword) == 0 {
+	newPassword := strings.Trim(req.Password, " ")
+	if len(newPassword) == 0 {
 		c.logger.Errorw("request failed", "reason", "invalid password", "uri", r.RequestURI, "error", err.Error())
 		failed(w, err, http.StatusBadRequest)
 		return
-    }
+	}
 
 	hashedPword, err := hashPassword(newPassword)
 	if err != nil {
