@@ -137,14 +137,6 @@ func fromProductModelToType(productModel models.Product) types.Product {
 	}
 }
 
-func fromProductTypesToModels(products []types.Product) []models.Product {
-	modelProducts := make([]models.Product, len(products))
-	for index, product := range products {
-		modelProducts[index] = fromProductTypeToModel(product)
-	}
-	return modelProducts
-}
-
 func fromProductTypeToModel(product types.Product) models.Product {
 	return models.Product{
 		LinnworksID:         product.LinnworksID,

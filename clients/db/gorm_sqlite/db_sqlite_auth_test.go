@@ -42,3 +42,34 @@ func TestDbAuth(t *testing.T) {
 		})
 	}
 }
+
+func TestDbAuth_ChangePassword(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		userId   uint
+		password string
+		hasError bool
+	}{
+		{"return no error when user exists", 1, "test", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setup()
+			defer teardown()
+
+			db, err := NewSqliteDb(tmpDb)
+			if err != nil {
+				t.Errorf("failed to open db, err=%s", err.Error())
+			}
+
+			db.Connection.Save(&models.User{Username: "darth-vader", Password: "empire-rocks-123"})
+
+			err = db.UpdateUserPassword(tt.userId, tt.password)
+			if tt.hasError && err == nil {
+				t.Errorf("expecting to throw error")
+			}
+		})
+	}
+}

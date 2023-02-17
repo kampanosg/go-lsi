@@ -86,6 +86,7 @@ func main() {
 	router.Handle("/api/v1/sync/status", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncStatusRequest)))
 	router.Handle("/api/v1/sync/recent", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRecentRequest)))
 	router.Handle("/api/v1/sync", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncRequest)))
+	router.Handle("/api/v1/auth/change-password", http.HandlerFunc(authController.HandlePasswordChangeRequest))
 	router.Handle("/api/v1/auth", http.HandlerFunc(authController.HandleAuthRequest))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 

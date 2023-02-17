@@ -692,7 +692,35 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"kampanosg\",\n    \"password\": \"ALLOY-sparse-navigate-okra-1353\"\n}",
+							"raw": "{\n    \"username\": \"darth-vader\",\n    \"password\": \"empire-rocks-123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{POS_URL}}/api/v1/auth",
+							"host": [
+								"{{POS_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth - Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"darth-vader\",\n    \"password\": \"empire-rocks-123456\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -789,7 +817,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"from\": \"2023-01-30T23:30:00Z\",\n    \"to\": \"2023-01-30T23:55:00Z\"\n}",
+							"raw": "{\n    \"from\": \"2023-02-16T8:30:00Z\",\n    \"to\": \"2023-02-17T17:00:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -952,10 +980,35 @@
 			]
 		}
 	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
 	"variable": [
 		{
 			"key": "POS_JWT",
-			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzQyNjA1ODQ4NDgsImlhdCI6MTY3NDE3NDE5MCwic3ViIjoia2FtcGFub3NnIn0.nZwK8-x4xBaCBZ5ghG6lvsjQWp0A6kxzgsOvdJP7g2o"
+			"value": "a.jwt.token"
+		},
+		{
+			"key": "POS_URL",
+			"value": "http://localhost:8080",
+			"type": "string"
 		}
 	]
 }
