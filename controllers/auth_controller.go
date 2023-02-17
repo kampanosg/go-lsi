@@ -99,28 +99,28 @@ func (c *AuthController) HandlePasswordChangeRequest(w http.ResponseWriter, r *h
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		c.logger.Errorw("request failed", "reason", "unable to decode body", "uri", r.RequestURI, "error", err.Error())
-		failed(w, err, http.StatusBadRequest)
+		failed(w, err, http.StatusUnauthorized)
 		return
 	}
 
 	user, err := c.db.GetUserByUsername(req.Username)
 	if err != nil {
 		c.logger.Errorw("request failed", "reason", "unable to auth user", "uri", r.RequestURI, "error", err.Error())
-		failed(w, err, http.StatusUnauthorized)
+		failed(w, errBadPassword, http.StatusUnauthorized)
 		return
 	}
 
 	newPassword := strings.Trim(req.Password, " ")
 	if len(newPassword) == 0 {
 		c.logger.Errorw("request failed", "reason", "invalid password", "uri", r.RequestURI, "error", err.Error())
-		failed(w, err, http.StatusBadRequest)
+		failed(w, errBadPassword, http.StatusUnauthorized)
 		return
 	}
 
 	hashedPword, err := hashPassword(newPassword)
 	if err != nil {
 		c.logger.Errorw("request failed", "reason", "unable to hash password", "uri", r.RequestURI, "error", err.Error())
-		failed(w, err, http.StatusBadRequest)
+		failed(w, errBadPassword, http.StatusUnauthorized)
 		return
 	}
 

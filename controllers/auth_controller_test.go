@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	SigningKey   = "test-signing-key"
-	EasyPassword = "$2a$14$ZbEQyjYsmCGBC8zAviOobuWQW/2YxjO0eyUS8St1p.9r0D.wVPM9K"
+	SigningKey = "test-signing-key"
+	EmpireHash = "$2a$14$ZbEQyjYsmCGBC8zAviOobuWQW/2YxjO0eyUS8St1p.9r0D.wVPM9K"
 )
 
 var (
@@ -42,8 +42,8 @@ func TestAuthController(t *testing.T) {
 		{"fail when receive PUT req", http.MethodPut, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
 		{"fail when receive TRACE req", http.MethodTrace, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
 		{"fail when user is not found", http.MethodPost, types.AuthRequest{Username: "darth-vadre", Password: "="}, types.User{}, errUserNotFound, http.StatusUnauthorized},
-		{"fail when password is wrong", http.MethodPost, types.AuthRequest{Username: "darth-vader", Password: "password"}, types.User{Username: "darth-vader", Password: EasyPassword}, nil, http.StatusUnauthorized},
-		{"succeed when correct auth details", http.MethodPost, types.AuthRequest{Username: "darth-vader", Password: "empire-123"}, types.User{Username: "darth-vader", Password: EasyPassword}, nil, http.StatusOK},
+		{"fail when password is wrong", http.MethodPost, types.AuthRequest{Username: "darth-vader", Password: "password"}, types.User{Username: "darth-vader", Password: EmpireHash}, nil, http.StatusUnauthorized},
+		{"succeed when correct auth details", http.MethodPost, types.AuthRequest{Username: "darth-vader", Password: "empire-123"}, types.User{Username: "darth-vader", Password: EmpireHash}, nil, http.StatusOK},
 	}
 
 	logger, _ := zap.NewDevelopment()
@@ -83,25 +83,28 @@ func TestAuthController(t *testing.T) {
 func TestAuthController_ChangePassword(t *testing.T) {
 
 	tests := []struct {
-		name   string
-		method string
-		req    types.AuthRequest
-		dbRes  types.User
-		dbErr  error
-		status int
+		name             string
+		method           string
+		req              types.AuthRequest
+		dbGetUserRes     types.User
+		dbGetUserErr     error
+		dbUpdatePwordErr error
+		status           int
 	}{
-		{"fail when receive GET req", http.MethodGet, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive CONNECT req", http.MethodConnect, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive DELETE req", http.MethodDelete, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive HEAD req", http.MethodHead, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive OPTIONS req", http.MethodOptions, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive PATCH req", http.MethodPatch, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive PUT req", http.MethodPut, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive TRACE req", http.MethodTrace, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
-		{"fail when receive POST req", http.MethodPost, types.AuthRequest{}, types.User{}, nil, http.StatusMethodNotAllowed},
+		{"fail when receive GET req", http.MethodGet, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive CONNECT req", http.MethodConnect, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive DELETE req", http.MethodDelete, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive HEAD req", http.MethodHead, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive OPTIONS req", http.MethodOptions, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive PATCH req", http.MethodPatch, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive TRACE req", http.MethodTrace, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
+		{"fail when receive POST req", http.MethodPost, types.AuthRequest{}, types.User{}, nil, nil, http.StatusMethodNotAllowed},
 
-		{"fail when user is not found", http.MethodPost, types.AuthRequest{Username: "darth-vadre", Password: "="}, types.User{}, errUserNotFound, http.StatusUnauthorized},
-		{"succeed when correct auth details", http.MethodPost, types.AuthRequest{Username: "darth-vader", Password: "empire-123"}, types.User{Username: "darth-vader", Password: EasyPassword}, nil, http.StatusOK},
+		{"fail when user is not found", http.MethodPut, types.AuthRequest{Username: "darth-vadre", Password: "="}, types.User{}, errUserNotFound, nil, http.StatusUnauthorized},
+
+		{"fail when password is not provided", http.MethodPut, types.AuthRequest{Username: "darth-vadre", Password: ""}, types.User{}, nil, nil, http.StatusUnauthorized},
+		{"fail when password is only spaces", http.MethodPut, types.AuthRequest{Username: "darth-vadre", Password: "         "}, types.User{}, nil, nil, http.StatusUnauthorized},
+		{"succeed when correct auth details", http.MethodPut, types.AuthRequest{Username: "darth-vader", Password: "empire-123"}, types.User{Username: "darth-vader", Password: EmpireHash}, nil, nil, http.StatusOK},
 	}
 
 	logger, _ := zap.NewDevelopment()
@@ -110,12 +113,13 @@ func TestAuthController_ChangePassword(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			db.On("GetUserByUsername", tt.req.Username).Return(tt.dbRes, tt.dbErr)
+			db.On("GetUserByUsername", tt.req.Username).Return(tt.dbGetUserRes, tt.dbGetUserErr)
+			db.On("UpdateUserPassword", uint(0), TestHash).Return(tt.dbUpdatePwordErr)
 
 			ctrl := NewAuthController(db, sk, logger.Sugar())
 
 			router := mux.NewRouter()
-			router.HandleFunc("/", ctrl.HandleAuthRequest)
+			router.HandleFunc("/", ctrl.HandlePasswordChangeRequest)
 
 			b, err := json.Marshal(tt.req)
 			if err != nil {

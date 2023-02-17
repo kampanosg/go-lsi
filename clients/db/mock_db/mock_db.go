@@ -72,7 +72,7 @@ func (db *MockDb) GetUserByUsername(username string) (types.User, error) {
 }
 
 func (db *MockDb) UpdateUserPassword(userId uint, password string) error {
-	args := db.Called(userId, password)
+	args := db.Called(userId, mock.Anything)
 	return args.Error(0)
 }
 
