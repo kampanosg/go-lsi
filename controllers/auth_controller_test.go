@@ -114,7 +114,7 @@ func TestAuthController_ChangePassword(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db.On("GetUserByUsername", tt.req.Username).Return(tt.dbGetUserRes, tt.dbGetUserErr)
-			db.On("UpdateUserPassword", uint(0), TestHash).Return(tt.dbUpdatePwordErr)
+			db.On("UpdateUserPassword", uint(0), EmpireHash).Return(tt.dbUpdatePwordErr)
 
 			ctrl := NewAuthController(db, sk, logger.Sugar())
 

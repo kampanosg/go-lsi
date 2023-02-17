@@ -176,17 +176,13 @@ func (c *LinnworksClient) CreateOrders(orders []types.Order) (LinnworksCreateOrd
 
 		resp, err := c.makeRequest(Post, linnworksUrl, payload, headers)
 		if err != nil {
-			// return ordersResp, err
-			c.logger.Debugw("http client threw error", "error", err)
-			continue
+			return ordersResp, err
 		}
 
 		c.logger.Debugw("linnworks finished processing new order", "response", string(resp))
 		var productResps LinnworksCreateOrdersResponse
 		if err := json.Unmarshal(resp, &productResps); err != nil {
-			// return ordersResp, err
-			c.logger.Debugw("json parser could not parse resp", "error", err)
-			continue
+			return ordersResp, err
 		}
 
 		ordersResp = append(ordersResp, productResps...)
