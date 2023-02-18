@@ -44,6 +44,11 @@ func (s *SyncTool) SyncProducts() error {
 	s.logger.Infow("will attempt to upsert products", "total", len(newProducts))
 
 	for _, newProduct := range newProducts {
+
+		if isService(newProduct) {
+			continue
+		}
+
 		upsert, ok := productsUpsertMap[newProduct.LinnworksID]
 		if !ok {
 			newProduct.SquareID = fmt.Sprintf("#%s", newProduct.LinnworksID)
@@ -133,6 +138,10 @@ func (s *SyncTool) SyncProducts() error {
 		}
 	}
 	return nil
+}
+
+func isService(product types.Product) bool {
+	return strings.HasPrefix(product.SKU, "GTR-")
 }
 
 func buildMappedCategoriesById(categories []types.Category) map[string]types.Category {

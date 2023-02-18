@@ -13,6 +13,21 @@ const (
 	Pence = 100.0
 )
 
+var (
+    services = map[string]bool {
+        "Standard Guitar Setup": true,
+        "Deluxe Guitar Setup": true,
+        "Guitar Re-stringing": true,
+        "Headstock Repair": true,
+        "Nut Replacement": true,
+        "Pickup Installation": true,
+        "Electrical Work": true,
+        "Machine Head Installation": true,
+        "Bridge Fitting": true,
+        "Tremolo Installation": true,
+    }
+)
+
 func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 	s.logger.Infow("will start syncing orders")
 
@@ -35,23 +50,33 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 			orderProductsMap := make(map[string]types.OrderProduct, 0)
 			for _, item := range newOrder.LineItems {
 				var product types.Product
-				product, err = s.Db.GetProductByVarId(item.CatalogObjectID)
-				if err != nil {
-					s.logger.Errorw("unable to retrieve product from db", "variation", item.CatalogObjectID, errKey, err.Error())
-					s.logger.Infow("will attempt to retrieve product by name", "name", item.Name)
-					product, err = s.Db.GetProductByTitle(item.Name)
-					if err != nil {
-						s.logger.Errorw("unable to retrieve product from db", "name", item.Name, errKey, err.Error())
-						return err
-					}
-				}
 
-				orderProduct, ok := orderProductsMap[item.CatalogObjectID]
-				if ok {
-					orderProduct.PricePerUnit += item.TotalMoney.Amount
-					orderProduct.Quantity = updateOrderProductQty(orderProduct.Quantity, item.Quantity)
-					orderProductsMap[item.CatalogObjectID] = orderProduct
-					continue
+				if isSquareService(item) {
+					product = types.Product{
+						Price:   item.TotalMoney.Amount,
+						Barcode: "SERVICE",
+						SKU:     "SERVICE",
+						Title:   "SERVICE",
+					}
+				} else {
+					product, err = s.Db.GetProductByVarId(item.CatalogObjectID)
+					if err != nil {
+						s.logger.Errorw("unable to retrieve product from db", "variation", item.CatalogObjectID, errKey, err.Error())
+						s.logger.Infow("will attempt to retrieve product by name", "name", item.Name)
+						product, err = s.Db.GetProductByTitle(item.Name)
+						if err != nil {
+							s.logger.Errorw("unable to retrieve product from db", "name", item.Name, errKey, err.Error())
+							return err
+						}
+					}
+
+					orderProduct, ok := orderProductsMap[item.CatalogObjectID]
+					if ok {
+						orderProduct.PricePerUnit += item.TotalMoney.Amount
+						orderProduct.Quantity = updateOrderProductQty(orderProduct.Quantity, item.Quantity)
+						orderProductsMap[item.CatalogObjectID] = orderProduct
+						continue
+					}
 				}
 
 				orderProductsMap[item.CatalogObjectID] = fromSquareLineItemToDomain(item, product)
@@ -120,4 +145,8 @@ func updateOrderProductQty(oldQty, newQty string) string {
 	}
 
 	return fmt.Sprintf("%d", (qty1 + qty2))
+}
+
+func isSquareService(item square.SquareLineItem) bool {
+    return services[item.Name]
 }

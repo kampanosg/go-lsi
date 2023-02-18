@@ -33,5 +33,8 @@ func NewSqliteDb(dbPath string) (SqliteDb, error) {
 	db.AutoMigrate(&models.Product{})
 	db.AutoMigrate(&models.Order{})
 
+    db.Unscoped().Delete(&models.Product{})
+    db.Unscoped().Delete(&models.Category{})
+
 	return SqliteDb{Connection: db}, nil
 }
