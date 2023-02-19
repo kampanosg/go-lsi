@@ -14,18 +14,18 @@ const (
 )
 
 var (
-    services = map[string]bool {
-        "Standard Guitar Setup": true,
-        "Deluxe Guitar Setup": true,
-        "Guitar Re-stringing": true,
-        "Headstock Repair": true,
-        "Nut Replacement": true,
-        "Pickup Installation": true,
-        "Electrical Work": true,
-        "Machine Head Installation": true,
-        "Bridge Fitting": true,
-        "Tremolo Installation": true,
-    }
+	services = map[string]bool{
+		"Standard Guitar Setup":     true,
+		"Deluxe Guitar Setup":       true,
+		"Guitar Re-stringing":       true,
+		"Headstock Repair":          true,
+		"Nut Replacement":           true,
+		"Pickup Installation":       true,
+		"Electrical Work":           true,
+		"Machine Head Installation": true,
+		"Bridge Fitting":            true,
+		"Tremolo Installation":      true,
+	}
 )
 
 func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
@@ -148,5 +148,5 @@ func updateOrderProductQty(oldQty, newQty string) string {
 }
 
 func isSquareService(item square.SquareLineItem) bool {
-    return services[item.Name]
+	return services[item.Name]
 }

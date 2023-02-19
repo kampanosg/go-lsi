@@ -76,11 +76,12 @@ func main() {
 	pingController := controllers.NewPingController()
 	syncController := controllers.NewSyncController(syncTool, sqliteDb, logger)
 
-	// setSyncLoop(syncInterval, logger, syncTool)
+	setSyncLoop(syncInterval, logger, syncTool)
 
 	router := mux.NewRouter()
 
 	router.Handle("/api/v1/ping", authMiddleware.ProtectedEndpoint(http.HandlerFunc(pingController.HandlePingRequest)))
+	router.Handle("/api/v1/inventory/all", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleAllInventoryRequest)))
 	router.Handle("/api/v1/inventory", authMiddleware.ProtectedEndpoint(http.HandlerFunc(inventoryController.HandleInventoryRequest)))
 	router.Handle("/api/v1/orders", authMiddleware.ProtectedEndpoint(http.HandlerFunc(ordersController.HandleOrdersRequest)))
 	router.Handle("/api/v1/sync/status", authMiddleware.ProtectedEndpoint(http.HandlerFunc(syncController.HandleSyncStatusRequest)))
@@ -101,7 +102,7 @@ func logInit() *zap.SugaredLogger {
 
 	pe.EncodeTime = zapcore.ISO8601TimeEncoder
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
-	level := zap.DebugLevel
+	level := zap.InfoLevel
 
 	core := zapcore.NewTee(
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),

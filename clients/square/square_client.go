@@ -12,25 +12,27 @@ import (
 )
 
 const (
-	TYPE_CATEGORY  = "CATEGORY"
-	TYPE_ITEM      = "ITEM"
-	TYPE_VARIATION = "ITEM_VARIATION"
-	TYPE_SERVICE   = "APPOINTMENTS_SERVICE"
+	TypeCategory  = "CATEGORY"
+	TypeItem      = "ITEM"
+	TypeVariation = "ITEM_VARIATION"
+	TypeService   = "APPOINTMENTS_SERVICE"
 
-	VISIBILITY   = "PRIVATE"
-	PRODUCT_TYPE = "REGULAR"
+	Visibility   = "PRIVATE"
+	ProductType = "REGULAR"
 
-	PENCE_MULTIPLIER = 100
-	BATCH_SIZE       = 50
-	CURRENCY         = "GBP"
+	PenceMultiplier = 100
+	BatchSize       = 700
+	Currency         = "GBP"
 
-	VARIATION_ORDINAL = 1
-	VARIATION_NAME    = "Regular"
-	VARIATION_PRICING = "FIXED_PRICING"
+	VariationOrdinal = 1
+	VariationName    = "Regular"
+	VariationPricing = "FIXED_PRICING"
 
-	SERVICE_SKU_SUFFIX = "GTR-"
+	ServiceSkuSuffix = "GTR-"
 
-	ORDER_LIMIT = 50
+	OrderLimit = 50
+
+	DefaultSleepDuration = 90 * time.Second
 )
 
 type SQ interface {
@@ -89,7 +91,7 @@ func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpse
 	for _, category := range categories {
 		object := SquareUpsertCategoryObject{
 			Id:        category.SquareID,
-			Type:      TYPE_CATEGORY,
+			Type:      TypeCategory,
 			IsDeleted: false,
 			Version:   category.Version,
 			CategoryData: SquareCategoryData{
@@ -142,7 +144,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 
 	for _, product := range products {
 
-		if len(objects) >= BATCH_SIZE {
+		if len(objects) >= BatchSize {
 			currentBatch.Objects = objects
 			batches = append(batches, currentBatch)
 
@@ -154,23 +156,23 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		availableForBooking := false
 		teamMemberIds := make([]string, 0)
 
-		if strings.HasPrefix(product.SKU, SERVICE_SKU_SUFFIX) {
+		if strings.HasPrefix(product.SKU, ServiceSkuSuffix) {
 			availableForBooking = true
 			teamMemberIds = c.TeamMemberIds
 		}
 
 		itemMoney := SquarePriceMoney{
-			Amount:   int(product.Price * PENCE_MULTIPLIER),
-			Currency: CURRENCY,
+			Amount:   int(product.Price * PenceMultiplier),
+			Currency: Currency,
 		}
 
 		variationData := SquareProductVariationData{
 			ItemID:              product.SquareID,
 			Sku:                 product.SKU,
 			Upc:                 product.Barcode,
-			Name:                VARIATION_NAME,
-			PricingType:         VARIATION_PRICING,
-			Ordinal:             VARIATION_ORDINAL,
+			Name:                VariationName,
+			PricingType:         VariationPricing,
+			Ordinal:             VariationOrdinal,
 			PriceMoney:          itemMoney,
 			ServiceDuration:     serviceDuration,
 			AvailableForBooking: availableForBooking,
@@ -179,7 +181,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 
 		itemVariations := []SquareProductVariation{
 			{
-				Type:                  TYPE_VARIATION,
+				Type:                  TypeVariation,
 				ID:                    product.SquareVarID,
 				IsDeleted:             false,
 				PresentAtAllLocations: true,
@@ -188,7 +190,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 			},
 		}
 
-		productType := PRODUCT_TYPE
+		productType := ProductType
 		if strings.HasPrefix(product.SKU, "GTR-") {
 			productType = "APPOINTMENTS_SERVICE"
 		}
@@ -196,7 +198,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		itemData := SquareProductData{
 			Name:               product.Title,
 			CategoryID:         product.SquareCategoryID,
-			Visibility:         VISIBILITY,
+			Visibility:         Visibility,
 			ProductType:        productType,
 			SkipModifierScreen: false,
 			IsTaxable:          true,
@@ -204,7 +206,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		}
 
 		object := SquareProductObject{
-			Type:                  TYPE_ITEM,
+			Type:                  TypeItem,
 			ID:                    product.SquareID,
 			IsDeleted:             false,
 			PresentAtAllLocations: true,
@@ -246,9 +248,12 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 		return squareResp, err
 	}
 
-	err = json.Unmarshal(resp, &squareResp)
+	if err := json.Unmarshal(resp, &squareResp); err != nil {
+		c.logger.Errorw("unable to unmarshall request", "error", err)
+		return squareResp, err
+	}
 
-	return squareResp, err
+	return squareResp, nil
 }
 
 func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
@@ -278,7 +283,7 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 	headers["Content-Type"] = "application/json"
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
 
-	for _, br := range batchRequests {
+	for index, br := range batchRequests {
 		jsonReq, err := json.Marshal(br)
 		if err != nil {
 			c.logger.Errorw("unable to marshall request", "error", err)
@@ -291,6 +296,12 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 			return err
 		}
 
+		if index >= len(batchRequests) - 1 {
+			break
+		}
+
+		c.logger.Infow("will sleep to avoid rate limiting", "duration", DefaultSleepDuration)
+		time.Sleep(DefaultSleepDuration)
 	}
 	return nil
 }
@@ -310,7 +321,7 @@ func (c *SquareClient) SearchOrders(start time.Time, end time.Time) ([]SquareOrd
 	for {
 		searchRequest := SquareSearchOrdersRequest{
 			ReturnEntries: false,
-			Limit:         ORDER_LIMIT,
+			Limit:         OrderLimit,
 			Query: SquareQuery{
 				Filter: SquareFilter{
 					DateTimeFilter: SquareDateTimeFilter{

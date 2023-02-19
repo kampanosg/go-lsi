@@ -15,18 +15,18 @@ import (
 )
 
 var (
-    excludedIds = map[string]bool {
-        "VFCFO4YK5QCIGIPI3QGJVK4I": true,
-        "AHGU7NEM4PODEE3UMRSKAAG2": true,
-        "25O5FVWY76CRZRZAFIWF26MS": true,
-        "6RDRSF6PLPI6GYAUOK7R6ASZ": true,
-        "TLR4MWIMYVLFBWXLD7K3ZJD5": true,
-        "RNHZ4FHU67S7AERXP4PB6WCW": true,
-        "7WYBRBZIYEXUZL43UGHHDB7H": true,
-        "D45BUSWUUII2MZO7XDHRKBMB": true,
-        "DHDHZFYTAFHDBL7MG26TDAAB": true,
-        "CDL27LZ5AVFOARQQHARB4W5F": true,
-    }
+	excludedIds = map[string]bool{
+		"VFCFO4YK5QCIGIPI3QGJVK4I": true,
+		"AHGU7NEM4PODEE3UMRSKAAG2": true,
+		"25O5FVWY76CRZRZAFIWF26MS": true,
+		"6RDRSF6PLPI6GYAUOK7R6ASZ": true,
+		"TLR4MWIMYVLFBWXLD7K3ZJD5": true,
+		"RNHZ4FHU67S7AERXP4PB6WCW": true,
+		"7WYBRBZIYEXUZL43UGHHDB7H": true,
+		"D45BUSWUUII2MZO7XDHRKBMB": true,
+		"DHDHZFYTAFHDBL7MG26TDAAB": true,
+		"CDL27LZ5AVFOARQQHARB4W5F": true,
+	}
 )
 
 // / usage: go run delete_square_inventory.go ACCESS_TOKEN LOCATION_ID
@@ -45,11 +45,11 @@ func main() {
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", args[0])
 
 	ids := make([]string, 0)
-    titles := make(map[string]string, 0)
+	titles := make(map[string]string, 0)
 	cursor := ""
 
 	for {
-		url := fmt.Sprintf("%s/catalog/list?types=CATEGORY&cursor=%s", host, cursor)
+		url := fmt.Sprintf("%s/catalog/list?types=ITEM&cursor=%s", host, cursor)
 		resp, err := makeRequest2("GET", url, headers, []byte{})
 		if err != nil {
 			panic(err)
@@ -61,11 +61,11 @@ func main() {
 		}
 
 		for _, o := range r.Objects {
-            if isExcludedID(o.ID) {
-                continue
-            }
+			if isExcludedID(o.ID) {
+				continue
+			}
 			ids = append(ids, o.ID)
-            titles[o.ID] = o.ItemData.Name
+			titles[o.ID] = o.ItemData.Name
 		}
 
 		cursor = r.Cursor
@@ -75,18 +75,18 @@ func main() {
 	}
 
 	// fmt.Printf("total items to delete: %d\n", len(ids))
-    // for id, title := range titles {
-        // fmt.Printf("%s - %s\n", id, title)
-    // }
+	// for id, title := range titles {
+	// fmt.Printf("%s - %s\n", id, title)
+	// }
 
-    // panic("stahp")
+	// panic("stahp")
 
 	client := square.NewSquareClient(accessToken, host, version, location, make([]string, 0), logger)
 	client.BatchDeleteItems(ids)
 }
 
 func isExcludedID(id string) bool {
-    return excludedIds[id]
+	return excludedIds[id]
 }
 
 func makeRequest2(method, url string, headers map[string]string, jsonReq []byte) ([]byte, error) {

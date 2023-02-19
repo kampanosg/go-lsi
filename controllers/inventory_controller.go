@@ -22,6 +22,26 @@ func NewInventoryController(db db.DB, logger *zap.SugaredLogger) InventoryContro
 	return InventoryController{db: db, logger: logger}
 }
 
+func (c *InventoryController) HandleAllInventoryRequest(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		c.logger.Errorw("request failed", "reason", "method not supported", "method", r.Method, "uri", r.RequestURI)
+		failed(w, errMethodNotSupported, http.StatusMethodNotAllowed)
+		return
+	}
+
+	products, err := c.db.GetProducts()
+	if err != nil {
+		failed(w, err, http.StatusNotFound)
+		return
+	}
+
+	resp := types.OkResp{Items: products, Total: len(products)}
+
+	ok(w, resp)
+
+}
+
 func (c *InventoryController) HandleInventoryRequest(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {

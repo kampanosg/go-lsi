@@ -3,9 +3,18 @@ package sync
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/kampanosg/go-lsi/clients/linnworks"
 	"github.com/kampanosg/go-lsi/types"
+)
+
+const (
+	ProductBatchSize = 500
+)
+
+var (
+	sleepDuration = time.Duration(90 * time.Second)
 )
 
 type upsertProduct struct {
@@ -91,36 +100,56 @@ func (s *SyncTool) SyncProducts() error {
 	s.logger.Infow("found updated or new products", "total", len(productsToUpsert))
 	if len(productsToUpsert) > 0 {
 
-		resp, err := s.SquareClient.UpsertProducts(productsToUpsert)
-		if err != nil {
-			s.logger.Errorw("unable to upsert products", reasonKey, msgSqErr, errKey, err.Error())
-			return err
-		}
+		ptus := make([]types.Product, 0)
 
-		if len(resp.IDMappings) > 0 {
-			s.logger.Debugw("found new product mappings", "total", len(resp.IDMappings))
-			for _, idMapping := range resp.IDMappings {
-				if !strings.HasSuffix(idMapping.ClientObjectID, "-var") {
-					product := productsSquareIdMapping[idMapping.ClientObjectID]
-					product.SquareID = idMapping.ObjectID
-					for _, varIdMapping := range resp.IDMappings {
-						clientObjectId := varIdMapping.ClientObjectID
-						clientObjectIdLen := len(clientObjectId)
-						productId := clientObjectId[1 : clientObjectIdLen-4]
-						if strings.HasSuffix(clientObjectId, "-var") && productId == product.LinnworksID {
-							product.SquareVarID = varIdMapping.ObjectID
-							break
+		for index, ptu := range productsToUpsert {
+
+			ptus = append(ptus, ptu)
+			if len(ptus) < ProductBatchSize {
+				continue
+			}
+
+			s.logger.Debugw("sending product batch to square", "length", len(ptus), "items", ptus)
+
+			resp, err := s.SquareClient.UpsertProducts(ptus)
+			if err != nil {
+				s.logger.Errorw("unable to upsert products", reasonKey, msgSqErr, errKey, err.Error())
+				return err
+			}
+
+			if len(resp.IDMappings) > 0 {
+				s.logger.Debugw("found new product mappings", "total", len(resp.IDMappings))
+				for _, idMapping := range resp.IDMappings {
+					if !strings.HasSuffix(idMapping.ClientObjectID, "-var") {
+						product := productsSquareIdMapping[idMapping.ClientObjectID]
+						product.SquareID = idMapping.ObjectID
+						for _, varIdMapping := range resp.IDMappings {
+							clientObjectId := varIdMapping.ClientObjectID
+							clientObjectIdLen := len(clientObjectId)
+							productId := clientObjectId[1 : clientObjectIdLen-4]
+							if strings.HasSuffix(clientObjectId, "-var") && productId == product.LinnworksID {
+								product.SquareVarID = varIdMapping.ObjectID
+								break
+							}
 						}
+						productsSquareIdMapping[product.SquareID] = product
 					}
-					productsSquareIdMapping[product.SquareID] = product
 				}
 			}
-		}
 
-		for _, object := range resp.Objects {
-			product := productsSquareIdMapping[object.ID]
-			product.Version = object.Version
-			s.Db.UpsertProduct(product)
+			for _, object := range resp.Objects {
+				product := productsSquareIdMapping[object.ID]
+				product.Version = object.Version
+				s.Db.UpsertProduct(product)
+			}
+
+			if index >= len(productsToUpsert) - 1 {
+				break
+			}
+
+			ptus = make([]types.Product, 0)
+			s.logger.Infow("will sleep to avoid rate limit", "duration", sleepDuration)
+			time.Sleep(sleepDuration)
 		}
 	}
 
