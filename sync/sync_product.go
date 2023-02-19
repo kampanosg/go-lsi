@@ -105,7 +105,7 @@ func (s *SyncTool) SyncProducts() error {
 		for index, ptu := range productsToUpsert {
 
 			ptus = append(ptus, ptu)
-			if len(ptus) < ProductBatchSize {
+			if len(ptus) < ProductBatchSize && index < len(productsToUpsert) - 1 {
 				continue
 			}
 
