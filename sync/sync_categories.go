@@ -53,7 +53,7 @@ func (s *SyncTool) SyncCategories() error {
 
 			newCategory.SquareID = upsert.category.SquareID
 			newCategory.Version = upsert.category.Version
-			newerVersion, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
+			newerVersion, _, err := s.SquareClient.GetItemVersion(newCategory.SquareID)
 			if err != nil {
 				s.logger.Debugw("using existing version", "id", newCategory.SquareID, "version", newCategory.Version)
 				newCategory.Version = upsert.category.Version

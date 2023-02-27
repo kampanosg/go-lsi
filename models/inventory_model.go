@@ -26,4 +26,5 @@ type Product struct {
 	Price               float64
 	SKU                 string `gorm:"index"`
 	Version             int64
+	VariationVersion    int64
 }

@@ -25,6 +25,8 @@ var (
 		"Machine Head Installation": true,
 		"Bridge Fitting":            true,
 		"Tremolo Installation":      true,
+		"General Appointment":       true,
+		"Hardware Installation":     true,
 	}
 )
 
@@ -48,15 +50,15 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 			s.logger.Infow("detected new square order", "squareId", newOrder.ID)
 
 			orderProductsMap := make(map[string]types.OrderProduct, 0)
-			for _, item := range newOrder.LineItems {
+			for index, item := range newOrder.LineItems {
 				var product types.Product
 
 				if isSquareService(item) {
 					product = types.Product{
 						Price:   item.TotalMoney.Amount,
-						Barcode: "SERVICE",
-						SKU:     "SERVICE",
-						Title:   "SERVICE",
+						Barcode: fmt.Sprintf("SERVICE-%d", index+1),
+						SKU:     fmt.Sprintf("SERVICE-%d", index+1),
+						Title:   fmt.Sprintf("SERVICE-%d", index+1),
 					}
 				} else {
 					product, err = s.Db.GetProductByVarId(item.CatalogObjectID)
@@ -69,14 +71,14 @@ func (s *SyncTool) SyncOrders(start time.Time, end time.Time) error {
 							return err
 						}
 					}
+				}
 
-					orderProduct, ok := orderProductsMap[item.CatalogObjectID]
-					if ok {
-						orderProduct.PricePerUnit += item.TotalMoney.Amount
-						orderProduct.Quantity = updateOrderProductQty(orderProduct.Quantity, item.Quantity)
-						orderProductsMap[item.CatalogObjectID] = orderProduct
-						continue
-					}
+				orderProduct, ok := orderProductsMap[item.CatalogObjectID]
+				if ok {
+					orderProduct.PricePerUnit += item.TotalMoney.Amount
+					orderProduct.Quantity = updateOrderProductQty(orderProduct.Quantity, item.Quantity)
+					orderProductsMap[item.CatalogObjectID] = orderProduct
+					continue
 				}
 
 				orderProductsMap[item.CatalogObjectID] = fromSquareLineItemToDomain(item, product)

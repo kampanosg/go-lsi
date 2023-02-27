@@ -17,12 +17,12 @@ const (
 	TypeVariation = "ITEM_VARIATION"
 	TypeService   = "APPOINTMENTS_SERVICE"
 
-	Visibility   = "PRIVATE"
+	Visibility  = "PRIVATE"
 	ProductType = "REGULAR"
 
 	PenceMultiplier = 100
 	BatchSize       = 700
-	Currency         = "GBP"
+	Currency        = "GBP"
 
 	VariationOrdinal = 1
 	VariationName    = "Regular"
@@ -36,7 +36,7 @@ const (
 )
 
 type SQ interface {
-	GetItemVersion(squareId string) (int64, error)
+	GetItemVersion(squareId string) (int64, int64, error)
 	UpsertCategories(categories []types.Category) (SquareUpsertResponse, error)
 	UpsertProducts(products []types.Product) (SquareUpsertResponse, error)
 	BatchDeleteItems(itemIds []string) error
@@ -63,7 +63,7 @@ func NewSquareClient(accessToken, host, version, location string, teamMembers []
 	}
 }
 
-func (c *SquareClient) GetItemVersion(squareId string) (int64, error) {
+func (c *SquareClient) GetItemVersion(squareId string) (int64, int64, error) {
 	headers := make(map[string]string)
 	headers["Square-Version"] = c.ApiVersion
 	headers["Content-Type"] = "application/json"
@@ -72,16 +72,23 @@ func (c *SquareClient) GetItemVersion(squareId string) (int64, error) {
 	url := fmt.Sprintf("%s/catalog/object/%s", c.Host, squareId)
 	resp, err := c.makeRequest("GET", url, headers, []byte{})
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	var r SquareCatalogItemResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		c.logger.Errorw("failed to parse object", "error", err.Error())
-		return 0, err
+		return 0, 0, err
 	}
 
-	return r.Object.Version, nil
+	itemVersion := r.Object.Version
+	var itemVarVersion int64
+
+	if len(r.Object.ItemData.Variations) > 0 {
+		itemVarVersion = r.Object.ItemData.Variations[0].Version
+	}
+
+	return itemVersion, itemVarVersion, nil
 }
 
 func (c *SquareClient) UpsertCategories(categories []types.Category) (SquareUpsertResponse, error) {
@@ -185,7 +192,7 @@ func (c *SquareClient) UpsertProducts(products []types.Product) (SquareUpsertRes
 				ID:                    product.SquareVarID,
 				IsDeleted:             false,
 				PresentAtAllLocations: true,
-				Version:               product.Version,
+				Version:               product.VariationVersion,
 				ItemVariationData:     variationData,
 			},
 		}
@@ -296,7 +303,7 @@ func (c *SquareClient) BatchDeleteItems(itemIds []string) error {
 			return err
 		}
 
-		if index >= len(batchRequests) - 1 {
+		if index >= len(batchRequests)-1 {
 			break
 		}
 

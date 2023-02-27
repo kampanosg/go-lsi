@@ -75,13 +75,15 @@ func (s *SyncTool) SyncProducts() error {
 			newProduct.SquareID = upsert.product.SquareID
 			newProduct.SquareVarID = upsert.product.SquareVarID
 			newProduct.SquareCategoryID = upsert.product.SquareCategoryID
-			newerVersion, err := s.SquareClient.GetItemVersion(newProduct.SquareID)
+			newerItemVersion, newerVarVersion, err := s.SquareClient.GetItemVersion(newProduct.SquareID)
 			if err != nil {
 				s.logger.Debugw("using existing version", "id", newProduct.SquareID, "version", newProduct.Version)
 				newProduct.Version = upsert.product.Version
+				newProduct.VariationVersion = upsert.product.VariationVersion
 			} else {
-				s.logger.Debugw("found newer version", "id", newProduct.SquareID, "version", newerVersion)
-				newProduct.Version = newerVersion
+				s.logger.Debugw("found newer version", "id", newProduct.SquareID, "itemVersion", newerItemVersion, "itemVarVersion", newerVarVersion)
+				newProduct.Version = newerItemVersion
+				newProduct.VariationVersion = newerVarVersion
 			}
 		}
 
@@ -105,7 +107,7 @@ func (s *SyncTool) SyncProducts() error {
 		for index, ptu := range productsToUpsert {
 
 			ptus = append(ptus, ptu)
-			if len(ptus) < ProductBatchSize && index < len(productsToUpsert) - 1 {
+			if len(ptus) < ProductBatchSize && index < len(productsToUpsert)-1 {
 				continue
 			}
 
@@ -143,7 +145,7 @@ func (s *SyncTool) SyncProducts() error {
 				s.Db.UpsertProduct(product)
 			}
 
-			if index >= len(productsToUpsert) - 1 {
+			if index >= len(productsToUpsert)-1 {
 				break
 			}
 

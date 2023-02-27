@@ -23,5 +23,6 @@ type Product struct {
 	Barcode             string    `json:"barcode"`
 	SKU                 string    `json:"sku"`
 	Version             int64     `json:"version"`
+	VariationVersion    int64     `json:"variationVersion"`
 	UpdatedAt           time.Time `json:"updatedAt"`
 }
